@@ -1,0 +1,973 @@
+{
+  "_note": "Reference for language packs. chrome/labels/caps/cues: translate every value; keep keys. caps[scene][i] is the caption of step i; cues[scene] are the English cue phrases (map each to a phrase that occurs verbatim in the translated section). paper: structure each locale paper.js must mirror (ids, types, counts).",
+  "chrome": {
+    "docTitle": "Bitcoin: A Peer-to-Peer Electronic Cash System · narrated",
+    "kick": "A narrated reading · Satoshi Nakamoto · 2008",
+    "begin": "Begin",
+    "replay": "Replay",
+    "loading": "Loading narration…",
+    "narrationMissing": "Narration for this language isn’t ready yet — pick another language in the settings menu.",
+    "narratedBy": "Narrated by {voice} · {minutes} min · {hint}",
+    "clickWord": "click any word to jump there",
+    "blockHeight": "Block height",
+    "price": "Bitcoin price",
+    "btcusd": "BTC/USD",
+    "connecting": "connecting…",
+    "unavailable": "unavailable",
+    "justNow": "just now",
+    "minAgo": "{n} min ago",
+    "playAria": "Play / pause",
+    "ovTitle": "Whole poster (O)",
+    "ovAria": "Toggle whole-poster view",
+    "fsTitle": "Full screen (F)",
+    "fsAria": "Toggle full screen",
+    "voiceTitle": "Language & voice",
+    "voiceAria": "Language & voice",
+    "findTitle": "Find in paper (Ctrl+F)",
+    "findAria": "Find in paper",
+    "findPlaceholder": "Find in paper…",
+    "findCloseAria": "Close search",
+    "findInputAria": "Search the paper",
+    "findPrevAria": "Previous match",
+    "findNextAria": "Next match",
+    "languageHeading": "Language",
+    "narratorHeading": "Narrator",
+    "theme": "Theme",
+    "themeAuto": "Auto",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "readerMode": "Reader",
+    "posterMode": "Poster",
+    "confirmationsN": "{n} confirmations",
+    "about": "About",
+    "aboutClose": "Close"
+  },
+  "labels": {
+    "ringText": "A PEER-TO-PEER ELECTRONIC CASH SYSTEM ✦ SATOSHI NAKAMOTO ✦ MMVIII ✦",
+    "releaseDate": "31 October 2008 · bitcoin.org",
+    "finInstitution": "Financial\ninstitution",
+    "sameCoinTwice": "same coin, twice?",
+    "signed": "signed",
+    "customer": "Customer",
+    "merchant": "Merchant",
+    "bank": "Bank",
+    "reversed": "reversed",
+    "fees": "fees",
+    "tooSmall": "too small to bother",
+    "prying": "Name? Address?\nPhone? ID?",
+    "fraud": "fraud,",
+    "pricedIn": "priced in",
+    "inPersonOk": "in person: cash just works",
+    "onlineTrusted": "online: a trusted party in the middle",
+    "irrevEscrow": "irreversible for sellers · escrow for buyers",
+    "distributedTs": "a distributed timestamp server",
+    "attackers": "attackers",
+    "honestNodes": "honest nodes",
+    "transaction": "Transaction",
+    "hash": "Hash",
+    "ownerPubKey": "Owner {n}’s\nPublic Key",
+    "ownerSig": "Owner {n}’s\nSignature",
+    "ownerPrivKey": "Owner {n}’s\nPrivate Key",
+    "verify": "Verify",
+    "sign": "Sign",
+    "signedAgainBy": "signed again\nby Owner {n}",
+    "doubleSpend": "double-spend?",
+    "mint": "MINT",
+    "bankCaps": "BANK",
+    "oneCompany": "everything rides on one company",
+    "timeAxis": "time",
+    "firstTx": "first",
+    "laterTx": "later",
+    "itemLabel": "Item",
+    "newspaper": "THE  DAILY  TIMESTAMP",
+    "notice": "NOTICE · block hash",
+    "existed": "EXISTED",
+    "block": "Block",
+    "prevHash": "Prev Hash",
+    "nonce": "Nonce",
+    "nonceN": "Nonce {n}",
+    "hashLower": "hash",
+    "expectedTries": "expected tries",
+    "zero": "zero",
+    "zeros": "zeros",
+    "oneVote": "1 vote",
+    "onePerson": "one person",
+    "honestChain": "honest chain",
+    "attackerChain": "attacker’s chain",
+    "easy": "easy",
+    "hard": "hard",
+    "difficulty": "difficulty",
+    "targetRate": "target: about 6 blocks per hour",
+    "tooFast": "too fast → more zeros required",
+    "editedHash": "edited → hash no longer starts with zeros",
+    "foundHash": "✓ found: verifying takes just one hash",
+    "sendMissed": "send me the one I missed",
+    "blockCreator": "block creator",
+    "goldMiners": "gold miners spend effort…",
+    "btcEnergy": "…Bitcoin spends CPU time & electricity",
+    "txIn": "in",
+    "txOut": "out",
+    "feeFlow": "input − output = 0.02 fee → the block’s creator",
+    "cap21": "21,000,000 cap",
+    "halving": "coins in circulation · a halving every 210,000 blocks",
+    "nowBlock": "now · block {h} · {m}M mined",
+    "newCoin": "new coin → creator",
+    "defraud": "defraud people",
+    "mintNew": "mint new coins",
+    "yourTx": "your transaction",
+    "blockPlus": "block +{n}",
+    "blockHeaderHash": "Block Header (Block Hash)",
+    "rootHash": "Root Hash",
+    "blockHeader": "Block Header",
+    "approx80": "≈ 80 bytes",
+    "perYear": "bytes · per hour · per day · per year",
+    "ram2gb": "2 GB of RAM (2008)",
+    "oneYearHeaders": "↑ one year of headers",
+    "moore": "+1.2 GB per year (Moore’s Law)",
+    "merkleRoot": "Merkle Root",
+    "lightClient": "light client",
+    "fullNode": "full node",
+    "everyBlock": "every block, every transaction",
+    "headersOnly": "block headers only · 80 bytes each",
+    "attackerMoreCpu": "attacker’s chain, more CPU power",
+    "alertInvalid": "alert: invalid block",
+    "businessesNode": "businesses: own node",
+    "everyCent": "a separate transaction for every cent?",
+    "payee": "payee",
+    "payment": "payment",
+    "changeBack": "change, back to the sender",
+    "fanoutOk": "fan-out is fine: no full history needed",
+    "identities": "Identities",
+    "transactions": "Transactions",
+    "trustedThird": "Trusted\nThird Party",
+    "counterparty": "Counterparty",
+    "publicStr": "Public",
+    "tradPrivacy": "Traditional Privacy Model",
+    "newPrivacy": "New Privacy Model",
+    "nowPublic": "must now be public…",
+    "keyN": "key {n}",
+    "sameOwner": "same owner",
+    "revealed": "revealed!",
+    "noCreate": "create value out of thin air",
+    "noSteal": "take money that was never his",
+    "onlyTakeBack": "only: take back his own payment",
+    "honestLead": "honest lead",
+    "blocksAxis": "blocks →",
+    "attackerBehind": "attacker: z blocks behind",
+    "walkLegend": "+1 honest block (p)   −1 attacker block (q)",
+    "defP": "probability an honest node finds the next block",
+    "defQ": "probability the attacker finds the next block",
+    "defQz": "probability the attacker ever catches up from z behind",
+    "ifPLEQ": "if p ≤ q",
+    "ifPGT": "if p > q",
+    "zBehindAxis": "z (blocks behind) →",
+    "recipient": "recipient",
+    "sender": "sender",
+    "freshKey": "fresh key",
+    "secretChain": "secret parallel chain: his alternate transaction",
+    "finiteSum": "finite sum: only k = 0 … z",
+    "attackerProb": "attacker success probability",
+    "blocksWait": "blocks to wait for P < 0.1%",
+    "trustedThirdCaps": "TRUSTED THIRD PARTY",
+    "twice": "twice?",
+    "consensus": "CONSENSUS",
+    "byCpu": "by CPU power"
+  },
+  "caps": {
+    "coin": [
+      "Bitcoin",
+      "A peer-to-peer electronic cash system",
+      "Satoshi Nakamoto · 31 October 2008"
+    ],
+    "p2p": [
+      "Payments online go through a financial institution",
+      "Peer-to-peer: straight from one party to another",
+      "Digital signatures prove who is paying…",
+      "…but who stops the same coin being spent twice?",
+      "The fix: a peer-to-peer network",
+      "Transactions are hashed into an ongoing chain",
+      "History can’t change without redoing the proof-of-work",
+      "The longest chain is the record of what happened",
+      "…and proof it came from the most CPU power",
+      "An honest majority outpaces attackers",
+      "Messages are broadcast on a best-effort basis",
+      "Nodes leave and rejoin at will…",
+      "…accepting the longest chain as proof of what they missed"
+    ],
+    "trust": [
+      "Online commerce relies on trusted third parties",
+      "Payments can always be reversed: banks mediate disputes",
+      "Mediation adds costs and kills small casual payments",
+      "Merchants must be wary of their customers",
+      "A certain percentage of fraud is accepted",
+      "In person, physical cash needs no middleman",
+      "Online, there’s no cash: only a trusted party",
+      "Needed: cryptographic proof instead of trust",
+      "Irreversible payments protect sellers; escrow protects buyers",
+      "A peer-to-peer timestamp server proves the order of transactions",
+      "Secure while honest nodes control more CPU power"
+    ],
+    "txchain": [
+      "An electronic coin is a chain of digital signatures",
+      "Each owner signs a hash of the previous transaction and the next owner’s public key",
+      "…and adds them to the end of the coin",
+      "A payee verifies each signature down the chain",
+      "…but can’t tell if an owner signed the coin away twice",
+      "Common fix: a central mint checks every transaction",
+      "Then the whole system depends on whoever runs the mint",
+      "…just like a bank",
+      "Only the earliest transaction counts",
+      "So every transaction must be publicly announced",
+      "Everyone agrees on a single history of the order",
+      "Proof that most nodes saw it first"
+    ],
+    "timestamp": [
+      "A timestamp server starts with a block of items",
+      "…takes a hash of the whole block…",
+      "…and publishes the hash widely, like in a newspaper",
+      "Proof the data existed at that time",
+      "Each timestamp includes the previous one in its hash…",
+      "…forming a chain",
+      "Every new timestamp reinforces the ones before it"
+    ],
+    "pow": [
+      "Proof-of-work, borrowed from Adam Back’s Hashcash",
+      "Find a value whose SHA-256 hash begins with zero bits",
+      "Every extra zero multiplies the work by sixteen…",
+      "…yet anyone can check it with a single hash",
+      "Increment the nonce until the hash has enough zeros",
+      "Change the block and its proof-of-work breaks",
+      "…and every block after it must be redone too",
+      "One-IP-one-vote? Anyone can grab many IPs",
+      "Proof-of-work is one-CPU-one-vote",
+      "The longest chain carries the most work: the majority",
+      "An attacker must redo blocks, then catch up and pass",
+      "Difficulty tracks a moving average: about 6 blocks an hour",
+      "Blocks too fast? Difficulty goes up"
+    ],
+    "network": [
+      "The network: nodes, loosely connected",
+      "1 · New transactions are broadcast to all nodes",
+      "2 · Each node collects new transactions into a block",
+      "3 · Each node works on a difficult proof-of-work",
+      "4 · The first to find one broadcasts its block",
+      "5 · Nodes accept it only if every transaction is valid",
+      "6 · …and build the next block on top of it",
+      "The longest chain is always the correct one",
+      "Two blocks at once: the network splits",
+      "Each side keeps the other branch, just in case",
+      "The next block breaks the tie; everyone switches over",
+      "Broadcasts don’t need to reach every node",
+      "Missed a block? Ask for it when the next one arrives"
+    ],
+    "incentive": [
+      "By convention, a block’s first transaction is special",
+      "It creates a brand-new coin for the block’s creator",
+      "An incentive to support the network, and a way to issue coins",
+      "Like gold miners adding gold, but spending CPU time and electricity",
+      "Fees: whatever inputs exceed outputs goes to the block’s creator",
+      "A fixed supply, after which fees alone pay: inflation free",
+      "The incentive also encourages nodes to stay honest",
+      "Playing by the rules pays better than undermining them"
+    ],
+    "merkle": [
+      "Once a transaction is buried under enough blocks…",
+      "…the spent transactions before it can be discarded",
+      "Transactions are hashed in pairs, up a Merkle tree",
+      "Only the root goes into the block’s hash",
+      "Old blocks shrink by stubbing off branches",
+      "Interior hashes needn’t be stored",
+      "A block header alone is about 80 bytes",
+      "One every 10 minutes is just 4.2 MB a year",
+      "A sliver next to 2 GB of RAM, so headers fit in memory"
+    ],
+    "spv": [
+      "Payments can be verified without running a full node",
+      "Keep just the block headers of the longest chain",
+      "Ask network nodes until convinced it’s the longest",
+      "Fetch the Merkle branch linking the transaction to its block",
+      "He can’t check the transaction himself…",
+      "…but every block added after it confirms it",
+      "An attacker who overpowers the network can fool it",
+      "Defence: alerts from nodes trigger a full download",
+      "Busy businesses still run their own nodes"
+    ],
+    "inout": [
+      "Handling coins one by one would be unwieldy",
+      "So transactions have multiple inputs and outputs",
+      "Either one input from a larger previous transaction…",
+      "…or several inputs combining smaller amounts",
+      "At most two outputs: the payment, and any change",
+      "Fan-out isn’t a problem: no standalone history needed"
+    ],
+    "privacy": [
+      "Banks keep things private by limiting who sees the information",
+      "Bitcoin must announce every transaction publicly…",
+      "…so the wall moves: public keys stay anonymous",
+      "The public sees amounts, but not who",
+      "Like a stock exchange’s “tape”: times and sizes, no names",
+      "Use a new key pair for each transaction",
+      "Multi-input transactions reveal a common owner",
+      "Reveal one owner and linked transactions can follow"
+    ],
+    "calc": [
+      "An attacker tries to build an alternate chain faster than the honest one",
+      "Even if he wins, he can’t create value or steal…",
+      "…he can only try to take back money he recently spent",
+      "The race is a binomial random walk: +1 or −1 each block",
+      "Catching up from behind is the Gambler’s Ruin problem",
+      "p: an honest node finds the next block · q: the attacker does",
+      "If p > q, the attacker’s odds are (q/p)ᶻ",
+      "The odds drop exponentially with every block behind",
+      "How long should the recipient wait before trusting a payment?",
+      "A fresh key pair, shortly before signing, stops pre-built chains",
+      "The dishonest sender secretly mines a parallel chain",
+      "The recipient waits for z blocks on top",
+      "The attacker’s progress follows a Poisson distribution",
+      "Weight each outcome by its catch-up probability",
+      "Rearranged to avoid summing the infinite tail",
+      "Converting to C code…",
+      "Running results: the probability drops off exponentially",
+      "How many blocks to wait for less than a 0.1% chance"
+    ],
+    "conclusion": [
+      "Electronic transactions without relying on trust",
+      "Coins made from digital signatures give strong ownership…",
+      "…but need a way to prevent double-spending",
+      "A peer-to-peer network records a public history with proof-of-work",
+      "It quickly becomes impractical for an attacker to change",
+      "Robust in its unstructured simplicity",
+      "Nodes need no identity; messages need no route",
+      "Nodes leave and rejoin at will, then accept the longest chain",
+      "They vote with CPU power: extend valid blocks, ignore invalid ones",
+      "Rules and incentives, enforced by consensus"
+    ]
+  },
+  "cues": {
+    "coin": [
+      "PEER-TO-PEER",
+      "Satoshi"
+    ],
+    "p2p": [
+      "directly from one party",
+      "Digital signatures provide",
+      "the main benefits are lost",
+      "We propose a solution",
+      "timestamps transactions by hashing",
+      "cannot be changed without redoing",
+      "The longest chain not only",
+      "largest pool of CPU power",
+      "generate the longest chain and outpace",
+      "Messages are broadcast",
+      "nodes can leave and rejoin",
+      "accepting the longest"
+    ],
+    "trust": [
+      "Completely non-reversible transactions",
+      "The cost of mediation",
+      "Merchants must be wary",
+      "A certain percentage of fraud",
+      "avoided in person",
+      "no mechanism exists",
+      "What is needed",
+      "computationally impractical to reverse",
+      "distributed timestamp server",
+      "The system is secure"
+    ],
+    "txchain": [
+      "digitally signing a hash",
+      "adding these to the end",
+      "A payee can verify",
+      "payee can't verify that one",
+      "trusted central authority, or mint",
+      "the fate of the entire money system",
+      "just like a bank",
+      "We need a way",
+      "publicly announced",
+      "agree on a single history",
+      "the majority of nodes agreed"
+    ],
+    "timestamp": [
+      "taking a hash of a block",
+      "widely publishing the hash",
+      "The timestamp proves",
+      "Each timestamp includes the previous",
+      "forming a chain",
+      "reinforcing the ones before"
+    ],
+    "pow": [
+      "scanning for a value",
+      "The average work required",
+      "verified by executing a single hash",
+      "incrementing a nonce",
+      "the block cannot be changed",
+      "redoing all the blocks after it",
+      "one-IP-address-one-vote",
+      "Proof-of-work is essentially",
+      "The majority decision is represented",
+      "To modify a past block",
+      "To compensate for increasing hardware",
+      "If they're generated too fast"
+    ],
+    "network": [
+      "New transactions are broadcast",
+      "Each node collects new transactions",
+      "Each node works on finding",
+      "When a node finds",
+      "Nodes accept the block only",
+      "Nodes express their acceptance",
+      "Nodes always consider the longest",
+      "If two nodes broadcast",
+      "save the other branch",
+      "The tie will be broken",
+      "New transaction broadcasts do not",
+      "If a node does not receive"
+    ],
+    "incentive": [
+      "a special transaction that starts",
+      "This adds an incentive",
+      "analogous to gold miners",
+      "The incentive can also be funded",
+      "Once a predetermined number",
+      "The incentive may help",
+      "He ought to find it more profitable"
+    ],
+    "merkle": [
+      "the spent transactions before it",
+      "transactions are hashed in a Merkle",
+      "with only the root included",
+      "Old blocks can then be compacted",
+      "The interior hashes do not",
+      "A block header with no transactions",
+      "If we suppose blocks are generated",
+      "With computer systems typically"
+    ],
+    "spv": [
+      "keep a copy of the block headers",
+      "querying network nodes",
+      "obtain the Merkle branch",
+      "He can't check the transaction",
+      "blocks added after it",
+      "more vulnerable if the network is overpowered",
+      "accept alerts from network nodes",
+      "Businesses that receive frequent"
+    ],
+    "inout": [
+      "To allow value to be split",
+      "a single input from a larger",
+      "multiple inputs combining smaller",
+      "at most two outputs",
+      "It should be noted that fan-out"
+    ],
+    "privacy": [
+      "The necessity to announce",
+      "by keeping public keys anonymous",
+      "The public can see",
+      "stock exchanges",
+      "a new key pair should be used",
+      "Some linking is still unavoidable",
+      "The risk is that if the owner"
+    ],
+    "calc": [
+      "it does not throw the system open",
+      "An attacker can only try",
+      "Binomial Random Walk",
+      "The probability of an attacker catching up",
+      "probability an honest node finds",
+      "#qz",
+      "Given our assumption",
+      "We now consider how long",
+      "The receiver generates a new key pair",
+      "Once the transaction is sent",
+      "The recipient waits until",
+      "Poisson distribution",
+      "we multiply the Poisson density",
+      "Rearranging to avoid",
+      "Converting to C code",
+      "Running some results",
+      "Solving for P less than"
+    ],
+    "conclusion": [
+      "coins made from digital signatures",
+      "incomplete without a way",
+      "we proposed a peer-to-peer network",
+      "quickly becomes computationally impractical",
+      "The network is robust",
+      "They do not need to be identified",
+      "Nodes can leave and rejoin",
+      "They vote with their CPU power",
+      "Any needed rules and incentives"
+    ]
+  },
+  "paper": [
+    {
+      "id": "title",
+      "scene": "coin",
+      "items": [
+        {
+          "t": "title",
+          "lines": [
+            "{BITCOIN|Bitcoin:}",
+            "{A|a} {PEER-TO-PEER|peer-to-peer}",
+            "{ELECTRONIC|electronic}",
+            "{CASH|cash} {SYSTEM|system.}"
+          ]
+        },
+        {
+          "t": "byline",
+          "text": "Satoshi {Nakamoto|Nakamoto.} {satoshin@gmx.com|} {www.bitcoin.org|}"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "scene": "p2p",
+      "items": [
+        {
+          "t": "abs1",
+          "text": "{Abstract.|Abstract.} A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution. Digital signatures provide part of the solution, but the main benefits are lost if a trusted third party is still required to prevent double-spending."
+        },
+        {
+          "t": "abs2",
+          "text": "We propose a solution to the double-spending problem using a peer-to-peer network. The network timestamps transactions by hashing them into an ongoing chain of hash-based proof-of-work, forming a record that cannot be changed without redoing the proof-of-work. The longest chain not only serves as proof of the sequence of events witnessed, but proof that it came from the largest pool of CPU power. As long as a majority of CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers. The network itself requires minimal structure. Messages are broadcast on a best effort basis, and nodes can leave and rejoin the network at will, accepting the longest proof-of-work chain as proof of what happened while they were gone."
+        }
+      ]
+    },
+    {
+      "id": "s1",
+      "num": "1",
+      "scene": "trust",
+      "items": [
+        {
+          "t": "h",
+          "text": "{1.|One.} Introduction"
+        },
+        {
+          "t": "p",
+          "text": "Commerce on the Internet has come to rely almost exclusively on financial institutions serving as trusted third parties to process electronic payments. While the system works well enough for most transactions, it still suffers from the inherent weaknesses of the trust based model. Completely non-reversible transactions are not really possible, since financial institutions cannot avoid mediating disputes. The cost of mediation increases transaction costs, limiting the minimum practical transaction size and cutting off the possibility for small casual transactions, and there is a broader cost in the loss of ability to make non-reversible payments for non-reversible services. With the possibility of reversal, the need for trust spreads. Merchants must be wary of their customers, hassling them for more information than they would otherwise need. A certain percentage of fraud is accepted as unavoidable. These costs and payment uncertainties can be avoided in person by using physical currency, but no mechanism exists to make payments over a communications channel without a trusted party."
+        },
+        {
+          "t": "p",
+          "text": "What is needed is an electronic payment system based on cryptographic proof instead of trust, allowing any two willing parties to transact directly with each other without the need for a trusted third party. Transactions that are computationally impractical to reverse would protect sellers from fraud, and routine escrow mechanisms could easily be implemented to protect buyers. In this paper, we propose a solution to the double-spending problem using a peer-to-peer distributed timestamp server to generate computational proof of the chronological order of transactions. The system is secure as long as honest nodes collectively control more CPU power than any cooperating group of attacker nodes."
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "num": "2",
+      "scene": "txchain",
+      "items": [
+        {
+          "t": "h",
+          "text": "{2.|Two.} Transactions"
+        },
+        {
+          "t": "p",
+          "text": "We define an electronic coin as a chain of digital signatures. Each owner transfers the coin to the next by digitally signing a hash of the previous transaction and the public key of the next owner and adding these to the end of the coin. A payee can verify the signatures to verify the chain of ownership."
+        },
+        {
+          "t": "fig",
+          "h": 250,
+          "scene": "txchain"
+        },
+        {
+          "t": "p",
+          "text": "The problem of course is the payee can't verify that one of the owners did not double-spend the coin. A common solution is to introduce a trusted central authority, or mint, that checks every transaction for double spending. After each transaction, the coin must be returned to the mint to issue a new coin, and only coins issued directly from the mint are trusted not to be double-spent. The problem with this solution is that the fate of the entire money system depends on the company running the mint, with every transaction having to go through them, just like a bank."
+        },
+        {
+          "t": "p",
+          "text": "We need a way for the payee to know that the previous owners did not sign any earlier transactions. For our purposes, the earliest transaction is the one that counts, so we don't care about later attempts to double-spend. The only way to confirm the absence of a transaction is to be aware of all transactions. In the mint based model, the mint was aware of all transactions and decided which arrived first. To accomplish this without a trusted party, transactions must be publicly announced {[1]|}, and we need a system for participants to agree on a single history of the order in which they were received. The payee needs proof that at the time of each transaction, the majority of nodes agreed it was the first received."
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "num": "3",
+      "scene": "timestamp",
+      "items": [
+        {
+          "t": "h",
+          "text": "{3.|Three.} Timestamp Server"
+        },
+        {
+          "t": "p",
+          "text": "The solution we propose begins with a timestamp server. A timestamp server works by taking a hash of a block of items to be timestamped and widely publishing the hash, such as in a newspaper or Usenet post {[2-5]|}. The timestamp proves that the data must have existed at the time, obviously, in order to get into the hash. Each timestamp includes the previous timestamp in its hash, forming a chain, with each additional timestamp reinforcing the ones before it."
+        },
+        {
+          "t": "fig",
+          "h": 170,
+          "scene": "timestamp"
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "num": "4",
+      "scene": "pow",
+      "items": [
+        {
+          "t": "h",
+          "text": "{4.|Four.} Proof-of-Work"
+        },
+        {
+          "t": "p",
+          "text": "To implement a distributed timestamp server on a peer-to-peer basis, we will need to use a proof-of-work system similar to Adam Back's Hashcash {[6]|}, rather than newspaper or Usenet posts. The proof-of-work involves scanning for a value that when hashed, such as with {SHA-256,|S H A two fifty-six,} the hash begins with a number of zero bits. The average work required is exponential in the number of zero bits required and can be verified by executing a single hash."
+        },
+        {
+          "t": "p",
+          "text": "For our timestamp network, we implement the proof-of-work by incrementing a nonce in the block until a value is found that gives the block's hash the required zero bits. Once the CPU effort has been expended to make it satisfy the proof-of-work, the block cannot be changed without redoing the work. As later blocks are chained after it, the work to change the block would include redoing all the blocks after it."
+        },
+        {
+          "t": "fig",
+          "h": 170,
+          "scene": "pow"
+        },
+        {
+          "t": "p",
+          "text": "The proof-of-work also solves the problem of determining representation in majority decision making. If the majority were based on {one-IP-address-one-vote,|one I P address, one vote,} it could be subverted by anyone able to allocate many {IPs.|I Ps.} Proof-of-work is essentially {one-CPU-one-vote.|one C P U, one vote.} The majority decision is represented by the longest chain, which has the greatest proof-of-work effort invested in it. If a majority of CPU power is controlled by honest nodes, the honest chain will grow the fastest and outpace any competing chains. To modify a past block, an attacker would have to redo the proof-of-work of the block and all blocks after it and then catch up with and surpass the work of the honest nodes. We will show later that the probability of a slower attacker catching up diminishes exponentially as subsequent blocks are added."
+        },
+        {
+          "t": "p",
+          "text": "To compensate for increasing hardware speed and varying interest in running nodes over time, the proof-of-work difficulty is determined by a moving average targeting an average number of blocks per hour. If they're generated too fast, the difficulty increases."
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "num": "5",
+      "scene": "network",
+      "items": [
+        {
+          "t": "h",
+          "text": "{5.|Five.} Network"
+        },
+        {
+          "t": "p",
+          "text": "The steps to run the network are as follows:"
+        },
+        {
+          "t": "li",
+          "text": "{1)|One.} New transactions are broadcast to all nodes."
+        },
+        {
+          "t": "li",
+          "text": "{2)|Two.} Each node collects new transactions into a block."
+        },
+        {
+          "t": "li",
+          "text": "{3)|Three.} Each node works on finding a difficult proof-of-work for its block."
+        },
+        {
+          "t": "li",
+          "text": "{4)|Four.} When a node finds a proof-of-work, it broadcasts the block to all nodes."
+        },
+        {
+          "t": "li",
+          "text": "{5)|Five.} Nodes accept the block only if all transactions in it are valid and not already spent."
+        },
+        {
+          "t": "li",
+          "text": "{6)|Six.} Nodes express their acceptance of the block by working on creating the next block in the chain, using the hash of the accepted block as the previous hash."
+        },
+        {
+          "t": "p",
+          "text": "Nodes always consider the longest chain to be the correct one and will keep working on extending it. If two nodes broadcast different versions of the next block simultaneously, some nodes may receive one or the other first. In that case, they work on the first one they received, but save the other branch in case it becomes longer. The tie will be broken when the next proof-of-work is found and one branch becomes longer; the nodes that were working on the other branch will then switch to the longer one."
+        },
+        {
+          "t": "p",
+          "text": "New transaction broadcasts do not necessarily need to reach all nodes. As long as they reach many nodes, they will get into a block before long. Block broadcasts are also tolerant of dropped messages. If a node does not receive a block, it will request it when it receives the next block and realizes it missed one."
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "num": "6",
+      "scene": "incentive",
+      "items": [
+        {
+          "t": "h",
+          "text": "{6.|Six.} Incentive"
+        },
+        {
+          "t": "p",
+          "text": "By convention, the first transaction in a block is a special transaction that starts a new coin owned by the creator of the block. This adds an incentive for nodes to support the network, and provides a way to initially distribute coins into circulation, since there is no central authority to issue them. The steady addition of a constant of amount of new coins is analogous to gold miners expending resources to add gold to circulation. In our case, it is CPU time and electricity that is expended."
+        },
+        {
+          "t": "p",
+          "text": "The incentive can also be funded with transaction fees. If the output value of a transaction is less than its input value, the difference is a transaction fee that is added to the incentive value of the block containing the transaction. Once a predetermined number of coins have entered circulation, the incentive can transition entirely to transaction fees and be completely inflation free."
+        },
+        {
+          "t": "p",
+          "text": "The incentive may help encourage nodes to stay honest. If a greedy attacker is able to assemble more CPU power than all the honest nodes, he would have to choose between using it to defraud people by stealing back his payments, or using it to generate new coins. He ought to find it more profitable to play by the rules, such rules that favour him with more new coins than everyone else combined, than to undermine the system and the validity of his own wealth."
+        }
+      ]
+    },
+    {
+      "id": "s7",
+      "num": "7",
+      "scene": "merkle",
+      "items": [
+        {
+          "t": "h",
+          "text": "{7.|Seven.} Reclaiming Disk Space"
+        },
+        {
+          "t": "p",
+          "text": "Once the latest transaction in a coin is buried under enough blocks, the spent transactions before it can be discarded to save disk space. To facilitate this without breaking the block's hash, transactions are hashed in a Merkle Tree {[7][2][5],|,} with only the root included in the block's hash. Old blocks can then be compacted by stubbing off branches of the tree. The interior hashes do not need to be stored."
+        },
+        {
+          "t": "fig",
+          "h": 300,
+          "scene": "merkle"
+        },
+        {
+          "t": "p",
+          "text": "A block header with no transactions would be about 80 bytes. If we suppose blocks are generated every 10 minutes, {80 bytes * 6 * 24 * 365 = 4.2MB|80 bytes, times 6, times 24, times 365, equals 4.2 megabytes} per year. With computer systems typically selling with {2GB|2 gigabytes} of RAM as of 2008, and Moore's Law predicting current growth of {1.2GB|1.2 gigabytes} per year, storage should not be a problem even if the block headers must be kept in memory."
+        }
+      ]
+    },
+    {
+      "id": "s8",
+      "num": "8",
+      "scene": "spv",
+      "items": [
+        {
+          "t": "h",
+          "text": "{8.|Eight.} Simplified Payment Verification"
+        },
+        {
+          "t": "p",
+          "text": "It is possible to verify payments without running a full network node. A user only needs to keep a copy of the block headers of the longest proof-of-work chain, which he can get by querying network nodes until he's convinced he has the longest chain, and obtain the Merkle branch linking the transaction to the block it's timestamped in. He can't check the transaction for himself, but by linking it to a place in the chain, he can see that a network node has accepted it, and blocks added after it further confirm the network has accepted it."
+        },
+        {
+          "t": "fig",
+          "h": 250,
+          "scene": "spv"
+        },
+        {
+          "t": "p",
+          "text": "As such, the verification is reliable as long as honest nodes control the network, but is more vulnerable if the network is overpowered by an attacker. While network nodes can verify transactions for themselves, the simplified method can be fooled by an attacker's fabricated transactions for as long as the attacker can continue to overpower the network. One strategy to protect against this would be to accept alerts from network nodes when they detect an invalid block, prompting the user's software to download the full block and alerted transactions to confirm the inconsistency. Businesses that receive frequent payments will probably still want to run their own nodes for more independent security and quicker verification."
+        }
+      ]
+    },
+    {
+      "id": "s9",
+      "num": "9",
+      "scene": "inout",
+      "items": [
+        {
+          "t": "h",
+          "text": "{9.|Nine.} Combining and Splitting Value"
+        },
+        {
+          "t": "p",
+          "text": "Although it would be possible to handle coins individually, it would be unwieldy to make a separate transaction for every cent in a transfer. To allow value to be split and combined, transactions contain multiple inputs and outputs. Normally there will be either a single input from a larger previous transaction or multiple inputs combining smaller amounts, and at most two outputs: one for the payment, and one returning the change, if any, back to the sender."
+        },
+        {
+          "t": "fig",
+          "h": 190,
+          "scene": "inout"
+        },
+        {
+          "t": "p",
+          "text": "It should be noted that fan-out, where a transaction depends on several transactions, and those transactions depend on many more, is not a problem here. There is never the need to extract a complete standalone copy of a transaction's history."
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "num": "10",
+      "scene": "privacy",
+      "items": [
+        {
+          "t": "h",
+          "text": "{10.|Ten.} Privacy"
+        },
+        {
+          "t": "p",
+          "text": "The traditional banking model achieves a level of privacy by limiting access to information to the parties involved and the trusted third party. The necessity to announce all transactions publicly precludes this method, but privacy can still be maintained by breaking the flow of information in another place: by keeping public keys anonymous. The public can see that someone is sending an amount to someone else, but without information linking the transaction to anyone. This is similar to the level of information released by stock exchanges, where the time and size of individual trades, the \"tape\", is made public, but without telling who the parties were."
+        },
+        {
+          "t": "fig",
+          "h": 210,
+          "scene": "privacy"
+        },
+        {
+          "t": "p",
+          "text": "As an additional firewall, a new key pair should be used for each transaction to keep them from being linked to a common owner. Some linking is still unavoidable with multi-input transactions, which necessarily reveal that their inputs were owned by the same owner. The risk is that if the owner of a key is revealed, linking could reveal other transactions that belonged to the same owner."
+        }
+      ]
+    },
+    {
+      "id": "s11",
+      "num": "11",
+      "scene": "calc",
+      "items": [
+        {
+          "t": "h",
+          "text": "{11.|Eleven.} Calculations"
+        },
+        {
+          "t": "p",
+          "text": "We consider the scenario of an attacker trying to generate an alternate chain faster than the honest chain. Even if this is accomplished, it does not throw the system open to arbitrary changes, such as creating value out of thin air or taking money that never belonged to the attacker. Nodes are not going to accept an invalid transaction as payment, and honest nodes will never accept a block containing them. An attacker can only try to change one of his own transactions to take back money he recently spent."
+        },
+        {
+          "t": "p",
+          "text": "The race between the honest chain and an attacker chain can be characterized as a Binomial Random Walk. The success event is the honest chain being extended by one block, increasing its lead by {+1,|plus one,} and the failure event is the attacker's chain being extended by one block, reducing the gap by {-1.|minus one.}"
+        },
+        {
+          "t": "p",
+          "text": "The probability of an attacker catching up from a given deficit is analogous to a Gambler's Ruin problem. Suppose a gambler with unlimited credit starts at a deficit and plays potentially an infinite number of trials to try to reach breakeven. We can calculate the probability he ever reaches breakeven, or that an attacker ever catches up with the honest chain, as follows {[8]:|:}"
+        },
+        {
+          "t": "def",
+          "text": "{p =|p equals} probability an honest node finds the next block"
+        },
+        {
+          "t": "def",
+          "text": "{q =|q equals} probability the attacker finds the next block"
+        },
+        {
+          "t": "def",
+          "text": "{q_z =|q sub z equals} probability the attacker will ever catch up from z blocks behind"
+        },
+        {
+          "t": "math",
+          "id": "qz",
+          "say": "q sub z equals one, if p is less than or equal to q. Or q over p, to the power of z, if p is greater than q."
+        },
+        {
+          "t": "p",
+          "text": "Given our assumption that {p > q,|p is greater than q,} the probability drops exponentially as the number of blocks the attacker has to catch up with increases. With the odds against him, if he doesn't make a lucky lunge forward early on, his chances become vanishingly small as he falls further behind."
+        },
+        {
+          "t": "p",
+          "text": "We now consider how long the recipient of a new transaction needs to wait before being sufficiently certain the sender can't change the transaction. We assume the sender is an attacker who wants to make the recipient believe he paid him for a while, then switch it to pay back to himself after some time has passed. The receiver will be alerted when that happens, but the sender hopes it will be too late."
+        },
+        {
+          "t": "p",
+          "text": "The receiver generates a new key pair and gives the public key to the sender shortly before signing. This prevents the sender from preparing a chain of blocks ahead of time by working on it continuously until he is lucky enough to get far enough ahead, then executing the transaction at that moment. Once the transaction is sent, the dishonest sender starts working in secret on a parallel chain containing an alternate version of his transaction."
+        },
+        {
+          "t": "p",
+          "text": "The recipient waits until the transaction has been added to a block and z blocks have been linked after it. He doesn't know the exact amount of progress the attacker has made, but assuming the honest blocks took the average expected time per block, the attacker's potential progress will be a Poisson distribution with expected value:"
+        },
+        {
+          "t": "math",
+          "id": "lambda",
+          "say": "lambda equals z times q over p."
+        },
+        {
+          "t": "p",
+          "text": "To get the probability the attacker could still catch up now, we multiply the Poisson density for each amount of progress he could have made by the probability he could catch up from that point:"
+        },
+        {
+          "t": "math",
+          "id": "sum",
+          "say": "The sum, from k equals zero to infinity, of lambda to the k, times e to the minus lambda, over k factorial, times q over p to the power of z minus k, if k is less than or equal to z. Or one, if k is greater than z."
+        },
+        {
+          "t": "p",
+          "text": "Rearranging to avoid summing the infinite tail of the distribution..."
+        },
+        {
+          "t": "math",
+          "id": "rearr",
+          "say": "One, minus the sum, from k equals zero to z, of lambda to the k, e to the minus lambda, over k factorial, times one minus q over p to the power of z minus k."
+        },
+        {
+          "t": "p",
+          "text": "Converting to C code..."
+        },
+        {
+          "t": "code",
+          "hold": 5
+        },
+        {
+          "t": "p",
+          "text": "Running some results, we can see the probability drop off exponentially with z."
+        },
+        {
+          "t": "results",
+          "hold": 5.5
+        },
+        {
+          "t": "p",
+          "text": "Solving for P less than {0.1%...|0.1 percent.}"
+        },
+        {
+          "t": "ztable",
+          "head": "{P < 0.001|P less than 0.001.}",
+          "rows": [
+            [
+              "{q=0.10|q equals 0.10,}",
+              "{z=5|z equals 5.}"
+            ],
+            [
+              "{q=0.15|q equals 0.15,}",
+              "{z=8|z equals 8.}"
+            ],
+            [
+              "{q=0.20|q equals 0.20,}",
+              "{z=11|z equals 11.}"
+            ],
+            [
+              "{q=0.25|q equals 0.25,}",
+              "{z=15|z equals 15.}"
+            ],
+            [
+              "{q=0.30|q equals 0.30,}",
+              "{z=24|z equals 24.}"
+            ],
+            [
+              "{q=0.35|q equals 0.35,}",
+              "{z=41|z equals 41.}"
+            ],
+            [
+              "{q=0.40|q equals 0.40,}",
+              "{z=89|z equals 89.}"
+            ],
+            [
+              "{q=0.45|q equals 0.45,}",
+              "{z=340|z equals 340.}"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "num": "12",
+      "scene": "conclusion",
+      "items": [
+        {
+          "t": "h",
+          "text": "{12.|Twelve.} Conclusion"
+        },
+        {
+          "t": "p",
+          "text": "We have proposed a system for electronic transactions without relying on trust. We started with the usual framework of coins made from digital signatures, which provides strong control of ownership, but is incomplete without a way to prevent double-spending. To solve this, we proposed a peer-to-peer network using proof-of-work to record a public history of transactions that quickly becomes computationally impractical for an attacker to change if honest nodes control a majority of CPU power. The network is robust in its unstructured simplicity. Nodes work all at once with little coordination. They do not need to be identified, since messages are not routed to any particular place and only need to be delivered on a best effort basis. Nodes can leave and rejoin the network at will, accepting the proof-of-work chain as proof of what happened while they were gone. They vote with their CPU power, expressing their acceptance of valid blocks by working on extending them and rejecting invalid blocks by refusing to work on them. Any needed rules and incentives can be enforced with this consensus mechanism."
+        }
+      ]
+    },
+    {
+      "id": "refs",
+      "scene": null,
+      "items": [
+        {
+          "t": "refs",
+          "list": [
+            "W. Dai, \"b-money,\" http://www.weidai.com/bmoney.txt, 1998.",
+            "H. Massias, X.S. Avila, and J.-J. Quisquater, \"Design of a secure timestamping service with minimal trust requirements,\" In 20th Symposium on Information Theory in the Benelux, May 1999.",
+            "S. Haber, W.S. Stornetta, \"How to time-stamp a digital document,\" In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.",
+            "D. Bayer, S. Haber, W.S. Stornetta, \"Improving the efficiency and reliability of digital time-stamping,\" In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.",
+            "S. Haber, W.S. Stornetta, \"Secure names for bit-strings,\" In Proceedings of the 4th ACM Conference on Computer and Communications Security, pages 28-35, April 1997.",
+            "A. Back, \"Hashcash - a denial of service counter-measure,\" http://www.hashcash.org/papers/hashcash.pdf, 2002.",
+            "R.C. Merkle, \"Protocols for public key cryptosystems,\" In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, pages 122-133, April 1980.",
+            "W. Feller, \"An introduction to probability theory and its applications,\" 1957."
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  // The Bitcoin whitepaper — narrated, interactive edition.
+  // Deploy: pnpm install && pnpm run deploy (then point your domain at it).
+  "name": "whitepaper",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS"
+  },
+  "rules": [
+    { "type": "Text", "globs": ["**/*.txt", "**/*.html", "**/*.sql"] }
+  ]
+}

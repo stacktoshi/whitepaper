@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ₿ from the opening coin scene: same path, coin-dark plate, cream strokes -->
+  <style>
+    .bg { fill: #221e18; }
+    .g { fill: none; stroke: #e7dfcf; stroke-width: 9; stroke-linecap: round; }
+    @media (prefers-color-scheme: light) {
+      .bg { fill: #221e18; }
+      .g { stroke: #e7dfcf; }
+    }
+  </style>
+  <rect class="bg" width="64" height="64" rx="14"/>
+  <g class="g" transform="translate(30.5 32) scale(.3)">
+    <path d="M-36,-62 V62 M-50,-62 H8 C50,-62 50,-3 8,-3 H-36 M-36,-3 H14 C60,-3 60,62 14,62 H-50 M-18,-62 V-90 M8,-62 V-90 M-18,62 V90 M8,62 V90"/>
+  </g>
+</svg>

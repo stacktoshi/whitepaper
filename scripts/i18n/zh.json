@@ -1,0 +1,968 @@
+{
+  "paper": {
+    "sections": [
+      {
+        "id": "title",
+        "label": "封面",
+        "scene": "coin",
+        "items": [
+          {
+            "t": "title",
+            "lines": [
+              "比特币",
+              "一种点对点的",
+              "电子现金",
+              "系统"
+            ]
+          },
+          {
+            "t": "byline",
+            "text": "Satoshi {Nakamoto|Nakamoto.} {satoshin@gmx.com|} {www.bitcoin.org|}"
+          }
+        ]
+      },
+      {
+        "id": "abstract",
+        "label": "摘要",
+        "scene": "p2p",
+        "items": [
+          {
+            "t": "abs1",
+            "text": "摘要：一种完全的点对点电子货币应当允许在线支付从一方直接发送到另一方，而不需要通过一个金融机构。数字签名提供了部分解决方案，但如果仍需一个可信任的第三方来防止双重支付，那就失去了电子货币的主要优点。"
+          },
+          {
+            "t": "abs2",
+            "text": "我们提出一种使用点对点网络解决双重支付问题的方案。该网络通过将交易哈希进一条持续增长的基于哈希的工作量证明链来给交易打上时间戳，形成一条除非重做工作量证明否则不能更改的记录。最长的链不仅是被见证事件序列的证据，而且也是它本身是由最大 CPU 算力池产生的证据。只要多数的 CPU 算力被不打算联合攻击网络的节点控制，这些节点就将生成最长的链并超过攻击者。这种网络本身只需极简的架构。信息将被尽力广播，节点可以随时离开和重新加入网络，只需接受最长的工作量证明链作为它们离开时发生事件的证据。"
+          }
+        ]
+      },
+      {
+        "id": "s1",
+        "num": "1",
+        "label": "简介",
+        "scene": "trust",
+        "items": [
+          {
+            "t": "h",
+            "text": "{1.|一。} 简介"
+          },
+          {
+            "t": "p",
+            "text": "互联网贸易已经变得几乎完全依赖金融机构作为可信任的第三方来处理电子支付。尽管对于大部分交易这种系统运行得足够好，但仍需忍受基于信任模型这个固有缺点。由于金融机构不可避免的需要仲裁纠纷，完全不可撤销的交易实际是做不到的。仲裁成本增加了交易成本，限制了最小实际交易额度从而杜绝了日常小额交易的可能性，而且由于不支持不可撤销支付，对不可撤销服务进行支付将需要更大的成本。由于存在交易被撤销的可能性，对于信任的需求将更广泛。商家必须警惕他们的客户，麻烦他们提供更多他本不需要的信息。一定比例的欺诈被认为是不可避免的。虽可通过当面使用实物货币来避免这些成本及支付的不确定性，但不存在一个无可信任方而能在通信通道上进行支付的机制。"
+          },
+          {
+            "t": "p",
+            "text": "我们需要的是一个基于密码学原理而不是信任的电子支付系统，该系统允许任何有交易意愿的双方能直接交易而不需要一个可信任的第三方。交易在计算上的不可撤销将保护卖家不被欺诈，用来保护买家的程序化合约机制也应该较容易实现。在这篇论文中，我们提出一种使用点对点分布式时间戳服务器为基于时间的交易序列生成计算上的证据来解决双重支付问题的方案。只要诚实节点集体控制的 CPU 算力大于任何一个合作攻击节点群的 CPU 算力，这个系统就是安全的。"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "num": "2",
+        "label": "交易",
+        "scene": "txchain",
+        "items": [
+          {
+            "t": "h",
+            "text": "{2.|二。} 交易"
+          },
+          {
+            "t": "p",
+            "text": "我们将一枚电子货币定义为一条数字签名链。每个拥有者都通过将上一次交易和下一个拥有者的公钥的哈希值的数字签名添加到此货币末尾的方式将这枚货币转移给下一个拥有者。收款人可以通过验证数字签名来证实其为该链的所有者。"
+          },
+          {
+            "t": "fig",
+            "h": 250,
+            "scene": "txchain"
+          },
+          {
+            "t": "p",
+            "text": "这里的问题是收款人不能证实某个拥有者没有对此货币进行双重支付。通常的做法是引入一个可信任的中央机构或铸币厂来检查每笔交易是否存在双重支付。每笔交易之后，都需要将这枚货币退回铸币厂以换取发行一枚新的货币，只有由铸币厂直接发行的货币才能被确认没有被双重支付。这个方案的问题在于整个货币系统的命运都依赖于运营铸币厂的公司，每笔交易都需要经过它们，就像银行一样。"
+          },
+          {
+            "t": "p",
+            "text": "我们需要一种能让收款人知道上一个货币拥有者没有对任何更早的交易签名的方法。对我们来说，最早的那次交易是唯一有效的，所以我们不需要关心本次交易后面的双重支付尝试。唯一能确认一笔交易不存在的方法是知晓所有之前的交易。在铸币厂模型中，铸币厂知晓所有交易并能确定哪笔交易最先到达。在不引入一个可信任方的前提下要达到这个目的，所有交易就必须公开发布 {[1]|}，而且需要一个能让所有参与者对交易收到顺序的单一历史达成共识的系统。收款人在每笔交易时，都需要多数节点认同此交易是最先收到的证据。"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "num": "3",
+        "label": "时间戳服务器",
+        "scene": "timestamp",
+        "items": [
+          {
+            "t": "h",
+            "text": "{3.|三。} 时间戳服务器"
+          },
+          {
+            "t": "p",
+            "text": "我们提出的方案从时间戳服务器开始。时间戳服务器计算包含多个需要被打时间戳的数据项的区块的哈希值并广泛地发布这个哈希值，就像在报纸或新闻组帖子里 {[2-5]|}。时间戳能证明要得到这个哈希值，显然这些数据当时一定是存在的。每个时间戳的哈希值都纳入了上一个时间戳，形成一条链，后面的时间戳进一步增强前一个时间戳。"
+          },
+          {
+            "t": "fig",
+            "h": 170,
+            "scene": "timestamp"
+          }
+        ]
+      },
+      {
+        "id": "s4",
+        "num": "4",
+        "label": "工作量证明",
+        "scene": "pow",
+        "items": [
+          {
+            "t": "h",
+            "text": "{4.|四。} 工作量证明"
+          },
+          {
+            "t": "p",
+            "text": "为了实现一个基于点对点的时间戳服务器，我们需要使用一个类似 Adam Back 提出的哈希货币 {[6]|} 的工作量证明系统，而不是报纸或新闻组帖子那样。工作量证明采取搜索一个数，使得被哈希时（如使用 SHA-256）得到的哈希值以数个 0 比特开始。平均所需工作量将随所需 0 比特呈指数级增长，而验证却只需执行一次哈希。"
+          },
+          {
+            "t": "p",
+            "text": "对于我们的时间戳网络，我们通过在区块中加入一个随机数，直到使得区块的哈希值满足所需 0 比特的数被找到的方式实现工作量证明。一旦消耗了 CPU 算力使区块满足了工作量证明，那么除非重做这个工作否则就无法更改区块。由于后面的区块是链接在这个区块后面的，改变这个区块将需要重做所有后面的区块。"
+          },
+          {
+            "t": "fig",
+            "h": 170,
+            "scene": "pow"
+          },
+          {
+            "t": "p",
+            "text": "工作量证明同时解决了在多数决定中确定投票方式的问题。如果多数是按 IP 地址投票来决定，那么它将可能被能分配大量 IP 地址的人破坏。工作量证明本质上是按 CPU 投票。最长的链代表了多数决定，因为有最大的计算工作量证明的算力投入到这条链上。如果多数的 CPU 算力被诚实节点控制，诚实的链就会增长得最快并超过其他的竞争链。要修改过去的某区块，攻击者必须重做这个区块以及其后的所有区块的工作量证明，从而赶上并超过诚实节点的工作。我们后面会证明随着后续的区块被添加，一个更慢的攻击者赶上诚实节点的概率将呈指数级递减。"
+          },
+          {
+            "t": "p",
+            "text": "为了抵消硬件运算速度的增加及平衡不同时期运行节点的利益，工作量证明的难度将由移动平均数法来确定每小时生成区块的平均数。如果区块生成得过快，那么生成的难度就会增加。"
+          }
+        ]
+      },
+      {
+        "id": "s5",
+        "num": "5",
+        "label": "网络",
+        "scene": "network",
+        "items": [
+          {
+            "t": "h",
+            "text": "{5.|五。} 网络"
+          },
+          {
+            "t": "p",
+            "text": "运行网络的步骤如下："
+          },
+          {
+            "t": "li",
+            "text": "{1)|一。} 新交易向所有节点广播。"
+          },
+          {
+            "t": "li",
+            "text": "{2)|二。} 每个节点将新交易收集到一个区块。"
+          },
+          {
+            "t": "li",
+            "text": "{3)|三。} 每个节点为它的区块寻找工作量证明。"
+          },
+          {
+            "t": "li",
+            "text": "{4)|四。} 当一个节点找到了工作量证明，就向所有节点广播这个区块。"
+          },
+          {
+            "t": "li",
+            "text": "{5)|五。} 节点只有在区块内所有交易都是有效的且之前没有被支付的情况下接收这个区块。"
+          },
+          {
+            "t": "li",
+            "text": "{6)|六。} 节点通过使用这个区块的哈希值作为上一个哈希值，在链中创建下一个区块的方式表示对这个区块的接受。"
+          },
+          {
+            "t": "p",
+            "text": "节点总是认为最长的链为正确的并持续致力于延长它。如果两个节点同时广播了不同的下一个区块，有些节点可能先收到其中一个而其他节点先收到另一个。这种情况，节点基于他们收到的第一个区块工作，但是也保存另一个分支以防它变为更长的链。当下一个工作量证明被找到后僵局就会被打破，从而其中一个分支变得更长；在另一个分支上工作的节点将切换到更长的链上来。"
+          },
+          {
+            "t": "p",
+            "text": "新交易的广播不必到达所有的节点。只要到达一些节点，不久就会进入到一个区块。区块广播也是能容忍消息丢失的。如果一个节点没有收到某个区块，它将在收到下一个区块时发现它丢失了一个区块然后去请求这个区块。"
+          }
+        ]
+      },
+      {
+        "id": "s6",
+        "num": "6",
+        "label": "激励",
+        "scene": "incentive",
+        "items": [
+          {
+            "t": "h",
+            "text": "{6.|六。} 激励"
+          },
+          {
+            "t": "p",
+            "text": "我们约定，区块中的第一笔交易是区块创建者开创一枚属于他的新货币的特殊的交易。这就增加了对支持网络的节点的激励，并提供了一种初始分发货币到流通领域的方法，因为这里没有中央机构来发行货币。新货币按固定量稳定地增加就像金矿矿工消耗资源并增加黄金到流通领域一样。对我们而言，消耗的是 CPU 时间和电力。"
+          },
+          {
+            "t": "p",
+            "text": "激励也可以由交易费充当。如果交易的输出值小于其输入值，差价就作为交易费被加到包含此交易的区块的激励中。一旦预定量的货币进入了流通领域，激励将变为只含有交易费，这样可以完全避免通货膨胀。"
+          },
+          {
+            "t": "p",
+            "text": "激励会有助于鼓励节点保持诚实。如果一个贪心的攻击者有能力聚集比所有诚实节点更多的 CPU 算力，他将面临是以骗回已付款的方式欺诈别人还是使用这些算力生成新货币的抉择。他将发现遵守规则比破坏系统和他自己财产的有效性更有利，因为这些规则准许他获得比所有其他人都多的新货币。"
+          }
+        ]
+      },
+      {
+        "id": "s7",
+        "num": "7",
+        "label": "回收磁盘空间",
+        "scene": "merkle",
+        "items": [
+          {
+            "t": "h",
+            "text": "{7.|七。} 回收磁盘空间"
+          },
+          {
+            "t": "p",
+            "text": "一旦某个货币的最新交易已经被足够多的区块覆盖，这之前的支付交易就可以被丢弃以节省磁盘空间。为便于此而又不破坏区块的哈希值，交易将被哈希进默克尔树 {[7][2][5]|}，只有根节点被纳入到区块的哈希值。老的区块可通过剪除树枝的方式被压缩。树枝内部的哈希不需要被保存。"
+          },
+          {
+            "t": "fig",
+            "h": 300,
+            "scene": "merkle"
+          },
+          {
+            "t": "p",
+            "text": "每个不包含交易的区块头大约是 80 bytes。如果每 10 分钟生成一个区块，每年生成 80 bytes * 6 * 24 * 365 = 4.2 MB，2008 年在售的典型计算机有 2 GB 内存，并且摩尔定律预测目前每年内存增加 1.2 GB，所以就算区块头一定要存在内存里，存储也不是问题。"
+          }
+        ]
+      },
+      {
+        "id": "s8",
+        "num": "8",
+        "label": "简化的支付验证",
+        "scene": "spv",
+        "items": [
+          {
+            "t": "h",
+            "text": "{8.|八。} 简化的支付验证"
+          },
+          {
+            "t": "p",
+            "text": "不运行一个完整的网络节点也是可以进行支付验证的。用户只需拥有一个最长工作量证明链的区块头副本，他可以通过向其他网络节点查询以确认他拥有了最长的链，并获取链接交易到给交易打时间戳区块的默克尔分支。虽然他自己不能核实这个交易，但如果交易已经链接到链中的某个位置，就说明一个网络节点已经接受了此交易，而其后追加的区块进一步确认网络已经接受了它。"
+          },
+          {
+            "t": "fig",
+            "h": 250,
+            "scene": "spv"
+          },
+          {
+            "t": "p",
+            "text": "同样地，只要诚实节点控制着网络，这种简化验证就是可靠的；如果网络被攻击者控制，简化验证会变得比较脆弱。虽然网络节点可以验证他们自己的交易，但只要攻击者持续控制网络，那么这种简化的方法就可能被攻击者的伪造交易欺骗。一种对策是接受其他网络节点发现一个无效区块时发出的警告，提醒用户软件下载整个区块和被警告的交易来检查一致性。为了更加独立的安全性以及更快的支付确认，收款频繁的公司可能仍需运行他们自己的节点。"
+          }
+        ]
+      },
+      {
+        "id": "s9",
+        "num": "9",
+        "label": "合并和分割交易额",
+        "scene": "inout",
+        "items": [
+          {
+            "t": "h",
+            "text": "{9.|九。} 合并和分割交易额"
+          },
+          {
+            "t": "p",
+            "text": "尽管单独处理每个货币是可行的，但将一次转账按每一分拆成多次交易是不实际的。为允许交易额被分割和合并，交易将包含多个输入值和输出值。通常是一个从之前交易而得的较大输入值或多个较小输入值的组合，以及最多两个输出值：一个作为支付，另一个作为找零，如果有的话，退还给支付发送方。"
+          },
+          {
+            "t": "fig",
+            "h": 190,
+            "scene": "inout"
+          },
+          {
+            "t": "p",
+            "text": "注意这里的扇出，即一笔交易依赖数笔交易，这数笔交易又依赖更多的交易，在这里是不存在问题的。永远不会需要获取一笔交易历史的完整独立副本。"
+          }
+        ]
+      },
+      {
+        "id": "s10",
+        "num": "10",
+        "label": "隐私",
+        "scene": "privacy",
+        "items": [
+          {
+            "t": "h",
+            "text": "{10.|十。} 隐私"
+          },
+          {
+            "t": "p",
+            "text": "传统的银行模型通过限制参与方和可信任第三方对信息的访问来达到一定级别的隐私保护。交易必须要公开发布就不能使用这个方法，但隐私仍可在其他地方通过阻断信息流的方式来保护：那就是保持公钥匿名。公众能看到有人正在发送一定量货币给其他人，但是不能将交易关联到某个人。这和证券交易所发布的信息级别类似，每笔交易的时间和交易量，即行情是公开的，但是不会显示交易双方是谁。"
+          },
+          {
+            "t": "fig",
+            "h": 210,
+            "scene": "privacy"
+          },
+          {
+            "t": "p",
+            "text": "作为额外的防火墙，对每笔交易使用新密钥对可以防止他们被关联到一个共同的拥有者。由于多输入值交易存在，有些关联仍不可避免，因为多输入值交易必然暴露其多个输入是属于同一个拥有者的。风险就在于如果一个密钥的拥有者被暴露，关联性将暴露属于同一个拥有者的其他交易。"
+          }
+        ]
+      },
+      {
+        "id": "s11",
+        "num": "11",
+        "label": "计算",
+        "scene": "calc",
+        "items": [
+          {
+            "t": "h",
+            "text": "{11.|十一。} 计算"
+          },
+          {
+            "t": "p",
+            "text": "我们考虑一个攻击者试图生成一条比诚实链更快的替代链的情况。即使这个目标达到了，也不会使系统变得可以任意修改，比如凭空创建货币或拿走不属于他的钱。节点将不会接受无效的交易作为支付，而且诚实节点永远不会接受一个包含无效交易的区块。攻击者只可能改变他自己的某笔交易来拿回他不久前已经支出的钱。"
+          },
+          {
+            "t": "p",
+            "text": "诚实链与攻击者链之间的竞争可描述为二项随机漫步。成功事件是诚实节点被延长一个区块，两条链的差距加 1，失败事件是攻击者的链延长一个区块，两条链的差距减 1。"
+          },
+          {
+            "t": "p",
+            "text": "攻击者从某一落后位置赶上诚实链的概率类似于赌徒破产理论。设想一个拥有无限筹码的赌徒从一定亏损开始，进行可能无限次的赌博试图达到盈亏平衡。我们可以计算他达到盈亏平衡，即一个攻击者赶上诚实链的概率，如下 {[8]:|}："
+          },
+          {
+            "t": "def",
+            "text": "{p =|p 等于} 诚实节点找到下一个区块的概率"
+          },
+          {
+            "t": "def",
+            "text": "{q =|q 等于} 攻击者找到下一个区块的概率"
+          },
+          {
+            "t": "def",
+            "text": "{q_z =|q 下标 z 等于} 攻击者从落后 z 个区块赶上诚实链的概率"
+          },
+          {
+            "t": "math",
+            "id": "qz",
+            "say": "q 下标 z 等于一，如果 p 小于或等于 q；否则等于 q 比 p 的 z 次方，如果 p 大于 q。"
+          },
+          {
+            "t": "p",
+            "text": "我们假设 p > q，概率将随着攻击者需要赶上的区块数增加而呈指数下降。由于形势对他不利，如果他没有在早期幸运地快速赶上，他落得越远赶上的机会就越渺茫。"
+          },
+          {
+            "t": "p",
+            "text": "我们现在考虑一个新交易的收款人要等多久才能确保付款人不能再改变这个交易。我们假设作为攻击者的付款人是想让收款人相信他暂时已经付款，然后在一段时间后转换成支付回自己。这时收款人会收到警告，但付款人希望警告已为时已晚。"
+          },
+          {
+            "t": "p",
+            "text": "收款人生成一个新密钥对并将公钥给付款人，这样付款人就无法提前对交易签名。这能防止付款人通过持续工作直到他足够幸运获得大幅领先的方式预先准备一条区块链，然后在那时执行交易。一旦交易被发出，不诚实的付款人就开始秘密地在一条包含了他的替换版交易的平行链上工作。"
+          },
+          {
+            "t": "p",
+            "text": "收款人等到交易被加到区块中且其后追加了 z 个区块。他不知道攻击者确切的进度，但是假设诚实的区块按期望的平均时间生成，攻击者可能的进度将是一个泊松分布，其期望值为："
+          },
+          {
+            "t": "math",
+            "id": "lambda",
+            "say": "lambda 等于 z 乘以 q 比 p。"
+          },
+          {
+            "t": "p",
+            "text": "为计算攻击者现在仍然能赶上的概率，我们给每个他可能达到的进度的泊松密度乘以他在那个进度能赶上诚实链的概率："
+          },
+          {
+            "t": "math",
+            "id": "sum",
+            "say": "从 k 等于零到无穷大的求和：lambda 的 k 次方乘以 e 的负 lambda 次方，除以 k 的阶乘，再乘以 q 比 p 的 z 减 k 次方，如果 k 小于或等于 z；或者是一，如果 k 大于 z。"
+          },
+          {
+            "t": "p",
+            "text": "变换以避免对分布的无限尾部求和..."
+          },
+          {
+            "t": "math",
+            "id": "rearr",
+            "say": "一，减去从 k 等于零到 z 的求和：lambda 的 k 次方乘以 e 的负 lambda 次方除以 k 的阶乘，再乘以一减 q 比 p 的 z 减 k 次方。"
+          },
+          {
+            "t": "p",
+            "text": "转换成 C 语言代码..."
+          },
+          {
+            "t": "code",
+            "hold": 5
+          },
+          {
+            "t": "p",
+            "text": "运行得到一些结果，我们可以看到概率随 z 呈指数下降。"
+          },
+          {
+            "t": "results",
+            "hold": 5.5
+          },
+          {
+            "t": "p",
+            "text": "P 小于 0.1% 的解..."
+          },
+          {
+            "t": "ztable",
+            "head": "{P < 0.001|P 小于 0.001。}",
+            "rows": [
+              [
+                "{q=0.10|q 等于 0.10，}",
+                "{z=5|z 等于 5。}"
+              ],
+              [
+                "{q=0.15|q 等于 0.15，}",
+                "{z=8|z 等于 8。}"
+              ],
+              [
+                "{q=0.20|q 等于 0.20，}",
+                "{z=11|z 等于 11。}"
+              ],
+              [
+                "{q=0.25|q 等于 0.25，}",
+                "{z=15|z 等于 15。}"
+              ],
+              [
+                "{q=0.30|q 等于 0.30，}",
+                "{z=24|z 等于 24。}"
+              ],
+              [
+                "{q=0.35|q 等于 0.35，}",
+                "{z=41|z 等于 41。}"
+              ],
+              [
+                "{q=0.40|q 等于 0.40，}",
+                "{z=89|z 等于 89。}"
+              ],
+              [
+                "{q=0.45|q 等于 0.45，}",
+                "{z=340|z 等于 340。}"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "s12",
+        "num": "12",
+        "label": "总结",
+        "scene": "conclusion",
+        "items": [
+          {
+            "t": "h",
+            "text": "{12.|十二。} 总结"
+          },
+          {
+            "t": "p",
+            "text": "我们已经提出了一种不依赖信任的电子交易系统。我们从通用的数字签名货币体系开始，这体系提供了强有力的所有权控制，但由于缺乏防止双重支付的方法而不完善。为解决这个问题，我们提出一种使用工作量证明来记录公共交易历史的点对点网络，只要诚实节点控制了多数的 CPU 算力，对于攻击者，交易历史将很快变得在计算上不可更改。网络因其结构简洁性而强大。节点只需很少的协调就能同时工作。它们不需要被认证，因为信息不会被发送到某个特殊的位置，只需被尽力传播。节点可以随时离开和重新加入网络，只需接受工作量证明链作为它们离开时发生事件的证据。节点使用 CPU 算力来投票，通过致力于延长有效区块来表达对其接受，通过拒绝在无效区块上工作来表达对其抵制。任何需要的规则和激励都可通过这个共识机制来加强。"
+          }
+        ]
+      },
+      {
+        "id": "refs",
+        "label": "参考文献",
+        "scene": null,
+        "items": [
+          {
+            "t": "refs",
+            "list": [
+              "W. Dai, \"b-money,\" http://www.weidai.com/bmoney.txt, 1998.",
+              "H. Massias, X.S. Avila, and J.-J. Quisquater, \"Design of a secure timestamping service with minimal trust requirements,\" In 20th Symposium on Information Theory in the Benelux, May 1999.",
+              "S. Haber, W.S. Stornetta, \"How to time-stamp a digital document,\" In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.",
+              "D. Bayer, S. Haber, W.S. Stornetta, \"Improving the efficiency and reliability of digital time-stamping,\" In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.",
+              "S. Haber, W.S. Stornetta, \"Secure names for bit-strings,\" In Proceedings of the 4th ACM Conference on Computer and Communications Security, pages 28-35, April 1997.",
+              "A. Back, \"Hashcash - a denial of service counter-measure,\" http://www.hashcash.org/papers/hashcash.pdf, 2002.",
+              "R.C. Merkle, \"Protocols for public key cryptosystems,\" In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, pages 122-133, April 1980.",
+              "W. Feller, \"An introduction to probability theory and its applications,\" 1957."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "ui": {
+    "labels": {
+      "ringText": "一种点对点电子现金系统 ✦ SATOSHI NAKAMOTO ✦ MMVIII ✦",
+      "releaseDate": "2008 年 10 月 31 日 · bitcoin.org",
+      "finInstitution": "金融\n机构",
+      "sameCoinTwice": "同一枚币，花两次？",
+      "signed": "已签名",
+      "customer": "顾客",
+      "merchant": "商家",
+      "bank": "银行",
+      "reversed": "被撤销",
+      "fees": "手续费",
+      "tooSmall": "金额太小，懒得管",
+      "prying": "姓名？地址？\n电话？证件？",
+      "fraud": "欺诈，",
+      "pricedIn": "计入价格",
+      "inPersonOk": "当面：现金天然好用",
+      "onlineTrusted": "线上：中间有个受信任方",
+      "irrevEscrow": "对卖家不可逆 · 对买家有托管",
+      "distributedTs": "一个分布式时间戳服务器",
+      "attackers": "攻击者",
+      "honestNodes": "诚实节点",
+      "transaction": "交易",
+      "hash": "哈希",
+      "ownerPubKey": "所有者 {n} 的\n公钥",
+      "ownerSig": "所有者 {n} 的\n签名",
+      "ownerPrivKey": "所有者 {n} 的\n私钥",
+      "verify": "验证",
+      "sign": "签名",
+      "signedAgainBy": "再次由\n所有者 {n} 签名",
+      "doubleSpend": "双重支付？",
+      "mint": "铸币厂",
+      "bankCaps": "银行",
+      "oneCompany": "一切都押在一家公司身上",
+      "timeAxis": "时间",
+      "firstTx": "第一笔",
+      "laterTx": "之后的",
+      "itemLabel": "条目",
+      "newspaper": "每 日 时 间 戳",
+      "notice": "公告 · 区块哈希",
+      "existed": "已存在",
+      "block": "区块",
+      "prevHash": "上一个哈希",
+      "nonce": "随机数",
+      "nonceN": "随机数 {n}",
+      "hashLower": "哈希",
+      "expectedTries": "期望尝试次数",
+      "zero": "零",
+      "zeros": "个零",
+      "oneVote": "1 票",
+      "onePerson": "一个人",
+      "honestChain": "诚实链",
+      "attackerChain": "攻击者链",
+      "easy": "容易",
+      "hard": "困难",
+      "difficulty": "难度",
+      "targetRate": "目标：约每小时 6 个区块",
+      "tooFast": "太快 → 需要更多个零",
+      "editedHash": "已编辑 → 哈希不再以零开头",
+      "foundHash": "✓ 找到：验证只需一次哈希",
+      "sendMissed": "把我错过的那个发给我",
+      "blockCreator": "区块创建者",
+      "goldMiners": "金矿矿工花费气力…",
+      "btcEnergy": "…比特币花费 CPU 时间和电力",
+      "txIn": "输入",
+      "txOut": "输出",
+      "feeFlow": "输入 − 输出 = 0.02 手续费 → 区块创建者",
+      "cap21": "21,000,000 上限",
+      "halving": "流通中的币 · 每 210,000 个区块减半",
+      "nowBlock": "现在 · 区块 {h} · 已挖出 {m}M",
+      "newCoin": "新币 → 创建者",
+      "defraud": "欺诈他人",
+      "mintNew": "铸造新币",
+      "yourTx": "你的交易",
+      "blockPlus": "区块 +{n}",
+      "blockHeaderHash": "区块头（区块哈希）",
+      "rootHash": "根哈希",
+      "blockHeader": "区块头",
+      "approx80": "≈ 80 字节",
+      "perYear": "字节 · 每小时 · 每天 · 每年",
+      "ram2gb": "2 GB 内存（2008 年）",
+      "oneYearHeaders": "↑ 一年的区块头",
+      "moore": "每年 +1.2 GB（摩尔定律）",
+      "merkleRoot": "默克尔根",
+      "lightClient": "轻客户端",
+      "fullNode": "全节点",
+      "everyBlock": "每个区块、每笔交易",
+      "headersOnly": "仅区块头 · 每个 80 字节",
+      "attackerMoreCpu": "攻击者链，CPU 算力更多",
+      "alertInvalid": "警报：无效区块",
+      "businessesNode": "商家：自己的节点",
+      "everyCent": "每一分钱单独一笔交易？",
+      "payee": "收款人",
+      "payment": "付款",
+      "changeBack": "找零，退回给发送方",
+      "fanoutOk": "扇出没问题：不需要完整历史",
+      "identities": "身份",
+      "transactions": "交易",
+      "trustedThird": "受信任的\n第三方",
+      "counterparty": "交易对手",
+      "publicStr": "公众",
+      "tradPrivacy": "传统隐私模型",
+      "newPrivacy": "新隐私模型",
+      "nowPublic": "现在必须公开…",
+      "keyN": "密钥 {n}",
+      "sameOwner": "同一所有者",
+      "revealed": "暴露了！",
+      "noCreate": "凭空创造价值",
+      "noSteal": "拿走从不属于他的钱",
+      "onlyTakeBack": "只能：撤回他自己的付款",
+      "honestLead": "诚实链领先",
+      "blocksAxis": "区块 →",
+      "attackerBehind": "攻击者：落后 z 个区块",
+      "walkLegend": "+1 诚实区块 (p)   −1 攻击者区块 (q)",
+      "defP": "诚实节点找到下一个区块的概率",
+      "defQ": "攻击者找到下一个区块的概率",
+      "defQz": "攻击者从落后 z 个区块赶上来的概率",
+      "ifPLEQ": "若 p ≤ q",
+      "ifPGT": "若 p > q",
+      "zBehindAxis": "z（落后的区块数）→",
+      "recipient": "收款人",
+      "sender": "付款人",
+      "freshKey": "新密钥",
+      "secretChain": "秘密平行链：他的替换交易",
+      "finiteSum": "有限和：仅 k = 0 … z",
+      "attackerProb": "攻击者成功概率",
+      "blocksWait": "等待区块数（P < 0.1%）",
+      "trustedThirdCaps": "受信任的第三方",
+      "twice": "两次？",
+      "consensus": "共识",
+      "byCpu": "按 CPU 算力"
+    },
+    "chrome": {
+      "docTitle": "比特币：一种点对点电子现金系统 · 旁白朗读",
+      "kick": "一次旁白朗读 · Satoshi Nakamoto · 2008",
+      "begin": "开始",
+      "replay": "重播",
+      "loading": "正在加载旁白…",
+      "narrationMissing": "该语言的旁白尚未就绪——请在设置菜单中选择其他语言。",
+      "narratedBy": "旁白：{voice} · {minutes} 分钟 · {hint}",
+      "clickWord": "点击任意词语跳转到该处",
+      "blockHeight": "区块高度",
+      "price": "比特币价格",
+      "btcusd": "BTC/USD",
+      "connecting": "连接中…",
+      "unavailable": "不可用",
+      "justNow": "刚刚",
+      "minAgo": "{n} 分钟前",
+      "playAria": "播放 / 暂停",
+      "ovTitle": "整幅海报 (O)",
+      "ovAria": "切换整幅海报视图",
+      "voiceTitle": "语言与语音",
+      "voiceAria": "语言与语音",
+      "findTitle": "在论文中查找 (Ctrl+F)",
+      "findAria": "在论文中查找",
+      "findPlaceholder": "在论文中查找…",
+      "findCloseAria": "关闭搜索",
+      "findInputAria": "搜索论文",
+      "findPrevAria": "上一个匹配",
+      "findNextAria": "下一个匹配",
+      "languageHeading": "语言",
+      "narratorHeading": "旁白",
+      "confirmationsN": "{n} 个确认",
+      "fsTitle": "全屏（F）",
+      "fsAria": "全屏",
+      "theme": "主题",
+      "themeAuto": "自动",
+      "themeLight": "浅色",
+      "themeDark": "深色",
+      "readerMode": "阅读",
+      "posterMode": "海报",
+      "about": "关于",
+      "aboutClose": "关闭"
+    },
+    "caps": {
+      "coin": [
+        "比特币",
+        "一种点对点的电子现金系统",
+        "Satoshi Nakamoto · 2008 年 10 月 31 日"
+      ],
+      "p2p": [
+        "在线支付要经过金融机构",
+        "点对点：从一方直达另一方",
+        "数字签名证明谁在付款…",
+        "…但谁来防止同一枚币被花两次？",
+        "解法：一个点对点网络",
+        "交易被哈希进一条不断延伸的链",
+        "不重做工作量证明，历史就无法更改",
+        "最长的链就是所发生事情的记录",
+        "…也是它来自最多 CPU 算力的证明",
+        "诚实的多数会跑赢攻击者",
+        "消息以尽力而为的方式广播",
+        "节点可以随意离开并重新加入…",
+        "…并接受最长的链，作为错过期间发生事情的证明"
+      ],
+      "trust": [
+        "线上交易依赖受信任的第三方",
+        "付款总是可以被撤销：银行仲裁纠纷",
+        "仲裁增加成本，扼杀小额随意的支付",
+        "商家必须提防自己的顾客",
+        "一定比例的欺诈被视为不可避免",
+        "当面，实物现金不需要中间人",
+        "线上没有现金：只有受信任的一方",
+        "需要的是：用密码学证明代替信任",
+        "不可逆的付款保护卖家；托管保护买家",
+        "点对点时间戳服务器证明交易的顺序",
+        "只要诚实节点控制更多 CPU 算力就是安全的"
+      ],
+      "txchain": [
+        "电子币是一条数字签名链",
+        "每个所有者对上一笔交易和下一个所有者的公钥的哈希签名",
+        "…并把它们加到币的末尾",
+        "收款人验证链上的每一个签名",
+        "…但无法知道某个所有者是否把币花两次",
+        "常见解法：中央铸币厂检查每笔交易",
+        "于是整个系统取决于运营铸币厂的人",
+        "…就像银行一样",
+        "只有最早的那笔交易算数",
+        "所以每笔交易都必须公开发布",
+        "大家对单一的顺序历史达成共识",
+        "证明多数节点最先看到的是它"
+      ],
+      "timestamp": [
+        "时间戳服务器从一个条目区块开始",
+        "…对整个区块取哈希…",
+        "…并广泛发布该哈希，比如登在报纸上",
+        "证明数据在当时已经存在",
+        "每个时间戳把上一个时间戳纳入自己的哈希…",
+        "…形成一条链",
+        "每个新时间戳都加固之前的那些"
+      ],
+      "pow": [
+        "工作量证明，借鉴 Adam Back 的 Hashcash",
+        "找一个 SHA-256 哈希以零比特开头的值",
+        "每多一个零，工作量乘以十六…",
+        "…但任何人只需一次哈希即可验证",
+        "递增随机数，直到哈希有足够多的零",
+        "改动区块，它的工作量证明就作废",
+        "…而且其后每个区块都得重做",
+        "一 IP 一票？谁都能弄到很多 IP",
+        "工作量证明本质上是一 CPU 一票",
+        "最长的链承载最多工作：即多数",
+        "攻击者必须重做区块，再追赶和超越",
+        "难度跟随移动平均：约每小时 6 个区块",
+        "区块出得太快？难度上调"
+      ],
+      "network": [
+        "网络：节点，松散连接",
+        "1 · 新交易向所有节点广播",
+        "2 · 每个节点把新交易收进一个区块",
+        "3 · 每个节点求解一个困难的工作量证明",
+        "4 · 最先找到的节点广播自己的区块",
+        "5 · 只有其中每笔交易都有效，节点才接受",
+        "6 · …并在其上构建下一个区块",
+        "最长的链始终是正确的那个",
+        "同时出现两个区块：网络分叉",
+        "每一方都保留另一个分支，以防万一",
+        "下一个区块打破僵局；所有人切换过去",
+        "广播不必到达每个节点",
+        "错过了区块？下一个到来时去要"
+      ],
+      "incentive": [
+        "按照约定，区块的第一笔交易是特殊的",
+        "它为区块创建者创造一枚全新的币",
+        "既是支持网络的激励，也是发币的方式",
+        "像金矿矿工添加黄金，但花费 CPU 时间和电力",
+        "手续费：输入超出输出的部分归区块创建者",
+        "固定总量之后仅靠手续费：免于通胀",
+        "激励也促使节点保持诚实",
+        "按规则行事比破坏规则更划算"
+      ],
+      "merkle": [
+        "一旦一笔交易被足够多的区块掩埋…",
+        "…它之前被花费的交易就可以丢弃",
+        "交易两两哈希，向上构成默克尔树",
+        "只有根进入区块的哈希",
+        "剪掉分支，老区块随之缩小",
+        "中间哈希无需保存",
+        "仅区块头约 80 字节",
+        "每 10 分钟一个，一年也只有 4.2 MB",
+        "相比 2 GB 内存只是一细条，区块头放得进内存",
+        {
+          "fig": "交易被哈希进默克尔树"
+        }
+      ],
+      "spv": [
+        "不运行全节点也能验证付款",
+        "只保留最长链的区块头",
+        "向网络节点询问，直到确信它是最长的",
+        "获取把交易链接到其区块的默克尔分支",
+        "他无法亲自验证这笔交易…",
+        "…但其后添加的每个区块都在确认它",
+        "压制网络的攻击者可以骗过它",
+        "防御：节点警报触发完整下载",
+        "繁忙的商家仍运行自己的节点",
+        {
+          "fig": "最长的工作量证明链"
+        }
+      ],
+      "inout": [
+        "逐枚处理硬币会很笨拙",
+        "所以交易有多个输入和输出",
+        "要么是来自一笔更大前序交易的单个输入…",
+        "…要么是合并小额的多个输入",
+        "至多两个输出：付款，以及可能的找零",
+        "扇出不是问题：不需要独立完整的历史"
+      ],
+      "privacy": [
+        "银行通过限制谁能看到信息来保护隐私",
+        "比特币必须公开宣布每笔交易…",
+        "…于是墙挪了个位置：公钥保持匿名",
+        "公众看得到金额，看不到是谁",
+        "像证券交易所的行情带：时间和数量，没有姓名",
+        "每笔交易使用新的密钥对",
+        "多输入交易会暴露同一个所有者",
+        "一旦暴露一个所有者，关联的交易可能随之曝光"
+      ],
+      "calc": [
+        "攻击者试图让替代链的增长快过诚实链",
+        "即使他赢了，也不能凭空创造价值或偷窃…",
+        "…他只能试图撤回自己近期花出的钱",
+        "这场竞赛是二项随机漫步：每区块 +1 或 −1",
+        "从落后中追赶是赌徒破产问题",
+        "p：诚实节点找到下一个区块 · q：攻击者找到",
+        "若 p > q，攻击者的胜算是 (q/p)ᶻ",
+        "每落后一个区块，胜算呈指数下降",
+        "收款人要等多久才能相信一笔付款？",
+        "签字前才生成新密钥对，可阻止预建的链",
+        "不诚实的付款人秘密挖一条平行链",
+        "收款人在其上等 z 个区块",
+        "攻击者的进度服从泊松分布",
+        "每个结果按其追赶概率加权",
+        "变换形式以避免对无限尾部求和",
+        "转换为 C 代码…",
+        "运行结果：概率呈指数下降",
+        "要等多少个区块才能让概率低于 0.1%"
+      ],
+      "conclusion": [
+        "不依赖信任的电子交易",
+        "由数字签名构成的币给出强所有权…",
+        "…但还需要防止双重支付的办法",
+        "点对点网络用工作量证明记录公开历史",
+        "攻击者很快便难以改动它",
+        "以其非结构化的简洁而健壮",
+        "节点无需身份；消息无需路由",
+        "节点随意离开和重新加入，然后接受最长的链",
+        "它们用 CPU 算力投票：扩展有效区块，无视无效区块",
+        "所需的规则与激励，由共识来执行"
+      ]
+    },
+    "cues": {
+      "PEER-TO-PEER": "点对点",
+      "Satoshi": "Satoshi",
+      "directly from one party": "从一方直接发送",
+      "Digital signatures provide": "数字签名提供了",
+      "the main benefits are lost": "失去了电子货币的主要优点",
+      "We propose a solution": "我们提出一种",
+      "timestamps transactions by hashing": "来给交易打上时间戳",
+      "cannot be changed without redoing": "不能更改",
+      "The longest chain not only": "最长的链不仅",
+      "largest pool of CPU power": "最大 CPU 算力池",
+      "generate the longest chain and outpace": "生成最长的链并超过",
+      "Messages are broadcast": "信息将被尽力广播",
+      "nodes can leave and rejoin": "节点可以随时离开和重新加入",
+      "accepting the longest": "接受最长的工作量证明链",
+      "Completely non-reversible transactions": "完全不可撤销的交易",
+      "The cost of mediation": "仲裁成本",
+      "Merchants must be wary": "商家必须警惕",
+      "A certain percentage of fraud": "一定比例的欺诈",
+      "avoided in person": "当面使用实物货币",
+      "no mechanism exists": "不存在一个无可信任方",
+      "What is needed": "我们需要的是",
+      "computationally impractical to reverse": "交易在计算上的不可撤销",
+      "distributed timestamp server": "点对点分布式时间戳服务器",
+      "The system is secure": "这个系统就是安全的",
+      "digitally signing a hash": "哈希值的数字签名",
+      "adding these to the end": "添加到此货币末尾",
+      "A payee can verify": "收款人可以通过验证数字签名",
+      "trusted central authority, or mint": "可信任的中央机构或铸币厂",
+      "the fate of the entire money system": "整个货币系统的命运",
+      "just like a bank": "就像银行一样",
+      "We need a way": "我们需要一种能让收款人",
+      "publicly announced": "公开发布",
+      "agree on a single history": "单一历史达成共识",
+      "the majority of nodes agreed": "多数节点认同",
+      "taking a hash of a block": "区块的哈希值",
+      "widely publishing the hash": "广泛地发布这个哈希值",
+      "The timestamp proves": "时间戳能证明",
+      "Each timestamp includes the previous": "每个时间戳的哈希值都纳入了上一个时间戳",
+      "forming a chain": "形成一条链",
+      "reinforcing the ones before": "增强前一个时间戳",
+      "scanning for a value": "采取搜索一个数",
+      "The average work required": "平均所需工作量",
+      "verified by executing a single hash": "验证却只需执行一次哈希",
+      "incrementing a nonce": "加入一个随机数",
+      "the block cannot be changed": "无法更改区块",
+      "redoing all the blocks after it": "重做所有后面的区块",
+      "one-IP-address-one-vote": "按 IP 地址投票",
+      "Proof-of-work is essentially": "工作量证明本质上是",
+      "The majority decision is represented": "最长的链代表了多数决定",
+      "To modify a past block": "要修改过去的某区块",
+      "To compensate for increasing hardware": "为了抵消硬件运算速度的增加",
+      "New transactions are broadcast": "新交易向所有节点广播",
+      "Each node collects new transactions": "每个节点将新交易收集到一个区块",
+      "Each node works on finding": "每个节点为它的区块寻找",
+      "When a node finds": "当一个节点找到了工作量证明",
+      "Nodes accept the block only": "节点只有在区块内所有交易都是有效的",
+      "Nodes express their acceptance": "表示对这个区块的接受",
+      "Nodes always consider the longest": "节点总是认为最长的链为正确的",
+      "If two nodes broadcast": "如果两个节点同时广播",
+      "save the other branch": "保存另一个分支",
+      "The tie will be broken": "僵局就会被打破",
+      "New transaction broadcasts do not": "新交易的广播不必到达所有的节点",
+      "If a node does not receive": "如果一个节点没有收到某个区块",
+      "a special transaction that starts": "特殊的交易",
+      "This adds an incentive": "这就增加了对支持网络的节点的激励",
+      "analogous to gold miners": "就像金矿矿工",
+      "The incentive can also be funded": "激励也可以由交易费充当",
+      "Once a predetermined number": "一旦预定量的货币进入了流通领域",
+      "The incentive may help": "激励会有助于鼓励节点",
+      "He ought to find it more profitable": "他将发现遵守规则",
+      "the spent transactions before it": "这之前的支付交易",
+      "transactions are hashed in a Merkle": "哈希进默克尔树",
+      "with only the root included": "只有根节点被纳入",
+      "Old blocks can then be compacted": "老的区块可通过剪除树枝的方式被压缩",
+      "The interior hashes do not": "树枝内部的哈希不需要",
+      "A block header with no transactions": "每个不包含交易的区块头",
+      "If we suppose blocks are generated": "如果每 10 分钟生成一个区块",
+      "With computer systems typically": "2008 年在售的典型计算机",
+      "keep a copy of the block headers": "区块头副本",
+      "querying network nodes": "向其他网络节点查询",
+      "obtain the Merkle branch": "默克尔分支",
+      "blocks added after it": "其后追加的区块",
+      "more vulnerable if the network is overpowered": "如果网络被攻击者控制",
+      "accept alerts from network nodes": "接受其他网络节点",
+      "Businesses that receive frequent": "收款频繁的公司",
+      "To allow value to be split": "为允许交易额被分割和合并",
+      "a single input from a larger": "一个从之前交易而得的较大输入值",
+      "multiple inputs combining smaller": "多个较小输入值的组合",
+      "at most two outputs": "最多两个输出值",
+      "It should be noted that fan-out": "注意这里的扇出",
+      "The necessity to announce": "交易必须要公开发布",
+      "by keeping public keys anonymous": "保持公钥匿名",
+      "The public can see": "公众能看到",
+      "stock exchanges": "证券交易所",
+      "a new key pair should be used": "对每笔交易使用新密钥对",
+      "Some linking is still unavoidable": "有些关联仍不可避免",
+      "The risk is that if the owner": "风险就在于如果一个密钥的拥有者被暴露",
+      "it does not throw the system open": "不会使系统变得可以任意修改",
+      "An attacker can only try": "攻击者只可能改变他自己的某笔交易",
+      "Binomial Random Walk": "二项随机漫步",
+      "The probability of an attacker catching up": "攻击者从某一落后位置赶上诚实链的概率",
+      "probability an honest node finds": "诚实节点找到下一个区块的概率",
+      "Given our assumption": "我们假设",
+      "We now consider how long": "我们现在考虑一个新交易的收款人要等多久",
+      "The receiver generates a new key pair": "收款人生成一个新密钥对",
+      "Once the transaction is sent": "一旦交易被发出",
+      "The recipient waits until": "收款人等到交易",
+      "Poisson distribution": "泊松分布",
+      "we multiply the Poisson density": "泊松密度乘以",
+      "Rearranging to avoid": "变换以避免",
+      "Converting to C code": "转换成 C 语言代码",
+      "Running some results": "运行得到一些结果",
+      "Solving for P less than": "P 小于",
+      "coins made from digital signatures": "数字签名货币体系",
+      "incomplete without a way": "由于缺乏防止双重支付的方法而不完善",
+      "we proposed a peer-to-peer network": "我们提出一种使用工作量证明来记录公共交易历史的点对点网络",
+      "quickly becomes computationally impractical": "很快变得在计算上不可更改",
+      "The network is robust": "网络因其结构简洁性而强大",
+      "They do not need to be identified": "它们不需要被认证",
+      "Nodes can leave and rejoin": "节点可以随时离开和重新加入网络",
+      "They vote with their CPU power": "节点使用 CPU 算力来投票",
+      "Any needed rules and incentives": "任何需要的规则和激励",
+      "payee can't verify that one": "收款人不能证实",
+      "If they're generated too fast": "如果区块生成得过快",
+      "He can't check the transaction": "他自己不能核实这个交易"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# dependencies
+node_modules
+
+# narration + i18n build artifacts
+public/whitepaper/.cache/
+scripts/i18n/src/*.pdf
+
+# local env
+.env
+.env.local
+.env*.local
+
+# misc
+.DS_Store
+.wrangler/
+.shots/

@@ -1,0 +1,968 @@
+{
+  "paper": {
+    "sections": [
+      {
+        "id": "title",
+        "label": "Okładka",
+        "scene": "coin",
+        "items": [
+          {
+            "t": "title",
+            "lines": [
+              "Bitcoin",
+              "Elektroniczny",
+              "System Pieniężny",
+              "Typu Peer-to-Peer."
+            ]
+          },
+          {
+            "t": "byline",
+            "text": "Satoshi {Nakamoto|Nakamoto.} {satoshin@gmx.com|} {www.bitcoin.org|}"
+          }
+        ]
+      },
+      {
+        "id": "abstract",
+        "label": "Abstrakt",
+        "scene": "p2p",
+        "items": [
+          {
+            "t": "abs1",
+            "text": "{Abstrakt.|Abstrakt.} Pieniądz elektroniczny w formie czysto peer-to-peer umożliwiłby płatności online wysyłane bezpośrednio od nadawcy do odbiorcy bez pośrednictwa instytucji finansowej. Podpisy cyfrowe oferują częściowe rozwiązanie problemu, lecz tracimy ich główne korzyści, jeśli nadal potrzebna jest zaufana strona trzecia, by zapobiec fałszerstwu polegającym na podwójnym wydaniu tych samych środków."
+          },
+          {
+            "t": "abs2",
+            "text": "Proponujemy rozwiązanie problemu podwójnego wydatkowania przy użyciu sieci peer-to-peer. Sieć opatruje transakcje znacznikami czasu, haszując je na ciągły łańcuch algorytmu proof-of-work z wykorzystaniem skrótów kryptograficznych (ang. hash), tworząc zapis, którego nie da się zmienić bez wykonywania od nowa algorytmu proof-of-work. Najdłuższy łańcuch nie tylko służy jako dowód zaobserwowanego ciągu zdarzeń, ale i dowód, że pochodzi on z największej puli wykonanej pracy. Dopóki większość mocy obliczeniowej kontrolowana jest przez węzły, które nie współpracują w ataku na sieć, będą one generowały najdłuższy łańcuch i pozostawią atakujących w tyle. Sama sieć wymaga tylko minimalnej struktury. Wiadomości przekazywane są przy zachowaniu najwyższej staranności, a węzły mogą do woli opuszczać sieć i do niej wracać, akceptując najdłuższy łańcuch proof-of-work jako dowód tego, co miało miejsce pod ich nieobecność."
+          }
+        ]
+      },
+      {
+        "id": "s1",
+        "num": "1",
+        "label": "Wprowadzenie",
+        "scene": "trust",
+        "items": [
+          {
+            "t": "h",
+            "text": "{1.|Jeden.} Wprowadzenie"
+          },
+          {
+            "t": "p",
+            "text": "Handel w Internecie jest niemal całkowicie zależny od instytucji finansowych, pełniących rolę zaufanego pośrednika przetwarzającego płatności elektroniczne. Choć dla większości transakcji system ten się w miarę sprawdza, to nadal cierpi on z powodu nieodzownych słabości modelu opartego o zaufanie. Całkowicie nieodwracalne transakcje nie są tak naprawdę możliwe, jako że instytucje finansowe nie są w stanie uniknąć pośredniczenia w sporach. Koszty pośrednictwa zwiększają koszty transakcji, ograniczając minimalną praktyczną wartość transakcji i eliminując możliwość niewielkich, swobodnych transakcji, do tego dochodzą większe koszty w postaci utraty zdolności dokonywania nieodwracalnych płatności za nieodwracalne usługi. Wraz z możliwością cofania transakcji, rozpowszechnia się potrzeba zaufania. Sprzedawcy muszą być nieufni wobec swych klientów, żądając od nich więcej informacji, niż zwykle byłoby to konieczne. Pewien odsetek oszustw przyjmuje się jako nieunikniony. Owych kosztów i niepewnych płatności można uniknąć w transakcjach wykonywanych osobiście przy użyciu gotówki, nie istnieje jednak mechanizm umożliwiający płatności kanałem komunikacji bez udziału zaufanej strony trzeciej."
+          },
+          {
+            "t": "p",
+            "text": "Potrzebny jest wobec tego elektroniczny system płatności oparty o dowód kryptograficzny, a nie zaufanie, który pozwala dowolnym dwóm dobrowolnie podejmującym decyzje stronom na dokonywanie bezpośrednich transakcji między sobą bez potrzeby angażowania zaufanej strony trzeciej. Transakcje, których cofnięcie byłoby obliczeniowo niepraktyczne, chroniłyby sprzedawców przed oszustwem, zaś dla ochrony kupujących można byłoby wdrożyć rutynowe mechanizmy depozytowe. W niniejszej pracy proponujemy rozwiązanie problemu podwójnego wydania wykorzystujące serwer znaczników czasu typu peer-to-peer do generowania obliczeniowego dowodu porządku chronologicznego transakcji. System jest bezpieczny, o ile uczciwe węzły kolektywnie kontrolują większą moc obliczeniową niż jakakolwiek współpracująca grupa węzłów atakujących."
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "num": "2",
+        "label": "Transakcje",
+        "scene": "txchain",
+        "items": [
+          {
+            "t": "h",
+            "text": "{2.|Dwa.} Transakcje"
+          },
+          {
+            "t": "p",
+            "text": "Elektroniczną monetę definiujemy jako łańcuch podpisów cyfrowych. Każdy z właścicieli przekazuje monetę następnemu, podpisując cyfrowo hash poprzedniej transakcji oraz klucz publiczny następnego właściciela dopisując je na końcu monety. Odbiorca może zweryfikować podpisy celem zweryfikowania łańcucha własności."
+          },
+          {
+            "t": "fig",
+            "scene": "txchain",
+            "h": 250
+          },
+          {
+            "t": "p",
+            "text": "Oczywiście problemem jest to, że odbiorca nie jest w stanie zweryfikować, czy jeden z właścicieli nie wydał monety podwójnie. W takim przypadku powszechnym rozwiązaniem jest wprowadzenie zaufanego organu centralnego, bądź mennicy, która sprawdza każdą transakcję pod kątem podwójnego wydatkowania. Po każdej transakcji moneta musi zostać zwrócona do mennicy celem wydania nowej monety, i jedynie monety wydane bezpośrednio przez mennicę można uznać za niewydane podwójnie. Problem takiego rozwiązania polega na tym, że los całego systemu pieniężnego zależny jest od firmy prowadzącej mennicę, gdzie każda transakcja musi przez nią przejść, tak jak w systemie bankowym."
+          },
+          {
+            "t": "p",
+            "text": "Musimy znaleźć sposób, który umożliwi odbiorcy sprawdzenie, czy poprzedni właściciele nie podpisali żadnych wcześniejszych transakcji. Na nasze potrzeby uznamy za istotną tylko najwcześniejszą transakcję, nie interesują nas zatem późniejsze próby podwójnego wydatkowania. Jedynym sposobem na potwierdzenie braku transakcji jest znajomość wszystkich transakcji. W modelu opartym o mennicę, to mennica była świadoma wszystkich transakcji i decydowała, która z nich była pierwsza. Aby tego dokonać bez zaufanej strony trzeciej, transakcje muszą być ogłaszane publicznie {[1]|}, i potrzebny nam jest system, w którym uczestnicy zgadzają się na jedną historię porządku transakcji, w jakim je otrzymywano. Odbiorca potrzebuje dowodu, iż w czasie każdej transakcji większość węzłów zgodnie uznaje ją za tą pierwszą."
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "num": "3",
+        "label": "Serwer Znaczników Czasu",
+        "scene": "timestamp",
+        "items": [
+          {
+            "t": "h",
+            "text": "{3.|Trzy.} Serwer Znaczników Czasu"
+          },
+          {
+            "t": "p",
+            "text": "Proponowane przez nas rozwiązanie zaczyna się od serwera znaczników czasu. Serwer znaczników czasu działa poprzez opatrzenie znacznikiem czasu hasha bloku elementów i rozpowszechnienie hasha, przykładowo w gazecie lub poście na Usenecie {[2-5]|}. Znacznik czasu stanowi dowód, iż dane musiały wówczas istnieć, rzecz jasna, aby znaleźć się w hashu. Każdy znacznik czasu zawiera poprzedni znacznik w swym hashu, tworząc łańcuch, gdzie każdy kolejny znacznik wzmacnia znaczniki go poprzedzające."
+          },
+          {
+            "t": "fig",
+            "scene": "timestamp",
+            "h": 170
+          }
+        ]
+      },
+      {
+        "id": "s4",
+        "num": "4",
+        "label": "Proof-of-Work",
+        "scene": "pow",
+        "items": [
+          {
+            "t": "h",
+            "text": "{4.|Cztery.} Proof-of-Work"
+          },
+          {
+            "t": "p",
+            "text": "Aby zaimplementować serwer znaczników czasu na zasadzie peer-to-peer, potrzebny nam będzie system proof-of-work podobny do Hashcash Adama Back {[6]|}, a nie tylko gazeta czy posty na Usenecie. System proof-of-work szuka wartości, której hash, przykładowo {SHA-256,|esze, ha, a, dwa pięćdziesiąt sześć,} rozpoczyna się serią bitów zerowych. Przeciętny nakład wymaganej pracy jest wykładniczy do wymaganej liczby bitów zerowych i można go zweryfikować przy wykonaniu pojedynczego hasha."
+          },
+          {
+            "t": "p",
+            "text": "W naszej sieci znaczników czasu zaimplementujemy system proof-of-work poprzez inkrementację parametru nonce w bloku, aż do uzyskania wartości, dla której hash bloku zyskuje wymagane bity zerowe. Kiedy już włożony wysiłek obliczeniowy spełni wymagania proof-of-work, bloku nie da się zmienić bez ponownego wykonania obliczeń. W miarę dołączania za nim kolejnych bloków, jego zmiana wymagałaby wykonania od nowa wszystkich bloków dodanych po nim."
+          },
+          {
+            "t": "fig",
+            "scene": "pow",
+            "h": 170
+          },
+          {
+            "t": "p",
+            "text": "Algorytm proof-of-work rozwiązuje również problem ustalania reprezentacji przy podejmowaniu decyzji większości. Jeśli większość ustala się na zasadzie jednego adresu IP na jeden głos, oszukiwać mógłby każdy dysponujący wieloma adresami IP. Proof-of-work działa w praktyce na zasadzie {jeden-procesor-jeden-głos.|jeden procesor, jeden głos.} Decyzja większości reprezentowana jest przez najdłuższy łańcuch, który zgromadził największy wysiłek algorytmu proof-of-work. Jeśli większość mocy obliczeniowej kontrolowana jest przez uczciwe węzły, uczciwy łańcuch będzie rósł najszybciej i zostawi w tyle wszelkie konkurujące łańcuchy. Aby zmodyfikować wcześniejszy blok, atakujący musiałby wykonać od nowa proof-of-work dla tego bloku i wszystkich dodanych po nim, po czym dogonić i prześcignąć pracę uczciwych węzłów. Później pokażemy, iż prawdopodobieństwo nadgonienia przez wolniejszego atakującego spada wykładniczo wraz z dodawaniem kolejnych bloków."
+          },
+          {
+            "t": "p",
+            "text": "Aby zrekompensować wzrastającą szybkość sprzętową oraz zmieniające się z czasem zainteresowanie dbaniem o węzły, poziom trudności proof-of-work ustalany jest przy pomocy średniej ruchomej celującej w średnią liczbę bloków na godzinę. Jeśli są one generowane zbyt szybko, poziom trudności wzrasta."
+          }
+        ]
+      },
+      {
+        "id": "s5",
+        "num": "5",
+        "label": "Sieć",
+        "scene": "network",
+        "items": [
+          {
+            "t": "h",
+            "text": "{5.|Pięć.} Sieć"
+          },
+          {
+            "t": "p",
+            "text": "Kroki potrzebne do funkcjonowania sieci są następujące:"
+          },
+          {
+            "t": "li",
+            "text": "{1)|Jeden.} Nowe transakcje przekazywane są do wszystkich węzłów."
+          },
+          {
+            "t": "li",
+            "text": "{2)|Dwa.} Każdy węzeł gromadzi nowe transakcje w blok."
+          },
+          {
+            "t": "li",
+            "text": "{3)|Trzy.} Każdy węzeł pracuje nad znalezieniem trudnego proof-of-work dla swego bloku."
+          },
+          {
+            "t": "li",
+            "text": "{4)|Cztery.} Kiedy węzeł odnajdzie proof-of-work, ogłasza blok do wszystkich węzłów."
+          },
+          {
+            "t": "li",
+            "text": "{5)|Pięć.} Węzły akceptują blok wyłącznie wtedy, gdy wszystkie zawarte w nim transakcje są poprawne i nie zostały już wydane."
+          },
+          {
+            "t": "li",
+            "text": "{6)|Sześć.} Węzły podejmują decyzję o akceptacji bloku, pracując nad stworzeniem następnego bloku w łańcuchu, używając hasha zaakceptowanego bloku jako hasha poprzednika."
+          },
+          {
+            "t": "p",
+            "text": "Węzły zawsze uznają najdłuższy łańcuch za ten prawidłowy i pracują ciągle nad jego wydłużeniem. Jeśli dwa węzły przekazują różne wersje następnego bloku równocześnie, niektóre węzły mogą odebrać jeden lub drugi wcześniej. W takim przypadku pracują nad pierwszym odebranym, ale zapisują drugą gałąź na wypadek, gdyby stała się dłuższa. Remis zostaje rozstrzygnięty, gdy następny proof-of-work zostanie wykryty i jedna z gałęzi stanie się dłuższa; węzły pracujące nad drugą gałęzią przestawią się wówczas na tą dłuższą."
+          },
+          {
+            "t": "p",
+            "text": "Informacja o nowych transakcjach nie musi koniecznie docierać do wszystkich węzłów. O ile dotrą one do wielu węzłów, w niedługim czasie trafią do bloku. Przekazy bloków tolerują również zagubione wiadomości. Jeśli węzeł nie odbierze bloku, zażąda go po odebraniu następnego bloku, kiedy zauważy zgubę."
+          }
+        ]
+      },
+      {
+        "id": "s6",
+        "num": "6",
+        "label": "Zachęty",
+        "scene": "incentive",
+        "items": [
+          {
+            "t": "h",
+            "text": "{6.|Sześć.} Zachęty"
+          },
+          {
+            "t": "p",
+            "text": "Zwyczajowo pierwsza transakcja w bloku to specjalna transakcja tworząca nową monetę dla twórcy bloku. Stanowi to dla węzłów zachętę do wspierania sieci, oraz daje sposób na wstępne wprowadzenie monet do obiegu, jako że nie istnieje organ centralny je wydający. Ciągłe dodawanie stałej ilości nowych monet jest analogiczne do poszukiwaczy złota zużywających zasoby, aby wprowadzić złoto do obiegu. W naszym przypadku to czas procesora i elektryczność są zużywane."
+          },
+          {
+            "t": "p",
+            "text": "Za zachętę mogą również posłużyć opłaty transakcyjne. Jeśli wartość wyjściowa transakcji jest niższa od jej wartości wejściowej, różnica stanowi opłatę za transakcję dodawaną do wartości zachęty bloku zawierającego transakcję. Kiedy już z góry ustalona liczba monet wejdzie do obiegu, zachęta może płynąć całkowicie z opłat transakcyjnych i być w pełni wolna od inflacji."
+          },
+          {
+            "t": "p",
+            "text": "Zachęta może pomóc motywować węzły do uczciwości. Jeśli chciwy atakujący jest w stanie zgromadzić więcej mocy obliczeniowej, niż wszystkie uczciwe węzły razem wzięte, musiałby wybierać pomiędzy wykorzystaniem jej do oszukania ludzi poprzez refundowanie swych płatności, lub przy jej użyciu tworzyć nowe monety. Bardziej opłacałoby się mu przestrzegać zasad, dzięki którym może zyskać więcej nowych monet, niż wszyscy inni razem, zamiast podkopywać system oraz wartość swego własnego majątku."
+          }
+        ]
+      },
+      {
+        "id": "s7",
+        "num": "7",
+        "label": "Odzyskiwanie Przestrzeni Dyskowej",
+        "scene": "merkle",
+        "items": [
+          {
+            "t": "h",
+            "text": "{7.|Siedem.} Odzyskiwanie Przestrzeni Dyskowej"
+          },
+          {
+            "t": "p",
+            "text": "Kiedy już najnowsza transakcja monety zostanie pogrzebana pod wystarczającą ilością bloków, wydane przed nią transakcje można usunąć celem oszczędności przestrzeni dyskowej. W celu ułatwienia tego procesu bez naruszania hasha bloku, transakcje haszowane są w Drzewie Merkle {[7][2][5],|,} gdzie tylko korzeń zawarty jest w hashu bloku. Stare bloki można wówczas pomniejszyć, przycinając gałęzie drzewa. Haszów pośrednich nie trzeba przechowywać."
+          },
+          {
+            "t": "fig",
+            "scene": "merkle",
+            "h": 300
+          },
+          {
+            "t": "p",
+            "text": "Nagłówek bloku bez transakcji zajmuje około 80 bajtów. Jeśli założymy, że bloki generowane są co 10 minut, {80 bajtów * 6 * 24 * 365 = 4,2MB|80 bajtów, razy 6, razy 24, razy 365, równa się 4,2 megabajta} rocznie. Wziąwszy pod uwagę, iż nowe komputery w roku 2008 zwykle mają {2GB|2 gigabajty} pamięci RAM, a Prawo Moore'a przewiduje obecnie wzrost o {1,2GB|1,2 gigabajta} rocznie, pamięć nie powinna stanowić problemu nawet, jeśli nagłówki bloków muszą być w niej przechowywane."
+          }
+        ]
+      },
+      {
+        "id": "s8",
+        "num": "8",
+        "label": "Uproszczona Weryfikacja Płatności",
+        "scene": "spv",
+        "items": [
+          {
+            "t": "h",
+            "text": "{8.|Osiem.} Uproszczona Weryfikacja Płatności"
+          },
+          {
+            "t": "p",
+            "text": "Weryfikacja płatności możliwa jest bez potrzeby korzystania z pełnego węzła sieciowego. Użytkownik przechowywać musi jedynie kopię nagłówków bloków najdłuższego łańcucha proof-of-work, którą może uzyskać przeszukując węzły sieci, aż uzna, iż znalazł najdłuższy łańcuch, skąd może uzyskać gałąź Merkle łączącą transakcję z blokiem, w którym został oznaczony znacznikiem czasu. Nie może on sam sprawdzić transakcji, ale łącząc ją do punktu na łańcuchu może dostrzec, iż węzeł sieciowy ją zaakceptował, a dodane później bloki jeszcze bardziej potwierdzają akceptację ze strony sieci."
+          },
+          {
+            "t": "fig",
+            "scene": "spv",
+            "h": 250
+          },
+          {
+            "t": "p",
+            "text": "O ile uczciwe węzły kontrolują sieć, weryfikacja jest wiarygodna, jednak gdy sieć jest zdominowana przez atakującego, staje się podatna na ataki. Choć węzły sieci są w stanie same zweryfikować transakcje, uproszczona metoda może zostać zmylona przez sfabrykowane transakcje atakującego, tak długo jak atakujący jest w stanie dominować sieć. Sposobem na ochronę przed tego typu sytuacjami mogłoby być odbieranie ostrzeżeń od węzłów sieci, kiedy węzły te wykrywają nieprawidłowy blok, oprogramowanie użytkownika odpowiada pobierając cały blok i podejrzane transakcje celem potwierdzenia nieścisłości. Firmy odbierające często płatności zapewne i tak będą chciały mieć własne węzły dla bardziej niezależnej ochrony i szybszej weryfikacji."
+          }
+        ]
+      },
+      {
+        "id": "s9",
+        "num": "9",
+        "label": "Łączenie i Dzielenie Wartości",
+        "scene": "inout",
+        "items": [
+          {
+            "t": "h",
+            "text": "{9.|Dziewięć.} Łączenie i Dzielenie Wartości"
+          },
+          {
+            "t": "p",
+            "text": "Chociaż możliwe byłoby zarządzanie indywidualnymi monetami, nieporęcznym jest dokonywanie osobnej transakcji dla każdego grosza transferu. Aby umożliwiać dzielenie i łączenie wartości, transakcje posiadają wiele wejść i wyjść. Zwykle będzie albo jedno wejście dla większej poprzedniej transakcji, albo wiele wejść łączących mniejsze kwoty, oraz najwyżej dwa wyjścia: jedno dla płatności i drugie dla zwrotu reszty wysyłającemu, jeśli taka wystąpi."
+          },
+          {
+            "t": "fig",
+            "scene": "inout",
+            "h": 190
+          },
+          {
+            "t": "p",
+            "text": "Należy zauważyć, iż zjawisko rozwidlania, gdzie transakcja zależy od kilku innych transakcji, a transakcje te zależą od wielu więcej, nie jest tutaj problemem. Nigdy nie ma potrzeby wydobycia kompletnej samodzielnej kopii historii transakcji."
+          }
+        ]
+      },
+      {
+        "id": "s10",
+        "num": "10",
+        "label": "Prywatność",
+        "scene": "privacy",
+        "items": [
+          {
+            "t": "h",
+            "text": "{10.|Dziesięć.} Prywatność"
+          },
+          {
+            "t": "p",
+            "text": "Tradycyjny model bankowy osiąga pewien poziom prywatności ograniczając dostęp do informacji do zaangażowanych stron oraz zaufanej strony trzeciej. Konieczność ogłaszania wszystkich transakcji publicznie wyklucza tę metodę, nadal jednak można zachować prywatność przerywając przepływ informacji w innym miejscu: czyniąc klucze publiczne anonimowymi. Publika dostrzega, że ktoś przesyła komuś pewną kwotę, lecz bez informacji łączących transakcję z kimkolwiek. Przypomina to poziom informacji udostępniany przez giełdy papierów wartościowych, gdzie czas i rozmiar indywidualnych transakcji, czyli „taśma”, są upubliczniane, ale bez ujawniania stron transakcji."
+          },
+          {
+            "t": "fig",
+            "scene": "privacy",
+            "h": 210
+          },
+          {
+            "t": "p",
+            "text": "W ramach dodatkowego zabezpieczenia powinno się stosować nową parę kluczy dla każdej transakcji, aby nie dało się ich powiązać ze wspólnym właścicielem. Pewnego powiązania nie da się jednak uniknąć dla transakcji o wielu wejściach, które muszą ujawniać, że ich wejścia należały do tego samego właściciela. Ryzyko polega na tym, że jeśli właściciel klucza zostanie ujawniony, powiązanie mogłoby ujawnić inne transakcje należące do tego samego właściciela."
+          }
+        ]
+      },
+      {
+        "id": "s11",
+        "num": "11",
+        "label": "Obliczenia",
+        "scene": "calc",
+        "items": [
+          {
+            "t": "h",
+            "text": "{11.|Jedenaście.} Obliczenia"
+          },
+          {
+            "t": "p",
+            "text": "Rozważmy scenariusz, w którym atakujący usiłuje wygenerować alternatywny łańcuch szybciej, niż uczciwy łańcuch. Nawet, jeśli mu się uda, system nie stanie się otwarty na samowolne zmiany, takie jak tworzenie wartości z powietrza lub przywłaszczanie pieniędzy nienależących do atakującego. Węzły nie zaakceptują nieprawidłowej transakcji jako płatności, a uczciwe węzły nigdy nie zaakceptują bloku je zawierającego. Atakujący może jedynie próbować zmienić jedną z własnych transakcji w celu odzyskania niedawno wydanych pieniędzy."
+          },
+          {
+            "t": "p",
+            "text": "Wyścig pomiędzy uczciwym łańcuchem, a łańcuchem atakującym można scharakteryzować jako Dwumianowe Błądzenie Losowe. Sytuacja sukcesu ma miejsce, gdy uczciwy łańcuch wydłuża się o jeden blok, zwiększając swą przewagę o {+1,|plus jeden,} zaś sytuacja porażki ma miejsce, gdy łańcuch atakującego wydłuża się o jeden blok, redukując dystans o {-1.|minus jeden.}"
+          },
+          {
+            "t": "p",
+            "text": "Prawdopodobieństwo, że atakujący nadgoni przy danym deficycie jest analogiczne do problemu Ruiny Gracza. Załóżmy, że gracz o nieograniczonych zdolnościach kredytowych zaczyna na minusie i rozgrywa potencjalnie nieskończoną liczbę zagrań, starając się wyjść na zero. Możemy wyliczyć prawdopodobieństwo, że kiedykolwiek wyjdzie na zero, lub że atakujący kiedykolwiek nadgoni uczciwy łańcuch, w sposób następujący {[8]:|:}"
+          },
+          {
+            "t": "def",
+            "text": "{p =|p równa się} prawdopodobieństwo, że uczciwy węzeł znajdzie następny blok"
+          },
+          {
+            "t": "def",
+            "text": "{q =|q równa się} prawdopodobieństwo, że atakujący znajdzie następny blok"
+          },
+          {
+            "t": "def",
+            "text": "{q_z =|q pod z równa się} prawdopodobieństwo, że atakujący kiedykolwiek nadrobi różnicę z bloków"
+          },
+          {
+            "t": "math",
+            "id": "qz",
+            "say": "q pod z równa się jeden, jeśli p jest mniejsze lub równe q. Albo q przez p, do potęgi z, jeśli p jest większe niż q."
+          },
+          {
+            "t": "p",
+            "text": "Przy założeniu, że {p > q,|p jest większe niż q,} prawdopodobieństwo spada wykładniczo wraz ze wzrostem liczby bloków, jakie atakujący musi nadrobić. Jako, że szanse są przeciwko niemu, jeśli dość wcześnie nie dokona on udanego skoku wprzód, jego szanse znacząco spadają w miarę zostawania coraz bardziej w tyle."
+          },
+          {
+            "t": "p",
+            "text": "Rozważmy teraz, jak długo odbiorca nowej transakcji musi czekać, aby mieć wystarczającą pewność, że nadawca nie może już zmienić transakcji. Zakładamy, że nadawca to atakujący chcący wmówić odbiorcy na jakiś czas, że mu zapłacił, a następnie zabrać sobie kwotę z powrotem po upłynięciu jakiegoś czasu. Odbiorca zostanie ostrzeżony w takiej sytuacji, ale nadawca liczy, iż będzie już wówczas za późno."
+          },
+          {
+            "t": "p",
+            "text": "Odbiorca generuje nową parę kluczy i daje klucz publiczny nadawcy krótko przed podpisaniem. Powstrzymuje to nadawcę przed wcześniejszym przygotowywaniem łańcucha bloków, poprzez ciągłą pracę nad nim, aż do momentu gdy poszczęści mu się wystarczająco by dostatecznie wysunąć się naprzód, a następnie w owej chwili wykonać transakcję. Po wysłaniu transakcji nieuczciwy nadawca zaczyna pracować w tajemnicy nad łańcuchem równoległym zawierającym alternatywną wersję tejże transakcji."
+          },
+          {
+            "t": "p",
+            "text": "Odbiorca czeka, aż transakcja zostanie dodana do bloku, a po nim dołączonych zostanie z bloków. Nie zna on dokładnej wielkości postępów dokonanych przez atakującego, ale zakładając, że uczciwym blokom zajęło to przeciętny oczekiwany czas na blok, potencjalny postęp atakującego będzie rozkładem Poissona o wartości oczekiwanej:"
+          },
+          {
+            "t": "math",
+            "id": "lambda",
+            "say": "lambda równa się z razy q przez p."
+          },
+          {
+            "t": "p",
+            "text": "Aby uzyskać prawdopodobieństwo, że atakujący wciąż może nadgonić, mnożymy gęstość rozkładu Poissona dla każdej wartości postępu, jaki mógłby dokonać, przez prawdopodobieństwo nadgonienia od tego miejsca:"
+          },
+          {
+            "t": "math",
+            "id": "sum",
+            "say": "Suma, od k równego zero do nieskończoności, lambda do potęgi k, razy e do minus lambda, przez k silnia, razy q przez p do potęgi z minus k, jeśli k jest mniejsze lub równe z. Albo jeden, jeśli k jest większe niż z."
+          },
+          {
+            "t": "p",
+            "text": "Przekształcamy celem uniknięcia sumowania nieskończonego ogona dystrybucji…"
+          },
+          {
+            "t": "math",
+            "id": "rearr",
+            "say": "Jeden, minus suma, od k równego zero do z, lambda do potęgi k, razy e do minus lambda, przez k silnia, razy jeden minus q przez p, do potęgi z minus k."
+          },
+          {
+            "t": "p",
+            "text": "Konwertujemy na kod C…"
+          },
+          {
+            "t": "code",
+            "hold": 5
+          },
+          {
+            "t": "p",
+            "text": "Po sprawdzeniu wyników widać, że prawdopodobieństwo spada wykładniczo wraz ze wzrostem z."
+          },
+          {
+            "t": "results",
+            "hold": 5.5
+          },
+          {
+            "t": "p",
+            "text": "Wyniki dla P mniejszego niż {0,1%…|0,1 procenta.}"
+          },
+          {
+            "t": "ztable",
+            "head": "{P < 0.001|P mniejsze niż 0,001.}",
+            "rows": [
+              [
+                "{q=0.10|q równa się 0,10,}",
+                "{z=5|z równa się 5.}"
+              ],
+              [
+                "{q=0.15|q równa się 0,15,}",
+                "{z=8|z równa się 8.}"
+              ],
+              [
+                "{q=0.20|q równa się 0,20,}",
+                "{z=11|z równa się 11.}"
+              ],
+              [
+                "{q=0.25|q równa się 0,25,}",
+                "{z=15|z równa się 15.}"
+              ],
+              [
+                "{q=0.30|q równa się 0,30,}",
+                "{z=24|z równa się 24.}"
+              ],
+              [
+                "{q=0.35|q równa się 0,35,}",
+                "{z=41|z równa się 41.}"
+              ],
+              [
+                "{q=0.40|q równa się 0,40,}",
+                "{z=89|z równa się 89.}"
+              ],
+              [
+                "{q=0.45|q równa się 0,45,}",
+                "{z=340|z równa się 340.}"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "s12",
+        "num": "12",
+        "label": "Podsumowanie",
+        "scene": "conclusion",
+        "items": [
+          {
+            "t": "h",
+            "text": "{12.|Dwanaście.} Podsumowanie"
+          },
+          {
+            "t": "p",
+            "text": "Zaproponowaliśmy system transakcji elektronicznych nieopierający się na zaufaniu. Zaczęliśmy od standardowych ram dla monet wykorzystujących podpisy cyfrowe, co daje silną kontrolę nad własnością, lecz jest niekompletne bez sposobu na zapobieganie podwójnemu wydatkowaniu. Aby to rozwiązać, zaproponowaliśmy sieć peer-to-peer wykorzystującą system proof-of-work do rejestrowania publicznej historii transakcji, której zmiana szybko staje się obliczeniowo niepraktyczna dla atakującego, jeśli uczciwe węzły kontrolują większość mocy obliczeniowej. Sieć jest imponująca w swej nieustrukturyzowanej prostocie. Wszystkie węzły działają jednocześnie bez większej koordynacji. Nie trzeba ich identyfikować, gdyż wiadomości nie są przesyłane w żadne konkretne miejsce i ważne jest, by dostarczyć je przy zachowaniu najwyższej staranności. Węzły mogą dowolnie opuszczać sieć i do niej wracać, akceptując łańcuch proof-of-work jako dowód tego, co miało miejsce pod ich nieobecność. Głosują one przy użyciu swej mocy obliczeniowej, gdzie wyrażają akceptację prawidłowych bloków pracując nad ich wydłużaniem i odrzucają nieprawidłowe bloki odmawiając pracy nad nimi. Wszelkie potrzebne zasady i zachęty można wyegzekwować wykorzystując ten mechanizm konsensusu."
+          }
+        ]
+      },
+      {
+        "id": "refs",
+        "label": "Źródła",
+        "scene": null,
+        "items": [
+          {
+            "t": "refs",
+            "list": [
+              "W. Dai, \"b-money,\" http://www.weidai.com/bmoney.txt, 1998.",
+              "H. Massias, X.S. Avila, and J.-J. Quisquater, \"Design of a secure timestamping service with minimal trust requirements,\" In 20th Symposium on Information Theory in the Benelux, May 1999.",
+              "S. Haber, W.S. Stornetta, \"How to time-stamp a digital document,\" In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.",
+              "D. Bayer, S. Haber, W.S. Stornetta, \"Improving the efficiency and reliability of digital time-stamping,\" In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.",
+              "S. Haber, W.S. Stornetta, \"Secure names for bit-strings,\" In Proceedings of the 4th ACM Conference on Computer and Communications Security, pages 28-35, April 1997.",
+              "A. Back, \"Hashcash - a denial of service counter-measure,\" http://www.hashcash.org/papers/hashcash.pdf, 2002.",
+              "R.C. Merkle, \"Protocols for public key cryptosystems,\" In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, pages 122-133, April 1980.",
+              "W. Feller, \"An introduction to probability theory and its applications,\" 1957."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "ui": {
+    "labels": {
+      "ringText": "ELEKTRONICZNY SYSTEM PIENIĘŻNY TYPU PEER-TO-PEER ✦ SATOSHI NAKAMOTO ✦ MMVIII ✦",
+      "releaseDate": "31 października 2008 · bitcoin.org",
+      "finInstitution": "Instytucja\nfinansowa",
+      "sameCoinTwice": "ta sama moneta, dwa razy?",
+      "signed": "podpisano",
+      "customer": "Klient",
+      "merchant": "Sprzedawca",
+      "bank": "Bank",
+      "reversed": "cofnięto",
+      "fees": "opłaty",
+      "tooSmall": "za małe, by się trudzić",
+      "prying": "Imię? Adres?\nTelefon? ID?",
+      "fraud": "oszustwo,",
+      "pricedIn": "wliczone w cenę",
+      "inPersonOk": "osobiście: gotówka po prostu działa",
+      "onlineTrusted": "online: zaufana strona pośrodku",
+      "irrevEscrow": "nieodwracalne dla sprzedawców · depozyt dla kupujących",
+      "distributedTs": "rozdzielony serwer znaczników czasu",
+      "attackers": "atakujący",
+      "honestNodes": "uczciwe węzły",
+      "transaction": "Transakcja",
+      "hash": "Hash",
+      "ownerPubKey": "Klucz Publiczny\nWłaściciela {n}",
+      "ownerSig": "Podpis\nWłaściciela {n}",
+      "ownerPrivKey": "Klucz Prywatny\nWłaściciela {n}",
+      "verify": "Weryfikacja",
+      "sign": "Podpis",
+      "signedAgainBy": "podpisano ponownie\nprzez Właściciela {n}",
+      "doubleSpend": "podwójne wydanie?",
+      "mint": "MENNICA",
+      "bankCaps": "BANK",
+      "oneCompany": "wszystko spoczywa na jednej firmie",
+      "timeAxis": "czas",
+      "firstTx": "pierwsza",
+      "laterTx": "późniejsza",
+      "itemLabel": "Element",
+      "newspaper": "DZIENNY  ZNACZNIK  CZASU",
+      "notice": "OGŁOSZENIE · hash bloku",
+      "existed": "ISTNIAŁO",
+      "block": "Blok",
+      "prevHash": "Poprz. Hash",
+      "nonce": "Nonce",
+      "nonceN": "Nonce {n}",
+      "hashLower": "hash",
+      "expectedTries": "oczekiwane próby",
+      "zero": "zero",
+      "zeros": "zera",
+      "oneVote": "1 głos",
+      "onePerson": "jedna osoba",
+      "honestChain": "uczciwy łańcuch",
+      "attackerChain": "łańcuch atakującego",
+      "easy": "łatwo",
+      "hard": "trudno",
+      "difficulty": "trudność",
+      "targetRate": "cel: około 6 bloków na godzinę",
+      "tooFast": "za szybko → wymagane więcej zer",
+      "editedHash": "edytowany → hash już nie zaczyna się zerami",
+      "foundHash": "✓ znaleziono: weryfikacja to jeden hash",
+      "sendMissed": "prześlij mi ten, który przegapiłem",
+      "blockCreator": "twórca bloku",
+      "goldMiners": "poszukiwacze złota zużywają wysiłek…",
+      "btcEnergy": "…Bitcoin zużywa czas CPU i elektryczność",
+      "txIn": "wej.",
+      "txOut": "wyj.",
+      "feeFlow": "wejście − wyjście = 0,02 opłaty → twórca bloku",
+      "cap21": "limit 21 000 000",
+      "halving": "monety w obiegu · halving co 210 000 bloków",
+      "nowBlock": "teraz · blok {h} · {m}M wykopanych",
+      "newCoin": "nowa moneta → twórca",
+      "defraud": "oszukiwać ludzi",
+      "mintNew": "bić nowe monety",
+      "yourTx": "twoja transakcja",
+      "blockPlus": "blok +{n}",
+      "blockHeaderHash": "Nagłówek Bloku (Hash Bloku)",
+      "rootHash": "Korzeń (Hash)",
+      "blockHeader": "Nagłówek Bloku",
+      "approx80": "≈ 80 bajtów",
+      "perYear": "bajty · na godzinę · na dzień · na rok",
+      "ram2gb": "2 GB pamięci RAM (2008)",
+      "oneYearHeaders": "↑ rok nagłówków",
+      "moore": "+1,2 GB rocznie (Prawo Moore'a)",
+      "merkleRoot": "Korzeń Merkle",
+      "lightClient": "lekki klient",
+      "fullNode": "pełny węzeł",
+      "everyBlock": "każdy blok, każda transakcja",
+      "headersOnly": "tylko nagłówki bloków · po 80 bajtów",
+      "attackerMoreCpu": "łańcuch atakującego, więcej mocy CPU",
+      "alertInvalid": "ostrzeżenie: nieprawidłowy blok",
+      "businessesNode": "firmy: własny węzeł",
+      "everyCent": "osobna transakcja dla każdego grosza?",
+      "payee": "odbiorca",
+      "payment": "płatność",
+      "changeBack": "reszta, z powrotem do nadawcy",
+      "fanoutOk": "rozwidlanie nie problem: nie trzeba pełnej historii",
+      "identities": "Tożsamości",
+      "transactions": "Transakcje",
+      "trustedThird": "Zaufana\nStrona Trzecia",
+      "counterparty": "Kontrahent",
+      "publicStr": "Publika",
+      "tradPrivacy": "Tradycyjny Model Prywatności",
+      "newPrivacy": "Nowy Model Prywatności",
+      "nowPublic": "musi być teraz jawne…",
+      "keyN": "klucz {n}",
+      "sameOwner": "ten sam właściciel",
+      "revealed": "ujawniony!",
+      "noCreate": "tworzyć wartość z niczego",
+      "noSteal": "zabrać pieniądze, które nigdy nie były jego",
+      "onlyTakeBack": "tylko: odzyskać własną płatność",
+      "honestLead": "przewaga uczciwych",
+      "blocksAxis": "bloki →",
+      "attackerBehind": "atakujący: z bloków w tyle",
+      "walkLegend": "+1 uczciwy blok (p)   −1 blok atakującego (q)",
+      "defP": "prawdopodobieństwo, że uczciwy węzeł znajdzie następny blok",
+      "defQ": "prawdopodobieństwo, że atakujący znajdzie następny blok",
+      "defQz": "prawdopodobieństwo, że atakujący nadrobi z bloków w tyle",
+      "ifPLEQ": "jeśli p ≤ q",
+      "ifPGT": "jeśli p > q",
+      "zBehindAxis": "z (bloki w tyle) →",
+      "recipient": "odbiorca",
+      "sender": "nadawca",
+      "freshKey": "świeży klucz",
+      "secretChain": "tajny równoległy łańcuch: jego alternatywna transakcja",
+      "finiteSum": "suma skończona: tylko k = 0 … z",
+      "attackerProb": "prawdopodobieństwo sukcesu atakującego",
+      "blocksWait": "bloki oczekiwania dla P < 0,1%",
+      "trustedThirdCaps": "ZAUFANA STRONA TRZECIA",
+      "twice": "dwa razy?",
+      "consensus": "KONSENSUS",
+      "byCpu": "mocą CPU"
+    },
+    "chrome": {
+      "docTitle": "Bitcoin: Elektroniczny System Pieniężny Typu Peer-to-Peer · czytane",
+      "kick": "Czytanie z narracją · Satoshi Nakamoto · 2008",
+      "begin": "Rozpocznij",
+      "replay": "Odtwórz ponownie",
+      "loading": "Wczytywanie narracji…",
+      "narrationMissing": "Narracja dla tego języka nie jest jeszcze gotowa — wybierz inny język w menu ustawień.",
+      "narratedBy": "Czyta {voice} · {minutes} min · {hint}",
+      "clickWord": "kliknij dowolne słowo, by tam przeskoczyć",
+      "blockHeight": "Wysokość bloku",
+      "price": "Kurs Bitcoina",
+      "btcusd": "BTC/USD",
+      "connecting": "łączenie…",
+      "unavailable": "niedostępne",
+      "justNow": "właśnie teraz",
+      "minAgo": "{n} min temu",
+      "playAria": "Odtwórz / pauza",
+      "ovTitle": "Cały plakat (O)",
+      "ovAria": "Przełącz widok całego plakatu",
+      "voiceTitle": "Język i głos",
+      "voiceAria": "Język i głos",
+      "findTitle": "Znajdź w dokumencie (Ctrl+F)",
+      "findAria": "Znajdź w dokumencie",
+      "findPlaceholder": "Znajdź w dokumencie…",
+      "findCloseAria": "Zamknij wyszukiwanie",
+      "findInputAria": "Przeszukaj dokument",
+      "findPrevAria": "Poprzednie dopasowanie",
+      "findNextAria": "Następne dopasowanie",
+      "languageHeading": "Język",
+      "narratorHeading": "Narrator",
+      "confirmationsN": "{n} potwierdzeń",
+      "fsTitle": "Pełny ekran (F)",
+      "fsAria": "Pełny ekran",
+      "theme": "Motyw",
+      "themeAuto": "Auto",
+      "themeLight": "Jasny",
+      "themeDark": "Ciemny",
+      "readerMode": "Czytnik",
+      "posterMode": "Plakat",
+      "about": "O aplikacji",
+      "aboutClose": "Zamknij"
+    },
+    "caps": {
+      "coin": [
+        "Bitcoin",
+        "Elektroniczny System Pieniężny Typu Peer-to-Peer",
+        "Satoshi Nakamoto · 31 października 2008"
+      ],
+      "p2p": [
+        "Płatności online przechodzą przez instytucję finansową",
+        "Peer-to-peer: prosto od jednej strony do drugiej",
+        "Podpisy cyfrowe dowodzą, kto płaci…",
+        "…ale kto powstrzyma podwójne wydanie tej samej monety?",
+        "Rozwiązanie: sieć peer-to-peer",
+        "Transakcje są haszowane w ciągły łańcuch",
+        "Historii nie można zmienić bez ponownego wykonania proof-of-work",
+        "Najdłuższy łańcuch to zapis tego, co się wydarzyło",
+        "…i dowód, że pochodzi od największej mocy CPU",
+        "Uczciwa większość wyprzedza atakujących",
+        "Wiadomości przekazywane są przy zachowaniu najwyższej staranności",
+        "Węzły odchodzą i wracają do woli…",
+        "…przyjmując najdłuższy łańcuch jako dowód tego, co przegapiły"
+      ],
+      "trust": [
+        "Handel online opiera się na zaufanych stronach trzecich",
+        "Płatności zawsze można cofnąć: banki pośredniczą w sporach",
+        "Pośrednictwo dodaje koszty i zabija drobne swobodne płatności",
+        "Sprzedawcy muszą być nieufni wobec swych klientów",
+        "Pewien odsetek oszustw przyjmuje się jako nieunikniony",
+        "Osobiście gotówka działa bez pośredników",
+        "Online nie ma gotówki: jest tylko zaufana strona",
+        "Potrzebny: dowód kryptograficzny zamiast zaufania",
+        "Nieodwracalne płatności chronią sprzedawców; depozyt chroni kupujących",
+        "Serwer znaczników czasu peer-to-peer dowodzi kolejności transakcji",
+        "Bezpiecznie, dopóki uczciwe węzły kontrolują więcej mocy CPU"
+      ],
+      "txchain": [
+        "Elektroniczna moneta to łańcuch podpisów cyfrowych",
+        "Każdy właściciel podpisuje hash poprzedniej transakcji i klucz publiczny następnego",
+        "…i dopisuje je na końcu monety",
+        "Odbiorca weryfikuje każdy podpis w łańcuchu",
+        "…ale nie wie, czy właściciel nie wydał monety podwójnie",
+        "Powszechne rozwiązanie: centralna mennica sprawdza każdą transakcję",
+        "Wtedy cały system zależy od tego, kto prowadzi mennicę",
+        "…tak jak w banku",
+        "Liczy się tylko najwcześniejsza transakcja",
+        "Dlatego każda transakcja musi być ogłoszona publicznie",
+        "Wszyscy zgadzają się na jedną historię kolejności",
+        "Dowód, że większość węzłów zobaczyła ją pierwsza"
+      ],
+      "timestamp": [
+        "Serwer znaczników czasu zaczyna od bloku elementów",
+        "…liczy hash całego bloku…",
+        "…i rozpowszechnia hash szeroko, jak w gazecie",
+        "Dowód, że dane istniały w tym czasie",
+        "Każdy znacznik czasu zawiera poprzedni w swoim hashu…",
+        "…tworząc łańcuch",
+        "Każdy nowy znacznik czasu wzmacnia wcześniejsze"
+      ],
+      "pow": [
+        "Proof-of-work, zapożyczony z Hashcash Adama Backa",
+        "Znajdź wartość, której hash SHA-256 zaczyna się bitami zerowymi",
+        "Każde dodatkowe zero mnoży pracę szesnaście razy…",
+        "…a jednak każdy sprawdzi to jednym hashem",
+        "Inkrementuj nonce, aż hash ma wystarczająco zer",
+        "Zmień blok, a jego proof-of-work się psuje",
+        "…i każdy blok po nim też trzeba wykonać od nowa",
+        "Jeden adres IP — jeden głos? Każdy może zgarnąć wiele IP",
+        "Proof-of-work to jeden procesor — jeden głos",
+        "Najdłuższy łańcuch niesie najwięcej pracy: to większość",
+        "Atakujący musi wykonać bloki od nowa, potem dogonić i wyprzedzić",
+        "Trudność podąża za średnią ruchomą: ok. 6 bloków na godzinę",
+        "Bloki zbyt szybkie? Trudność rośnie"
+      ],
+      "network": [
+        "Sieć: węzły, luźno połączone",
+        "1 · Nowe transakcje przekazywane są do wszystkich węzłów",
+        "2 · Każdy węzeł gromadzi nowe transakcje w blok",
+        "3 · Każdy węzeł pracuje nad trudnym proof-of-work",
+        "4 · Pierwszy, który znajdzie, ogłasza swój blok",
+        "5 · Węzły przyjmują go tylko, gdy każda transakcja jest poprawna",
+        "6 · …i budują następny blok na nim",
+        "Najdłuższy łańcuch jest zawsze prawidłowy",
+        "Dwa bloki naraz: sieć się rozdziela",
+        "Każda strona trzyma drugą gałąź, na wszelki wypadek",
+        "Następny blok rozstrzyga remis; wszyscy przestawiają się na dłuższy",
+        "Przekazy nie muszą docierać do każdego węzła",
+        "Przegapiłeś blok? Poproś o niego, gdy przyjdzie następny"
+      ],
+      "incentive": [
+        "Ze zwyczaju pierwsza transakcja bloku jest specjalna",
+        "Tworzy zupełnie nową monetę dla twórcy bloku",
+        "Zachęta do wspierania sieci i sposób na wprowadzenie monet",
+        "Jak poszukiwacze złota dodają złoto, zużywając czas CPU i elektryczność",
+        "Opłaty: nadwyżka wejść nad wyjściami trafia do twórcy bloku",
+        "Stała podaż, potem płacą tylko opłaty: bez inflacji",
+        "Zachęta skłania też węzły do uczciwości",
+        "Grać według zasad opłaca się lepiej niż je podkopywać"
+      ],
+      "merkle": [
+        "Gdy transakcja jest pogrzebana pod wystarczającą liczbą bloków…",
+        "…wydane wcześniej transakcje można usunąć",
+        "Transakcje są haszowane parami, w górę drzewa Merkle",
+        "Do hasha bloku trafia tylko korzeń",
+        "Stare bloki kurczą się przez przycinanie gałęzi",
+        "Haszów pośrednich nie trzeba przechowywać",
+        "Sam nagłówek bloku to około 80 bajtów",
+        "Jeden co 10 minut to tylko 4,2 MB rocznie",
+        "Ułamek wobec 2 GB RAM: nagłówki mieszczą się w pamięci",
+        {
+          "fig": "Transakcje haszowane w Drzewie Merkle"
+        }
+      ],
+      "spv": [
+        "Płatności można weryfikować bez pełnego węzła",
+        "Trzymaj tylko nagłówki bloków najdłuższego łańcucha",
+        "Odpytuj węzły sieci, aż uwierzysz, że to najdłuższy",
+        "Pobierz gałąź Merkle łączącą transakcję z jej blokiem",
+        "Nie może sam sprawdzić transakcji…",
+        "…ale każdy dodany po niej blok ją potwierdza",
+        "Atakujący, który przechytrzy sieć, może ją zwieść",
+        "Obrona: ostrzeżenia węzłów uruchamiają pełne pobieranie",
+        "Zapracowane firmy i tak prowadzą własne węzły",
+        {
+          "fig": "Najdłuższy Łańcuch Proof-of-Work"
+        }
+      ],
+      "inout": [
+        "Obsługa monet pojedynczo byłaby nieporęczna",
+        "Dlatego transakcje mają wiele wejść i wyjść",
+        "Albo jedno wejście z większej poprzedniej transakcji…",
+        "…albo wiele wejść łączących mniejsze kwoty",
+        "Najwyżej dwa wyjścia: płatność i ewentualna reszta",
+        "Rozwidlanie nie problem: nie trzeba pełnej historii"
+      ],
+      "privacy": [
+        "Banki dbają o prywatność, ograniczając krąg widzących dane",
+        "Bitcoin musi ogłaszać każdą transakcję publicznie…",
+        "…więc mur się przesuwa: klucze publiczne pozostają anonimowe",
+        "Publika widzi kwoty, ale nie wie kto",
+        "Jak „taśma” giełdy: godziny i rozmiary, bez nazwisk",
+        "Używaj nowej pary kluczy do każdej transakcji",
+        "Transakcje wielowejściowe ujawniają wspólnego właściciela",
+        "Ujawnienie jednego właściciela może ujawnić powiązane transakcje"
+      ],
+      "calc": [
+        "Atakujący próbuje zbudować alternatywny łańcuch szybciej niż uczciwy",
+        "Nawet wygrywając, nie może tworzyć wartości ani kraść…",
+        "…może tylko spróbować odzyskać niedawno wydane pieniądze",
+        "Wyścig to dwumianowe błądzenie losowe: +1 albo −1 na blok",
+        "Nadganianie z tyłu to problem ruiny gracza",
+        "p: uczciwy węzeł znajduje następny blok · q: atakujący",
+        "Jeśli p > q, szanse atakującego to (q/p)ᶻ",
+        "Szanse spadają wykładniczo z każdym blokiem opóźnienia",
+        "Jak długo odbiorca powinien czekać, zanim zaufa płatności?",
+        "Świeża para kluczy tuż przed podpisaniem blokuje przygotowane łańcuchy",
+        "Nieuczciwy nadawca potajemnie kopie równoległy łańcuch",
+        "Odbiorca czeka na z bloków na wierzchu",
+        "Postęp atakującego podlega rozkładowi Poissona",
+        "Każdy wynik ważony prawdopodobieństwem nadgonienia",
+        "Przekształcone, by nie sumować nieskończonego ogona",
+        "Zamiana na kod C…",
+        "Wyniki: prawdopodobieństwo spada wykładniczo",
+        "Ile bloków czekać, by szansa była poniżej 0,1%?"
+      ],
+      "conclusion": [
+        "Transakcje elektroniczne bez opierania się na zaufaniu",
+        "Monety z podpisów cyfrowych dają silną własność…",
+        "…ale potrzebują sposobu na zapobieganie podwójnemu wydatkowaniu",
+        "Sieć peer-to-peer rejestruje publiczną historię z proof-of-work",
+        "Szybko staje się niepraktyczna do zmiany dla atakującego",
+        "Odporna w swojej nieustrukturyzowanej prostocie",
+        "Węzły nie potrzebują tożsamości; wiadomości nie potrzebują trasy",
+        "Węzły odchodzą i wracają, przyjmując najdłuższy łańcuch",
+        "Głosują mocą CPU: rozszerzają poprawne bloki, ignorują niepoprawne",
+        "Zasady i zachęty, wymuszone konsensusem"
+      ]
+    },
+    "cues": {
+      "PEER-TO-PEER": "Peer-to-Peer",
+      "Satoshi": "Satoshi",
+      "directly from one party": "bezpośrednio od nadawcy do odbiorcy",
+      "Digital signatures provide": "Podpisy cyfrowe oferują",
+      "the main benefits are lost": "tracimy ich główne korzyści",
+      "We propose a solution": "Proponujemy rozwiązanie problemu",
+      "timestamps transactions by hashing": "opatruje transakcje znacznikami czasu, haszując",
+      "cannot be changed without redoing": "nie da się zmienić bez wykonywania",
+      "The longest chain not only": "Najdłuższy łańcuch nie tylko",
+      "largest pool of CPU power": "z największej puli wykonanej pracy",
+      "generate the longest chain and outpace": "będą one generowały najdłuższy łańcuch",
+      "Messages are broadcast": "Wiadomości przekazywane są",
+      "nodes can leave and rejoin": "węzły mogą do woli opuszczać sieć",
+      "accepting the longest": "akceptując najdłuższy",
+      "Completely non-reversible transactions": "Całkowicie nieodwracalne transakcje",
+      "The cost of mediation": "Koszty pośrednictwa",
+      "Merchants must be wary": "Sprzedawcy muszą być nieufni",
+      "A certain percentage of fraud": "Pewien odsetek oszustw",
+      "avoided in person": "uniknąć w transakcjach wykonywanych osobiście",
+      "no mechanism exists": "nie istnieje jednak mechanizm",
+      "What is needed": "Potrzebny jest wobec tego",
+      "computationally impractical to reverse": "obliczeniowo niepraktyczne",
+      "distributed timestamp server": "serwer znaczników czasu typu peer-to-peer",
+      "The system is secure": "System jest bezpieczny",
+      "digitally signing a hash": "podpisując cyfrowo hash",
+      "adding these to the end": "dopisując je na końcu monety",
+      "A payee can verify": "Odbiorca może zweryfikować podpisy",
+      "trusted central authority, or mint": "zaufanego organu centralnego, bądź mennicy",
+      "the fate of the entire money system": "los całego systemu pieniężnego",
+      "just like a bank": "tak jak w systemie bankowym",
+      "We need a way": "Musimy znaleźć sposób",
+      "publicly announced": "ogłaszane publicznie",
+      "agree on a single history": "zgadzają się na jedną historię",
+      "the majority of nodes agreed": "większość węzłów zgodnie uznaje",
+      "taking a hash of a block": "znacznikiem czasu hasha bloku",
+      "widely publishing the hash": "rozpowszechnienie hasha",
+      "The timestamp proves": "Znacznik czasu stanowi dowód",
+      "Each timestamp includes the previous": "Każdy znacznik czasu zawiera poprzedni znacznik",
+      "forming a chain": "tworząc łańcuch",
+      "reinforcing the ones before": "wzmacnia znaczniki go poprzedzające",
+      "scanning for a value": "szuka wartości",
+      "The average work required": "Przeciętny nakład wymaganej pracy",
+      "verified by executing a single hash": "zweryfikować przy wykonaniu pojedynczego hasha",
+      "incrementing a nonce": "inkrementację parametru nonce",
+      "the block cannot be changed": "bloku nie da się zmienić",
+      "redoing all the blocks after it": "wykonania od nowa wszystkich bloków dodanych po nim",
+      "one-IP-address-one-vote": "jednego adresu IP na jeden głos",
+      "Proof-of-work is essentially": "Proof-of-work działa w praktyce",
+      "The majority decision is represented": "Decyzja większości reprezentowana jest",
+      "To modify a past block": "Aby zmodyfikować wcześniejszy blok",
+      "To compensate for increasing hardware": "Aby zrekompensować wzrastającą szybkość sprzętową",
+      "New transactions are broadcast": "Nowe transakcje przekazywane są",
+      "Each node collects new transactions": "Każdy węzeł gromadzi nowe transakcje",
+      "Each node works on finding": "Każdy węzeł pracuje nad znalezieniem",
+      "When a node finds": "Kiedy węzeł odnajdzie",
+      "Nodes accept the block only": "Węzły akceptują blok wyłącznie wtedy",
+      "Nodes express their acceptance": "Węzły podejmują decyzję o akceptacji",
+      "Nodes always consider the longest": "Węzły zawsze uznają najdłuższy łańcuch",
+      "If two nodes broadcast": "Jeśli dwa węzły przekazują",
+      "save the other branch": "zapisują drugą gałąź",
+      "The tie will be broken": "Remis zostaje rozstrzygnięty",
+      "New transaction broadcasts do not": "Informacja o nowych transakcjach nie musi",
+      "If a node does not receive": "Jeśli węzeł nie odbierze bloku",
+      "a special transaction that starts": "specjalna transakcja tworząca nową monetę",
+      "This adds an incentive": "Stanowi to dla węzłów zachętę",
+      "analogous to gold miners": "analogiczne do poszukiwaczy złota",
+      "The incentive can also be funded": "Za zachętę mogą również posłużyć opłaty transakcyjne",
+      "Once a predetermined number": "Kiedy już z góry ustalona liczba monet",
+      "The incentive may help": "Zachęta może pomóc motywować",
+      "He ought to find it more profitable": "Bardziej opłacałoby się mu przestrzegać zasad",
+      "the spent transactions before it": "wydane przed nią transakcje",
+      "transactions are hashed in a Merkle": "transakcje haszowane są w Drzewie Merkle",
+      "with only the root included": "gdzie tylko korzeń zawarty jest",
+      "Old blocks can then be compacted": "Stare bloki można wówczas pomniejszyć",
+      "The interior hashes do not": "Haszów pośrednich nie trzeba przechowywać",
+      "A block header with no transactions": "Nagłówek bloku bez transakcji",
+      "If we suppose blocks are generated": "Jeśli założymy, że bloki generowane są",
+      "With computer systems typically": "Wziąwszy pod uwagę, iż nowe komputery",
+      "keep a copy of the block headers": "kopię nagłówków bloków",
+      "querying network nodes": "przeszukując węzły sieci",
+      "obtain the Merkle branch": "uzyskać gałąź Merkle",
+      "blocks added after it": "dodane później bloki",
+      "more vulnerable if the network is overpowered": "gdy sieć jest zdominowana przez atakującego",
+      "accept alerts from network nodes": "odbieranie ostrzeżeń od węzłów sieci",
+      "Businesses that receive frequent": "Firmy odbierające często płatności",
+      "To allow value to be split": "Aby umożliwiać dzielenie i łączenie wartości",
+      "a single input from a larger": "jedno wejście dla większej poprzedniej transakcji",
+      "multiple inputs combining smaller": "wiele wejść łączących mniejsze kwoty",
+      "at most two outputs": "najwyżej dwa wyjścia",
+      "It should be noted that fan-out": "Należy zauważyć, iż zjawisko rozwidlania",
+      "The necessity to announce": "Konieczność ogłaszania wszystkich",
+      "by keeping public keys anonymous": "czyniąc klucze publiczne anonimowymi",
+      "The public can see": "Publika dostrzega",
+      "stock exchanges": "giełdy papierów wartościowych",
+      "a new key pair should be used": "nową parę kluczy dla każdej transakcji",
+      "Some linking is still unavoidable": "Pewnego powiązania nie da się jednak uniknąć",
+      "The risk is that if the owner": "Ryzyko polega na tym",
+      "it does not throw the system open": "system nie stanie się otwarty na samowolne zmiany",
+      "An attacker can only try": "Atakujący może jedynie próbować zmienić",
+      "Binomial Random Walk": "Dwumianowe Błądzenie Losowe",
+      "The probability of an attacker catching up": "Prawdopodobieństwo, że atakujący nadgoni",
+      "probability an honest node finds": "prawdopodobieństwo, że uczciwy węzeł znajdzie",
+      "Given our assumption": "Przy założeniu, że",
+      "We now consider how long": "Rozważmy teraz, jak długo",
+      "The receiver generates a new key pair": "Odbiorca generuje nową parę kluczy",
+      "Once the transaction is sent": "Po wysłaniu transakcji",
+      "The recipient waits until": "Odbiorca czeka, aż transakcja",
+      "Poisson distribution": "rozkładem Poissona",
+      "we multiply the Poisson density": "mnożymy gęstość rozkładu Poissona",
+      "Rearranging to avoid": "Przekształcamy celem uniknięcia",
+      "Converting to C code": "Konwertujemy na kod C",
+      "Running some results": "Po sprawdzeniu wyników",
+      "Solving for P less than": "Wyniki dla P mniejszego niż",
+      "coins made from digital signatures": "monet wykorzystujących podpisy cyfrowe",
+      "incomplete without a way": "niekompletne bez sposobu",
+      "we proposed a peer-to-peer network": "zaproponowaliśmy sieć peer-to-peer",
+      "quickly becomes computationally impractical": "szybko staje się obliczeniowo niepraktyczna",
+      "The network is robust": "Sieć jest imponująca",
+      "They do not need to be identified": "Nie trzeba ich identyfikować",
+      "Nodes can leave and rejoin": "Węzły mogą dowolnie opuszczać sieć",
+      "They vote with their CPU power": "Głosują one przy użyciu swej mocy obliczeniowej",
+      "Any needed rules and incentives": "Wszelkie potrzebne zasady i zachęty",
+      "payee can't verify that one": "odbiorca nie jest w stanie zweryfikować",
+      "If they're generated too fast": "Jeśli są one generowane zbyt szybko",
+      "He can't check the transaction": "Nie może on sam sprawdzić transakcji"
+    }
+  }
+}

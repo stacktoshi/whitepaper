@@ -1,0 +1,968 @@
+{
+  "paper": {
+    "sections": [
+      {
+        "id": "title",
+        "label": "Capa",
+        "scene": "coin",
+        "items": [
+          {
+            "t": "title",
+            "lines": [
+              "{Bitcoin|Bitcoin:}",
+              "{Um|um} {sistema|sistema}",
+              "{de dinheiro eletrônico|de dinheiro eletrônico}",
+              "{peer-to-peer.|peer-to-peer.}"
+            ]
+          },
+          {
+            "t": "byline",
+            "text": "Satoshi {Nakamoto|Nakamoto.} {satoshin@gmx.com|} {www.bitcoin.org|}"
+          }
+        ]
+      },
+      {
+        "id": "abstract",
+        "label": "Resumo",
+        "scene": "p2p",
+        "items": [
+          {
+            "t": "abs1",
+            "text": "{Resumo.|Resumo.} Uma versão puramente peer-to-peer de dinheiro eletrônico permitiria que pagamentos on-line fossem enviados diretamente de uma parte para outra, sem passar por uma instituição financeira. As assinaturas digitais fornecem parte da solução, mas os principais benefícios são perdidos se um terceiro confiável ainda é necessário para evitar o gasto duplo."
+          },
+          {
+            "t": "abs2",
+            "text": "Nós propomos uma solução para o problema de gasto duplo usando uma rede peer-to-peer. A rede insere data e hora nas transações através de um hash em uma cadeia contínua de prova de trabalho à base de hash, formando um registro que não pode ser alterado sem refazer a prova de trabalho. A cadeia mais longa não só serve como prova da sequência de eventos testemunhados, mas prova de que ela veio do maior pool de CPUs. Enquanto a maioria do poder das CPUs é controlado por nós que não estão cooperando para atacar a rede, eles irão gerar a cadeia mais longa e superar os atacantes. A própria rede requer estrutura mínima. As mensagens são espalhadas em regime de melhor esforço, e nós podem sair e regressar a rede à vontade, aceitando a cadeia mais longa de prova de trabalho, como prova do que aconteceu enquanto eles estavam fora."
+          }
+        ]
+      },
+      {
+        "id": "s1",
+        "num": "1",
+        "label": "Introdução",
+        "scene": "trust",
+        "items": [
+          {
+            "t": "h",
+            "text": "{1.|Um.} Introdução"
+          },
+          {
+            "t": "p",
+            "text": "O comércio na Internet tem dependido quase exclusivamente de instituições financeiras que servem como terceiros confiáveis para processar pagamentos eletrônicos. Enquanto o sistema funciona bem para a maioria das operações, ainda sofre com as deficiências inerentes ao modelo baseado em confiança. Transações completamente não-reversíveis não são possíveis, uma vez que as instituições financeiras não podem evitar a mediação de conflitos. O custo da mediação aumenta os custos de transação, o que limita o tamanho mínimo prático da transação e elimina a possibilidade de pequenas transações ocasionais, e há um custo mais amplo na perda da capacidade de fazer pagamentos não reversível para serviços não reversíveis. Com a possibilidade de reversão, a necessidade de confiança se espalha. Comerciantes devem ser cautelosos com os seus clientes, incomodando-os para obter mais informações do que seria de outra forma necessária. Uma certa percentagem de fraude é aceita como inevitável. Estes custos e incertezas de pagamento podem ser evitados presencialmente usando moeda física, mas não existe nenhum mecanismo para fazer pagamentos ao longo de um canal de comunicação sem uma parte confiável."
+          },
+          {
+            "t": "p",
+            "text": "O que é necessário é um sistema de pagamento eletrônico baseado em prova criptográfica em vez de confiança, permitindo a quaisquer duas partes dispostas a transacionar diretamente uma com a outra sem a necessidade de um terceiro confiável. Transações que são computacionalmente impraticáveis de reverter protegeriam os vendedores de fraudes e mecanismos rotineiros de custódia (escrow) poderiam ser facilmente implementados para proteger os compradores. Neste artigo, nós propomos uma solução para o problema de gasto duplo usando um servidor de horas distribuído peer-to-peer para gerar prova computacional da ordem cronológica das operações. O sistema é seguro desde que nós honestos controlem coletivamente mais poder de CPU do que qualquer grupo cooperado de nós atacantes."
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "num": "2",
+        "label": "Transações",
+        "scene": "txchain",
+        "items": [
+          {
+            "t": "h",
+            "text": "{2.|Dois.} Transações"
+          },
+          {
+            "t": "p",
+            "text": "Nós definimos uma moeda eletrônica como uma cadeia de assinaturas digitais. Cada proprietário transfere a moeda para o seguinte por uma assinatura digital de hash da operação anterior e a chave pública do dono da próxima e adicionando-os ao fim da moeda. Um beneficiário pode verificar as assinaturas para verificar a cadeia de propriedade."
+          },
+          {
+            "t": "fig",
+            "scene": "txchain",
+            "h": 250
+          },
+          {
+            "t": "p",
+            "text": "O problema, claro, é o beneficiário não poder confirmar se um dos pagadores não fez gasto duplo da moeda. Uma solução comum é a introdução de uma autoridade central confiável, ou casa da moeda, que verifique o gasto duplo para todas as transações. Depois de cada transação, a moeda deve ser devolvida à casa da moeda para a emissão de uma nova, e apenas moedas emitidas diretamente da casa da moeda são confiáveis de não ser gastas duplamente. O problema desta solução é que o destino de todo o sistema monetário depende da empresa que gerencia a casa da moeda, com todas as transações tendo de passar por ela, assim como um banco."
+          },
+          {
+            "t": "p",
+            "text": "Nós precisamos de uma maneira que o beneficiário possa saber se os proprietários anteriores não assinaram quaisquer transações anteriores. Para nossos propósitos, a transação mais antiga é a que conta, por isso, nós não nos preocupamos com as tentativas posteriores de gasto duplo. A única maneira de confirmar a ausência de uma transação é estar ciente de todas as transações. No modelo baseado em casa da moeda, a mesma está ciente de todas as transações e decide qual chegou primeiro. Para alcançar este objetivo sem uma parte confiável, as transações devem ser anunciadas publicamente {[1]|}, e precisamos de um sistema para que os participantes concordem em um histórico único a ordem em que foram recebidas. O beneficiário precisa da prova que, no momento de cada transação, a maioria dos nós concorda que ela está sendo recebida pela primeira vez."
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "num": "3",
+        "label": "Servidor Timestamp",
+        "scene": "timestamp",
+        "items": [
+          {
+            "t": "h",
+            "text": "{3.|Três.} Servidor Timestamp"
+          },
+          {
+            "t": "p",
+            "text": "A solução que propomos começa com um servidor timestamp. Um servidor timestamp trabalha gerando um hash de um bloco de itens a serem registrados temporalmente e publicando amplamente o hash, como em um jornal ou post Usenet {[2-5]|}. O timestamp prova que os dados devem ter existido na época, obviamente, a fim de entrar no hash. Cada timestamp inclui o anterior em seu hash, formando uma cadeia, com cada timestamp adicional reforçando os que vieram antes dele."
+          },
+          {
+            "t": "fig",
+            "scene": "timestamp",
+            "h": 170
+          }
+        ]
+      },
+      {
+        "id": "s4",
+        "num": "4",
+        "label": "Prova de Trabalho",
+        "scene": "pow",
+        "items": [
+          {
+            "t": "h",
+            "text": "{4.|Quatro.} Prova de Trabalho"
+          },
+          {
+            "t": "p",
+            "text": "Para implementar um servidor timestamp distribuído numa base peer-to-peer, teremos de usar um sistema de prova de trabalho semelhante ao Hashcash de Adam Back {[6]|}, em vez de jornal ou posts Usenet. A prova de trabalho envolve a procura por um valor que quando calculado o hash, tal como utilizando o {SHA-256,|esse agache dois cinco seis,} o mesmo comece com um número de bits zero. A média do trabalho requerida é exponencial ao número de bits zero requeridos e pode ser verificada por meio da execução de um único hash."
+          },
+          {
+            "t": "p",
+            "text": "Para nossa rede de timestamps, nós implementamos a prova de trabalho incrementando um nonce no bloco até que seja encontrado um valor que dê ao hash do bloco a quantidade necessária de bits zero. Uma vez que o esforço da CPU tem sido dispendido para satisfazer a prova de trabalho, o bloco não pode ser alterado sem refazer o trabalho. Como outros blocos são encadeados posteriormente, o trabalho para mudar um bloco incluiria refazer todos os blocos após ele."
+          },
+          {
+            "t": "fig",
+            "scene": "pow",
+            "h": 170
+          },
+          {
+            "t": "p",
+            "text": "A prova de trabalho também resolve o problema da determinação da representação na tomada de decisão da maioria. Se a maioria fosse baseada em {um-endereço-IP-um-voto,|um endereço IP, um voto,} isso poderia ser subvertido por qualquer pessoa capaz de alocar muitos {IPs.|i pés.} Prova de trabalho é, essencialmente, {uma-CPU-um-voto.|uma cê pê u, um voto.} A decisão da maioria é representada pela cadeia mais longa, que tem o maior esforço de prova de trabalho investido nela. Se a maioria do poder de CPU é controlado por nós honestos, a cadeia honesta vai crescer mais rápido e superar quaisquer cadeias concorrentes. Para modificar um bloco passado, o atacante terá de refazer a prova de trabalho do bloco e depois de todos os blocos posteriores e, em seguida, alcançar e superar o trabalho dos nós honestos. Vamos mostrar mais tarde que a probabilidade de um atacante mais lento ter sucesso diminui exponencialmente quando blocos subsequentes são adicionados."
+          },
+          {
+            "t": "p",
+            "text": "Para compensar o aumento da velocidade de hardware e o interesse variado em rodar nós ao longo do tempo, a dificuldade da prova de trabalho é determinado por uma média móvel visando um número médio de blocos por hora. Se eles são gerados muito rápido, a dificuldade aumenta."
+          }
+        ]
+      },
+      {
+        "id": "s5",
+        "num": "5",
+        "label": "Rede",
+        "scene": "network",
+        "items": [
+          {
+            "t": "h",
+            "text": "{5.|Cinco.} Rede"
+          },
+          {
+            "t": "p",
+            "text": "Os passos para executar a rede são os seguintes:"
+          },
+          {
+            "t": "li",
+            "text": "{1)|Um.} Novas transações são transmitidas para todos os nós."
+          },
+          {
+            "t": "li",
+            "text": "{2)|Dois.} Cada nó coleta novas transações em um bloco."
+          },
+          {
+            "t": "li",
+            "text": "{3)|Três.} Cada nó trabalha para encontrar uma difícil prova de trabalho para o seu bloco."
+          },
+          {
+            "t": "li",
+            "text": "{4)|Quatro.} Quando um nó encontra uma prova de trabalho, ele transmite o bloco para todos os nós."
+          },
+          {
+            "t": "li",
+            "text": "{5)|Cinco.} Os nós aceitam o bloco somente se todas as suas transações são válidas e já não foram gastas."
+          },
+          {
+            "t": "li",
+            "text": "{6)|Seis.} Os nós expressam sua aceitação do bloco, trabalhando na criação do próximo bloco na cadeia, usando o hash do bloco aceito como o hash anterior."
+          },
+          {
+            "t": "p",
+            "text": "Os nós sempre consideram a cadeia mais longa para ser a correta e continuarão trabalhando para estendê-la. Se dois nós transmitirem diferentes versões do bloco seguinte simultaneamente, alguns nós podem receber um ou o outro primeiro. Nesse caso, eles trabalham com o primeiro recebido, mas salvam o outro ramo caso ele se torne o mais longo. O empate será quebrado quando a próxima prova de trabalho for encontrada e um ramo se torne mais longo; os nós que estavam trabalhando em outro ramo, então, mudarão para o mais longo."
+          },
+          {
+            "t": "p",
+            "text": "Novas transmissões de transação não precisam necessariamente alcançar todos os nós. Contanto que elas atinjam muitos nós, elas vão entrar em um bloco em breve. Transmissões de bloco também são tolerantes com mensagens abandonadas. Se um nó não recebe um bloco, ele irá solicitá-lo ao receber o próximo e perceber um faltante."
+          }
+        ]
+      },
+      {
+        "id": "s6",
+        "num": "6",
+        "label": "Incentivo",
+        "scene": "incentive",
+        "items": [
+          {
+            "t": "h",
+            "text": "{6.|Seis.} Incentivo"
+          },
+          {
+            "t": "p",
+            "text": "Por convenção, a primeira transação de um bloco é uma operação especial que inicia uma nova moeda de propriedade do criador do bloco. Isso é um incentivo aos nós para apoiar a rede, e fornece uma maneira inicial de colocar moedas em circulação, uma vez que não existe uma autoridade central para emiti-las. A adição estável de uma quantidade constante de novas moedas é análogo a garimpeiros dispender recursos para colocar mais ouro em circulação. No nosso caso, tempo de CPU e eletricidade que estão sendo consumidos."
+          },
+          {
+            "t": "p",
+            "text": "O incentivo também pode ser financiado com taxas de transação. Se o valor de uma transação de saída é menor que o valor de entrada, a diferença é uma taxa de transação que é adicionada ao valor de incentivo do bloco que contém a transação. Uma vez que um número predeterminado de moedas já entraram em circulação, o incentivo pode migrar inteiramente para taxas de transação e ser completamente livre de inflação."
+          },
+          {
+            "t": "p",
+            "text": "O incentivo deve encorajar os nós a se manterem honestos. Se um atacante ganancioso é capaz de reunir mais poder de CPU do que todos os nós honestos, ele teria que escolher entre usá-lo para defraudar as pessoas roubando seus pagamentos, ou usá-lo para gerar novas moedas. Ele deve achar que é mais rentável jogar pelas regras, pois tais normas lhe favorecem com mais novas moedas do que todos os outros combinados, além de prejudicar o sistema e a validade de sua própria riqueza."
+          }
+        ]
+      },
+      {
+        "id": "s7",
+        "num": "7",
+        "label": "Recuperação do espaço em disco",
+        "scene": "merkle",
+        "items": [
+          {
+            "t": "h",
+            "text": "{7.|Sete.} Recuperação do espaço em disco"
+          },
+          {
+            "t": "p",
+            "text": "Uma vez que a transação mais recente de uma moeda está enterrada sob blocos suficientes, as transações gastas anteriormente podem ser descartadas para economizar espaço em disco. Para facilitar isso sem quebrar o hash do bloco, o hash das transações é feito em uma árvore Merkle {[7][2][5],|,} e apenas a raiz é incluída no hash do bloco. Blocos velhos podem então ser compactados removendo galhos da árvore. Os hashes internos não precisam ser armazenados."
+          },
+          {
+            "t": "fig",
+            "scene": "merkle",
+            "h": 300
+          },
+          {
+            "t": "p",
+            "text": "Um cabeçalho do bloco com nenhuma transação seria de cerca de 80 bytes. Se supormos que blocos são gerados a cada 10 minutos, {80 bytes * 6 * 24 * 365 = 4,2MB|80 bytes, vezes 6, vezes 24, vezes 365, equivale a 4,2 megabytes} por ano. Com computadores normalmente sendo vendidos com {2 GB|2 gigabytes} de RAM em 2008, e pela Lei de Moore prevendo um crescimento de {1,2 GB|1,2 gigabytes} por ano, o armazenamento não deve ser um problema, mesmo que os cabeçalhos do bloco devam ser mantidos em memória."
+          }
+        ]
+      },
+      {
+        "id": "s8",
+        "num": "8",
+        "label": "Verificação de Pagamento Simplificada",
+        "scene": "spv",
+        "items": [
+          {
+            "t": "h",
+            "text": "{8.|Oito.} Verificação de Pagamento Simplificada"
+          },
+          {
+            "t": "p",
+            "text": "É possível verificar os pagamentos sem executar um nó de rede completo. Um usuário só precisa manter uma cópia dos cabeçalhos do bloco da cadeia com a prova de trabalho mais longa, que ele pode recuperar consultando os nós da rede até que ele esteja convencido de que tem a cadeia mais longa, e obteve o ramo Merkle ligando a transação ao bloco que ela está registrada. Não se pode verificar a transação por si, mas ligando-a a um lugar na cadeia, pode-se ver que um nó de rede a aceitou, e blocos adicionados depois desse confirmam que a rede a aceitou."
+          },
+          {
+            "t": "fig",
+            "scene": "spv",
+            "h": 250
+          },
+          {
+            "t": "p",
+            "text": "Como tal, a verificação é confiável enquanto os nós honestos controlarem a rede, mas é mais vulnerável se a rede for subjugada por um atacante. Enquanto nós da rede podem verificar as transações por si mesmos, o método simplificado pode ser enganado por transações fabricadas de um atacante durante o tempo que o atacante pode continuar a dominar a rede. Uma estratégia para se proteger disso seria aceitar alertas dos nós da rede quando detectam um bloco inválido, levando o software do usuário a baixar o bloco completo e as transações alarmadas para confirmar a inconsistência. As empresas que recebem pagamentos frequentes provavelmente desejarão executar seus próprios nós para uma segurança mais independente e verificação mais rápida."
+          }
+        ]
+      },
+      {
+        "id": "s9",
+        "num": "9",
+        "label": "Combinando e Dividindo Valor",
+        "scene": "inout",
+        "items": [
+          {
+            "t": "h",
+            "text": "{9.|Nove.} Combinando e Dividindo Valor"
+          },
+          {
+            "t": "p",
+            "text": "Apesar de ser possível manipular as moedas individualmente, seria pesado fazer uma transação separada para cada centavo numa transferência. Para permitir que o valor seja dividido e combinado, as transações contêm múltiplas entradas e saídas. Normalmente haverá uma única entrada de uma transação anterior maior ou várias entradas combinando quantidades menores, e no máximo duas saídas: uma para o pagamento e, se houver, uma retornando o troco ao remetente."
+          },
+          {
+            "t": "fig",
+            "scene": "inout",
+            "h": 190
+          },
+          {
+            "t": "p",
+            "text": "Pode-se notar que a difusão, quando uma transação depende de várias transações, e estas dependem de muitas outras, não é um problema. Nunca há a necessidade de extrair uma cópia autônoma completa do histórico de uma transação."
+          }
+        ]
+      },
+      {
+        "id": "s10",
+        "num": "10",
+        "label": "Privacidade",
+        "scene": "privacy",
+        "items": [
+          {
+            "t": "h",
+            "text": "{10.|Dez.} Privacidade"
+          },
+          {
+            "t": "p",
+            "text": "O modelo bancário tradicional atinge um nível de privacidade, limitando o acesso à informação para as partes envolvidas e o terceiro confiável. A necessidade de anunciar todas as transações publicamente se opõe a este método, mas a privacidade ainda pode ser mantida quebrando o fluxo de informação em outro lugar: mantendo chaves públicas anônimas. O público pode ver que alguém está enviando uma quantidade para outra pessoa, mas sem informações que ligam a transação a qualquer um. Isto é semelhante ao nível de informação divulgada pelas bolsas de valores, onde o tempo e o tamanho dos negócios individuais, a \"fita\", é tornada pública, mas sem dizer quem são as partes."
+          },
+          {
+            "t": "fig",
+            "scene": "privacy",
+            "h": 210
+          },
+          {
+            "t": "p",
+            "text": "Como um firewall adicional, um novo par de chaves deve ser utilizado para cada transação para evitar que eles sejam ligados a um proprietário comum. Alguns links ainda são inevitáveis com operações multi-entrada, que necessariamente revelam que as entradas foram para a posse do mesmo proprietário. O risco é que, se o proprietário de uma chave é revelado, associações poderiam revelar outras transações que pertenceram ao mesmo dono."
+          }
+        ]
+      },
+      {
+        "id": "s11",
+        "num": "11",
+        "label": "Cálculos",
+        "scene": "calc",
+        "items": [
+          {
+            "t": "h",
+            "text": "{11.|Onze.} Cálculos"
+          },
+          {
+            "t": "p",
+            "text": "Nós consideramos o cenário de um atacante tentando gerar uma cadeia alternativa mais rápido que a cadeia honesta. Mesmo que seja feito, isso não deixa o sistema aberto a mudanças arbitrárias, como a criação de valor do nada ou tomar dinheiro que nunca pertenceu ao atacante. Os nós não vão aceitar uma transação inválida como forma de pagamento, e nós honestos nunca aceitarão um bloco contendo-as. Um invasor só pode tentar mudar uma de suas próprias transações para ter de volta o dinheiro que recentemente dispendeu."
+          },
+          {
+            "t": "p",
+            "text": "A corrida entre a cadeia honesta e uma cadeia atacante pode ser caracterizada como uma Caminhada Aleatória Binomial. O evento de sucesso é a cadeia honesta sendo prorrogada por mais um bloco, aumentando a sua liderança por {+1,|mais um,} e o evento de falha é cadeia do atacante sendo prorrogada por um bloco, reduzindo a lacuna por {-1.|menos um.}"
+          },
+          {
+            "t": "p",
+            "text": "A probabilidade de um atacante recuperar-se de um dado déficit é análogo ao problema da Ruína do Jogador. Suponha que um jogador com crédito ilimitado comece em um deficit e jogue potencialmente um número infinito de tentativas para atingir o breakeven. Podemos calcular a probabilidade de ele atingir o breakeven, ou de um atacante alcançar a cadeia honesta, como segue {[8]:|:}"
+          },
+          {
+            "t": "def",
+            "text": "{p =|p equivale a} probabilidade de um nó honesto encontrar o próximo bloco"
+          },
+          {
+            "t": "def",
+            "text": "{q =|q equivale a} probabilidade do atacante encontrar o próximo bloco"
+          },
+          {
+            "t": "def",
+            "text": "{q_z =|q sub z equivale a} probabilidade do atacante alcançar partindo de z blocos atrás"
+          },
+          {
+            "t": "math",
+            "id": "qz",
+            "say": "q sub z equivale a um, se p é menor ou igual a q. Ou q sobre p, elevado a z, se p é maior que q."
+          },
+          {
+            "t": "p",
+            "text": "Dada a nossa suposição que {p > q,|p é maior que q,} a probabilidade cai exponencialmente à medida que o número de blocos que o atacante tem que apanhar aumenta. Com as probabilidades contra, se ele não faz uma arrancada de sorte logo no início, suas chances se tornam muito pequenas quanto mais ele fica para trás."
+          },
+          {
+            "t": "p",
+            "text": "Vamos agora considerar quanto tempo o destinatário de uma nova transação precisa esperar antes de ficar suficientemente certo que o remetente não pode mudar a transação. Assumimos que o remetente é um atacante que quer fazer o destinatário acreditar por um momento que ele pagou, porém altera o pagamento de volta para si mesmo passado um tempo. O receptor será alertado quando isso acontecer, mas o remetente espera que seja tarde demais."
+          },
+          {
+            "t": "p",
+            "text": "O receptor gera um novo par de chaves e dá a chave pública para o remetente, pouco antes de assinar. Isso previne que o remetente prepare uma cadeia de blocos antes do tempo, trabalhando de forma contínua até que tenha a sorte de chegar à frente e executar a operação naquele momento. Uma vez que a transação é enviada, o remetente desonesto começa a trabalhar em segredo em uma cadeia paralela contendo uma versão alternativa de sua transação."
+          },
+          {
+            "t": "p",
+            "text": "O destinatário espera até que a transação tenha sido adicionada a um bloco e z blocos sejam ligados depois. Ele não sabe a quantidade exata de progresso do atacante, mas assumindo que os blocos honestos tomaram o tempo médio esperado por bloco, o progresso potencial do atacante será uma distribuição de Poisson com valor esperado:"
+          },
+          {
+            "t": "math",
+            "id": "lambda",
+            "say": "lambda equivale a z vezes q sobre p."
+          },
+          {
+            "t": "p",
+            "text": "Para obter a probabilidade do atacante ainda poder alcançar agora, multiplicamos a densidade de Poisson para cada quantidade de progresso que ele poderia ter feito pela probabilidade que ele pudesse alcançar a partir daquele ponto:"
+          },
+          {
+            "t": "math",
+            "id": "sum",
+            "say": "A soma, de k igual a zero até o infinito, de lambda elevado a k, vezes e elevado a menos lambda, sobre k fatorial, vezes q sobre p elevado a z menos k, se k for menor ou igual a z. Ou um, se k for maior que z."
+          },
+          {
+            "t": "p",
+            "text": "Rearranjando para evitar a soma da cauda infinita da distribuição..."
+          },
+          {
+            "t": "math",
+            "id": "rearr",
+            "say": "Um, menos a soma, de k igual a zero até z, de lambda elevado a k, vezes e elevado a menos lambda, sobre k fatorial, vezes um menos q sobre p, elevado a z menos k."
+          },
+          {
+            "t": "p",
+            "text": "Convertendo para código C..."
+          },
+          {
+            "t": "code",
+            "hold": 5
+          },
+          {
+            "t": "p",
+            "text": "Rodando alguns resultados, podemos ver a probabilidade cair exponencialmente com z."
+          },
+          {
+            "t": "results",
+            "hold": 5.5
+          },
+          {
+            "t": "p",
+            "text": "Resolvendo para P menor que {0,1%...|0,1 por cento.}"
+          },
+          {
+            "t": "ztable",
+            "head": "{P < 0.001|P menor que 0.001.}",
+            "rows": [
+              [
+                "{q=0.10|q igual a 0.10,}",
+                "{z=5|z igual a 5.}"
+              ],
+              [
+                "{q=0.15|q igual a 0.15,}",
+                "{z=8|z igual a 8.}"
+              ],
+              [
+                "{q=0.20|q igual a 0.20,}",
+                "{z=11|z igual a 11.}"
+              ],
+              [
+                "{q=0.25|q igual a 0.25,}",
+                "{z=15|z igual a 15.}"
+              ],
+              [
+                "{q=0.30|q igual a 0.30,}",
+                "{z=24|z igual a 24.}"
+              ],
+              [
+                "{q=0.35|q igual a 0.35,}",
+                "{z=41|z igual a 41.}"
+              ],
+              [
+                "{q=0.40|q igual a 0.40,}",
+                "{z=89|z igual a 89.}"
+              ],
+              [
+                "{q=0.45|q igual a 0.45,}",
+                "{z=340|z igual a 340.}"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "s12",
+        "num": "12",
+        "label": "Conclusão",
+        "scene": "conclusion",
+        "items": [
+          {
+            "t": "h",
+            "text": "{12.|Doze.} Conclusão"
+          },
+          {
+            "t": "p",
+            "text": "Propusemos um sistema de transações eletrônicas, sem depender de confiança. Começamos com o framework habitual de moedas feitas de assinaturas digitais, que fornece um forte controle de propriedade, mas é incompleto sem uma maneira de evitar o gasto duplo. Para resolver isso, propusemos uma rede peer-to-peer usando prova de trabalho para gravar um histórico público de transações que rapidamente se torna computacionalmente impraticável para um atacante para mudar se nós honestos controlarem a maioria do poder de CPU. A rede é robusta em sua simplicidade não estruturada. Os nós trabalham todos de uma vez, com pouca coordenação. Eles não precisam ser identificados, uma vez que as mensagens não são roteadas para qualquer lugar particular e só precisam ser apresentadas em regime de melhor esforço. Os nós podem sair e voltar a rede à vontade, aceitando a cadeia de prova de trabalho, como prova do que aconteceu enquanto eles estavam fora. Eles votam com seu poder de CPU, expressando a aceitação de blocos válidos, trabalhando em estendê-los e rejeitando blocos inválidos, recusando-se a trabalhar com eles. Todas as regras e incentivos necessários podem ser aplicados com este mecanismo de consenso."
+          }
+        ]
+      },
+      {
+        "id": "refs",
+        "label": "Referências",
+        "scene": null,
+        "items": [
+          {
+            "t": "refs",
+            "list": [
+              "W. Dai, \"b-money,\" http://www.weidai.com/bmoney.txt, 1998.",
+              "H. Massias, X.S. Avila, and J.-J. Quisquater, \"Design of a secure timestamping service with minimal trust requirements,\" In 20th Symposium on Information Theory in the Benelux, May 1999.",
+              "S. Haber, W.S. Stornetta, \"How to time-stamp a digital document,\" In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.",
+              "D. Bayer, S. Haber, W.S. Stornetta, \"Improving the efficiency and reliability of digital time-stamping,\" In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.",
+              "S. Haber, W.S. Stornetta, \"Secure names for bit-strings,\" In Proceedings of the 4th ACM Conference on Computer and Communications Security, pages 28-35, April 1997.",
+              "A. Back, \"Hashcash - a denial of service counter-measure,\" http://www.hashcash.org/papers/hashcash.pdf, 2002.",
+              "R.C. Merkle, \"Protocols for public key cryptosystems,\" In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, pages 122-133, April 1980.",
+              "W. Feller, \"An introduction to probability theory and its applications,\" 1957."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "ui": {
+    "labels": {
+      "ringText": "UM SISTEMA DE DINHEIRO ELETRÔNICO PEER-TO-PEER ✦ SATOSHI NAKAMOTO ✦ MMVIII ✦",
+      "releaseDate": "31 de outubro de 2008 · bitcoin.org",
+      "finInstitution": "Instituição\nfinanceira",
+      "sameCoinTwice": "a mesma moeda, duas vezes?",
+      "signed": "assinado",
+      "customer": "Cliente",
+      "merchant": "Comerciante",
+      "bank": "Banco",
+      "reversed": "revertido",
+      "fees": "taxas",
+      "tooSmall": "pequenas demais para valer a pena",
+      "prying": "Nome? Endereço?\nTelefone? ID?",
+      "fraud": "fraude,",
+      "pricedIn": "preço incluído",
+      "inPersonOk": "em pessoa: o dinheiro vivo simplesmente funciona",
+      "onlineTrusted": "online: uma parte confiável no meio",
+      "irrevEscrow": "irreversível para vendedores · custódia para compradores",
+      "distributedTs": "um servidor de timestamps distribuído",
+      "attackers": "atacantes",
+      "honestNodes": "nós honestos",
+      "transaction": "Transação",
+      "hash": "Hash",
+      "ownerPubKey": "Chave pública\ndo dono {n}",
+      "ownerSig": "Assinatura\ndo dono {n}",
+      "ownerPrivKey": "Chave privada\ndo dono {n}",
+      "verify": "Verificar",
+      "sign": "Assinar",
+      "signedAgainBy": "assinada de novo\npelo dono {n}",
+      "doubleSpend": "gasto duplo?",
+      "mint": "CASA DA MOEDA",
+      "bankCaps": "BANCO",
+      "oneCompany": "tudo depende de uma única empresa",
+      "timeAxis": "tempo",
+      "firstTx": "primeira",
+      "laterTx": "posterior",
+      "itemLabel": "Item",
+      "newspaper": "O TIMESTAMP DIÁRIO",
+      "notice": "AVISO · hash do bloco",
+      "existed": "EXISTIA",
+      "block": "Bloco",
+      "prevHash": "Hash anterior",
+      "nonce": "Nonce",
+      "nonceN": "Nonce {n}",
+      "hashLower": "hash",
+      "expectedTries": "tentativas esperadas",
+      "zero": "zero",
+      "zeros": "zeros",
+      "oneVote": "1 voto",
+      "onePerson": "uma pessoa",
+      "honestChain": "cadeia honesta",
+      "attackerChain": "cadeia do atacante",
+      "easy": "fácil",
+      "hard": "difícil",
+      "difficulty": "dificuldade",
+      "targetRate": "meta: cerca de 6 blocos por hora",
+      "tooFast": "rápido demais → mais zeros exigidos",
+      "editedHash": "editado → o hash já não começa com zeros",
+      "foundHash": "✓ encontrado: verificar custa um único hash",
+      "sendMissed": "me envie o que eu perdi",
+      "blockCreator": "criador do bloco",
+      "goldMiners": "garimpeiros gastam esforço…",
+      "btcEnergy": "…Bitcoin gasta tempo de CPU e eletricidade",
+      "txIn": "entrada",
+      "txOut": "saída",
+      "feeFlow": "entrada − saída = 0.02 de taxa → o criador do bloco",
+      "cap21": "teto de 21.000.000",
+      "halving": "moedas em circulação · metade a cada 210.000 blocos",
+      "nowBlock": "agora · bloco {h} · {m}M mineradas",
+      "newCoin": "moeda nova → criador",
+      "defraud": "defraudar pessoas",
+      "mintNew": "gerar moedas novas",
+      "yourTx": "sua transação",
+      "blockPlus": "bloco +{n}",
+      "blockHeaderHash": "Cabeçalho do Bloco (Hash do Bloco)",
+      "rootHash": "Hash Raiz",
+      "blockHeader": "Cabeçalho do Bloco",
+      "approx80": "≈ 80 bytes",
+      "perYear": "bytes · por hora · por dia · por ano",
+      "ram2gb": "2 GB de RAM (2008)",
+      "oneYearHeaders": "↑ um ano de cabeçalhos",
+      "moore": "+1,2 GB por ano (Lei de Moore)",
+      "merkleRoot": "Raiz Merkle",
+      "lightClient": "cliente leve",
+      "fullNode": "nó completo",
+      "everyBlock": "cada bloco, cada transação",
+      "headersOnly": "somente cabeçalhos de bloco · 80 bytes cada",
+      "attackerMoreCpu": "cadeia do atacante, mais poder de CPU",
+      "alertInvalid": "alerta: bloco inválido",
+      "businessesNode": "empresas: nó próprio",
+      "everyCent": "uma transação para cada centavo?",
+      "payee": "beneficiário",
+      "payment": "pagamento",
+      "changeBack": "troco, de volta ao remetente",
+      "fanoutOk": "a difusão está OK: sem necessidade de histórico completo",
+      "identities": "Identidades",
+      "transactions": "Transações",
+      "trustedThird": "Terceiro\nconfiável",
+      "counterparty": "Contraparte",
+      "publicStr": "Público",
+      "tradPrivacy": "Modelo de Privacidade Tradicional",
+      "newPrivacy": "Novo Modelo de Privacidade",
+      "nowPublic": "agora deve ser público…",
+      "keyN": "chave {n}",
+      "sameOwner": "mesmo dono",
+      "revealed": "revelado!",
+      "noCreate": "criar valor do nada",
+      "noSteal": "levar dinheiro que nunca foi seu",
+      "onlyTakeBack": "apenas: recuperar o próprio pagamento",
+      "honestLead": "vantagem honesta",
+      "blocksAxis": "blocos →",
+      "attackerBehind": "atacante: z blocos atrás",
+      "walkLegend": "+1 bloco honesto (p)   −1 bloco do atacante (q)",
+      "defP": "probabilidade de um nó honesto encontrar o próximo bloco",
+      "defQ": "probabilidade de o atacante encontrar o próximo bloco",
+      "defQz": "probabilidade de o atacante algum dia alcançar partindo de z blocos atrás",
+      "ifPLEQ": "se p ≤ q",
+      "ifPGT": "se p > q",
+      "zBehindAxis": "z (blocos atrás) →",
+      "recipient": "destinatário",
+      "sender": "remetente",
+      "freshKey": "chave nova",
+      "secretChain": "cadeia paralela secreta: a transação alternativa dele",
+      "finiteSum": "soma finita: apenas k = 0 … z",
+      "attackerProb": "probabilidade de sucesso do atacante",
+      "blocksWait": "blocos a esperar para P < 0,1%",
+      "trustedThirdCaps": "TERCEIRO CONFIÁVEL",
+      "twice": "duas vezes?",
+      "consensus": "CONSENSO",
+      "byCpu": "pelo poder de CPU"
+    },
+    "chrome": {
+      "docTitle": "Bitcoin: Um Sistema de Dinheiro Eletrônico Peer-to-Peer · narrado",
+      "kick": "Uma leitura narrada · Satoshi Nakamoto · 2008",
+      "begin": "Iniciar",
+      "replay": "Repetir",
+      "loading": "Carregando narração…",
+      "narrationMissing": "A narração para este idioma ainda não está pronta — escolha outro idioma no menu de configurações.",
+      "narratedBy": "Narrado por {voice} · {minutes} min · {hint}",
+      "clickWord": "clique em qualquer palavra para ir até ela",
+      "blockHeight": "Altura do bloco",
+      "price": "Preço do Bitcoin",
+      "btcusd": "BTC/USD",
+      "connecting": "conectando…",
+      "unavailable": "indisponível",
+      "justNow": "agora mesmo",
+      "minAgo": "há {n} min",
+      "playAria": "Reproduzir / pausar",
+      "ovTitle": "Pôster completo (O)",
+      "ovAria": "Alternar visão do pôster completo",
+      "voiceTitle": "Idioma e voz",
+      "voiceAria": "Idioma e voz",
+      "findTitle": "Buscar no documento (Ctrl+F)",
+      "findAria": "Buscar no documento",
+      "findPlaceholder": "Buscar no documento…",
+      "findCloseAria": "Fechar busca",
+      "findInputAria": "Buscar no documento",
+      "findPrevAria": "Ocorrência anterior",
+      "findNextAria": "Próxima ocorrência",
+      "languageHeading": "Idioma",
+      "narratorHeading": "Narrador",
+      "confirmationsN": "{n} confirmações",
+      "fsTitle": "Tela cheia (F)",
+      "fsAria": "Tela cheia",
+      "theme": "Tema",
+      "themeAuto": "Auto",
+      "themeLight": "Claro",
+      "themeDark": "Escuro",
+      "readerMode": "Leitor",
+      "posterMode": "Pôster",
+      "about": "Sobre",
+      "aboutClose": "Fechar"
+    },
+    "caps": {
+      "coin": [
+        "Bitcoin",
+        "Um sistema de dinheiro eletrônico peer-to-peer",
+        "Satoshi Nakamoto · 31 de outubro de 2008"
+      ],
+      "p2p": [
+        "Pagamentos online passam por uma instituição financeira",
+        "Peer-to-peer: direto de uma parte para outra",
+        "Assinaturas digitais provam quem está pagando…",
+        "…mas quem impede que a mesma moeda seja gasta duas vezes?",
+        "A solução: uma rede peer-to-peer",
+        "As transações recebem hash em uma cadeia contínua",
+        "O histórico não muda sem refazer a prova de trabalho",
+        "A cadeia mais longa é o registro do que aconteceu",
+        "…e prova de que veio do maior poder de CPU",
+        "Uma maioria honesta supera os atacantes",
+        "As mensagens são espalhadas num regime de melhor esforço",
+        "Os nós saem e voltam à vontade…",
+        "…aceitando a cadeia mais longa como prova do que perderam"
+      ],
+      "trust": [
+        "O comércio online depende de terceiros confiáveis",
+        "Pagamentos podem sempre ser revertidos: bancos mediam disputas",
+        "A mediação adiciona custos e mata pequenos pagamentos casuais",
+        "Comerciantes precisam desconfiar de seus clientes",
+        "Uma certa percentagem de fraude é aceita",
+        "Em pessoa, dinheiro físico não precisa de intermediário",
+        "Online não há dinheiro vivo: apenas uma parte confiável",
+        "Necessário: prova criptográfica em vez de confiança",
+        "Pagamentos irreversíveis protegem vendedores; custódia protege compradores",
+        "Um servidor de timestamps peer-to-peer prova a ordem das transações",
+        "Seguro enquanto nós honestos controlarem mais poder de CPU"
+      ],
+      "txchain": [
+        "Uma moeda eletrônica é uma cadeia de assinaturas digitais",
+        "Cada dono assina um hash da transação anterior e da chave pública do próximo dono",
+        "…e adiciona ao fim da moeda",
+        "O beneficiário verifica cada assinatura da cadeia",
+        "…mas não consegue saber se um dono assinou a moeda duas vezes",
+        "Solução comum: uma casa da moeda central verifica cada transação",
+        "Aí o sistema todo depende de quem administra a casa da moeda",
+        "…exatamente como um banco",
+        "Só a transação mais antiga vale",
+        "Logo cada transação precisa ser anunciada publicamente",
+        "Todos concordam com um único histórico da ordem",
+        "Prova de que a maioria dos nós a viu primeiro"
+      ],
+      "timestamp": [
+        "Um servidor de timestamps começa com um bloco de itens",
+        "…gera o hash do bloco inteiro…",
+        "…e publica o hash amplamente, como num jornal",
+        "Prova de que os dados existiam naquele momento",
+        "Cada timestamp inclui o anterior em seu hash…",
+        "…formando uma cadeia",
+        "Cada novo timestamp reforça os anteriores"
+      ],
+      "pow": [
+        "Prova de trabalho, emprestada do Hashcash de Adam Back",
+        "Encontrar um valor cujo hash SHA-256 comece com bits zero",
+        "Cada zero extra multiplica o trabalho por dezesseis…",
+        "…e qualquer um verifica com um único hash",
+        "Incremente o nonce até o hash ter zeros suficientes",
+        "Mude o bloco e sua prova de trabalho quebra",
+        "…e todo bloco depois dele precisa ser refeito",
+        "Um-IP-um-voto? Qualquer um pode acumular muitos IPs",
+        "Prova de trabalho é um-CPU-um-voto",
+        "A cadeia mais longa carrega o maior trabalho: a maioria",
+        "O atacante precisa refazer blocos, depois alcançar e ultrapassar",
+        "A dificuldade segue uma média móvel: cerca de 6 blocos por hora",
+        "Blocos rápidos demais? A dificuldade sobe"
+      ],
+      "network": [
+        "A rede: nós, frouxamente conectados",
+        "1 · Novas transações são transmitidas a todos os nós",
+        "2 · Cada nó coleta novas transações em um bloco",
+        "3 · Cada nó trabalha numa prova de trabalho difícil",
+        "4 · O primeiro a encontrar transmite seu bloco",
+        "5 · Os nós o aceitam só se toda transação for válida",
+        "6 · …e constroem o próximo bloco sobre ele",
+        "A cadeia mais longa é sempre a correta",
+        "Dois blocos ao mesmo tempo: a rede se divide",
+        "Cada lado guarda o outro ramo, por precaução",
+        "O próximo bloco desfaz o empate; todos trocam de ramo",
+        "Transmissões não precisam chegar a todos os nós",
+        "Perdeu um bloco? Peça quando o próximo chegar"
+      ],
+      "incentive": [
+        "Por convenção, a primeira transação de um bloco é especial",
+        "Ela cria uma moeda nova para o criador do bloco",
+        "Um incentivo para sustentar a rede, e uma forma de emitir moedas",
+        "Como garimpeiros adicionando ouro, gastando tempo de CPU e eletricidade",
+        "Taxas: o que as entradas excederem das saídas vai ao criador do bloco",
+        "Oferta fixa, depois apenas taxas: livre de inflação",
+        "O incentivo também encoraja os nós a permanecerem honestos",
+        "Seguir as regras paga melhor que miná-las"
+      ],
+      "merkle": [
+        "Quando uma transação é enterrada sob blocos suficientes…",
+        "…as transações gastas antes dela podem ser descartadas",
+        "As transações recebem hash em pares, subindo por uma árvore Merkle",
+        "Só a raiz entra no hash do bloco",
+        "Blocos antigos encolhem podando galhos",
+        "Hashes internos não precisam ser armazenados",
+        "Um cabeçalho de bloco sozinho tem cerca de 80 bytes",
+        "Um a cada 10 minutos são só 4,2 MB por ano",
+        "Uma fatia perto de 2 GB de RAM: os cabeçalhos cabem na memória",
+        {
+          "fig": "Transações com hash em uma árvore Merkle"
+        }
+      ],
+      "spv": [
+        "Pagamentos podem ser verificados sem rodar um nó completo",
+        "Guarde apenas os cabeçalhos de bloco da cadeia mais longa",
+        "Pergunte aos nós da rede até se convencer de que é a mais longa",
+        "Busque o ramo Merkle ligando a transação ao seu bloco",
+        "Ele não consegue verificar a transação por si…",
+        "…mas cada bloco adicionado depois a confirma",
+        "Um atacante que subjugar a rede pode enganá-la",
+        "Defesa: alertas dos nós disparam um download completo",
+        "Empresas ocupadas ainda rodam seus próprios nós",
+        {
+          "fig": "A cadeia de prova de trabalho mais longa"
+        }
+      ],
+      "inout": [
+        "Administrar moedas uma a uma seria pesado",
+        "Por isso as transações têm múltiplas entradas e saídas",
+        "Ou uma única entrada de uma transação anterior maior…",
+        "…ou várias entradas combinando valores menores",
+        "No máximo duas saídas: o pagamento e o troco",
+        "A difusão não é problema: histórico completo desnecessário"
+      ],
+      "privacy": [
+        "Bancos garantem privacidade limitando quem vê a informação",
+        "Bitcoin precisa anunciar cada transação publicamente…",
+        "…então o muro se move: chaves públicas permanecem anônimas",
+        "O público vê valores, mas não quem",
+        "Como a \"fita\" de uma bolsa de valores: horários e tamanhos, sem nomes",
+        "Use um par de chaves novo a cada transação",
+        "Transações multi-entrada revelam um mesmo dono",
+        "Revelar um dono pode expor as transações ligadas"
+      ],
+      "calc": [
+        "Um atacante tenta construir uma cadeia alternativa mais rápido que a honesta",
+        "Mesmo vencendo, ele não pode criar valor nem roubar…",
+        "…só tentar recuperar dinheiro que gastou recentemente",
+        "A corrida é um passeio aleatório binomial: +1 ou −1 por bloco",
+        "Alcançar de trás é o problema da Ruína do Jogador",
+        "p: um nó honesto encontra o próximo bloco · q: o atacante",
+        "Se p > q, as chances do atacante são (q/p)ᶻ",
+        "As chances caem exponencialmente a cada bloco de atraso",
+        "Quanto tempo o destinatário deve esperar antes de confiar num pagamento?",
+        "Um par de chaves novo, pouco antes de assinar, evita cadeias prontas",
+        "O remetente desonesto minera em segredo uma cadeia paralela",
+        "O destinatário espera z blocos por cima",
+        "O progresso do atacante segue uma distribuição de Poisson",
+        "Cada resultado é ponderado pela sua probabilidade de alcance",
+        "Rearranjada para evitar somar a cauda infinita",
+        "Convertido para código C…",
+        "Resultados: a probabilidade cai exponencialmente",
+        "Quantos blocos esperar para menos de 0,1% de chance"
+      ],
+      "conclusion": [
+        "Transações eletrônicas sem depender de confiança",
+        "Moedas feitas de assinaturas digitais dão forte controle de posse…",
+        "…mas precisam de uma forma de evitar o gasto duplo",
+        "Uma rede peer-to-peer registra um histórico público com prova de trabalho",
+        "Logo se torna impraticável para um atacante alterar",
+        "Robusta em sua simplicidade não estruturada",
+        "Nós não precisam de identidade; mensagens não precisam de rota",
+        "Nós saem e voltam à vontade, e aceitam a cadeia mais longa",
+        "Votam com poder de CPU: estendem blocos válidos, ignoram inválidos",
+        "Regras e incentivos, aplicados por consenso"
+      ]
+    },
+    "cues": {
+      "PEER-TO-PEER": "peer-to-peer",
+      "Satoshi": "Satoshi",
+      "directly from one party": "diretamente de uma parte",
+      "Digital signatures provide": "As assinaturas digitais fornecem",
+      "the main benefits are lost": "os principais benefícios são perdidos",
+      "We propose a solution": "Nós propomos uma solução",
+      "timestamps transactions by hashing": "insere data e hora nas transações",
+      "cannot be changed without redoing": "não pode ser alterado sem refazer",
+      "The longest chain not only": "A cadeia mais longa não só",
+      "largest pool of CPU power": "do maior pool de CPUs",
+      "generate the longest chain and outpace": "gerar a cadeia mais longa",
+      "Messages are broadcast": "As mensagens são espalhadas",
+      "nodes can leave and rejoin": "nós podem sair e regressar",
+      "accepting the longest": "aceitando a cadeia mais longa",
+      "Completely non-reversible transactions": "Transações completamente não-reversíveis",
+      "The cost of mediation": "O custo da mediação",
+      "Merchants must be wary": "Comerciantes devem ser cautelosos",
+      "A certain percentage of fraud": "Uma certa percentagem de fraude",
+      "avoided in person": "evitados presencialmente",
+      "no mechanism exists": "não existe nenhum mecanismo",
+      "What is needed": "O que é necessário",
+      "computationally impractical to reverse": "computacionalmente impraticáveis de reverter",
+      "distributed timestamp server": "servidor de horas distribuído",
+      "The system is secure": "O sistema é seguro",
+      "digitally signing a hash": "por uma assinatura digital de hash",
+      "adding these to the end": "adicionando-os ao fim",
+      "A payee can verify": "Um beneficiário pode verificar",
+      "trusted central authority, or mint": "autoridade central confiável, ou casa da moeda",
+      "the fate of the entire money system": "o destino de todo o sistema monetário",
+      "just like a bank": "assim como um banco",
+      "We need a way": "Nós precisamos de uma maneira",
+      "publicly announced": "anunciadas publicamente",
+      "agree on a single history": "concordem em um histórico único",
+      "the majority of nodes agreed": "a maioria dos nós concorda",
+      "taking a hash of a block": "gerando um hash de um bloco",
+      "widely publishing the hash": "publicando amplamente o hash",
+      "The timestamp proves": "O timestamp prova",
+      "Each timestamp includes the previous": "Cada timestamp inclui o anterior",
+      "forming a chain": "formando uma cadeia",
+      "reinforcing the ones before": "reforçando os que vieram antes",
+      "scanning for a value": "a procura por um valor",
+      "The average work required": "A média do trabalho requerida",
+      "verified by executing a single hash": "execução de um único hash",
+      "incrementing a nonce": "incrementando um nonce",
+      "the block cannot be changed": "o bloco não pode ser alterado",
+      "redoing all the blocks after it": "refazer todos os blocos após ele",
+      "one-IP-address-one-vote": "um-endereço-IP-um-voto",
+      "Proof-of-work is essentially": "Prova de trabalho é, essencialmente",
+      "The majority decision is represented": "A decisão da maioria é representada",
+      "To modify a past block": "Para modificar um bloco passado",
+      "To compensate for increasing hardware": "Para compensar o aumento da velocidade de hardware",
+      "New transactions are broadcast": "Novas transações são transmitidas",
+      "Each node collects new transactions": "Cada nó coleta novas transações",
+      "Each node works on finding": "Cada nó trabalha para encontrar",
+      "When a node finds": "Quando um nó encontra",
+      "Nodes accept the block only": "Os nós aceitam o bloco somente",
+      "Nodes express their acceptance": "Os nós expressam sua aceitação",
+      "Nodes always consider the longest": "Os nós sempre consideram a cadeia mais longa",
+      "If two nodes broadcast": "Se dois nós transmitirem",
+      "save the other branch": "salvam o outro ramo",
+      "The tie will be broken": "O empate será quebrado",
+      "New transaction broadcasts do not": "Novas transmissões de transação",
+      "If a node does not receive": "Se um nó não recebe um bloco",
+      "a special transaction that starts": "operação especial que inicia",
+      "This adds an incentive": "Isso é um incentivo",
+      "analogous to gold miners": "análogo a garimpeiros",
+      "The incentive can also be funded": "O incentivo também pode ser financiado",
+      "Once a predetermined number": "Uma vez que um número predeterminado",
+      "The incentive may help": "O incentivo deve encorajar",
+      "He ought to find it more profitable": "mais rentável jogar pelas regras",
+      "the spent transactions before it": "as transações gastas anteriormente",
+      "transactions are hashed in a Merkle": "feito em uma árvore Merkle",
+      "with only the root included": "apenas a raiz é incluída",
+      "Old blocks can then be compacted": "Blocos velhos podem então ser compactados",
+      "The interior hashes do not": "Os hashes internos não precisam",
+      "A block header with no transactions": "Um cabeçalho do bloco com nenhuma transação",
+      "If we suppose blocks are generated": "Se supormos que blocos são gerados",
+      "With computer systems typically": "Com computadores normalmente",
+      "keep a copy of the block headers": "manter uma cópia dos cabeçalhos do bloco",
+      "querying network nodes": "consultando os nós da rede",
+      "obtain the Merkle branch": "obteve o ramo Merkle",
+      "blocks added after it": "blocos adicionados depois",
+      "more vulnerable if the network is overpowered": "mais vulnerável se a rede for subjugada",
+      "accept alerts from network nodes": "aceitar alertas dos nós da rede",
+      "Businesses that receive frequent": "As empresas que recebem pagamentos frequentes",
+      "To allow value to be split": "Para permitir que o valor seja dividido",
+      "a single input from a larger": "uma única entrada de uma transação anterior maior",
+      "multiple inputs combining smaller": "várias entradas combinando quantidades menores",
+      "at most two outputs": "no máximo duas saídas",
+      "It should be noted that fan-out": "Pode-se notar que a difusão",
+      "The necessity to announce": "A necessidade de anunciar",
+      "by keeping public keys anonymous": "mantendo chaves públicas anônimas",
+      "The public can see": "O público pode ver",
+      "stock exchanges": "bolsas de valores",
+      "a new key pair should be used": "um novo par de chaves deve ser utilizado",
+      "Some linking is still unavoidable": "Alguns links ainda são inevitáveis",
+      "The risk is that if the owner": "O risco é que, se o proprietário",
+      "it does not throw the system open": "não deixa o sistema aberto",
+      "An attacker can only try": "Um invasor só pode tentar",
+      "Binomial Random Walk": "Caminhada Aleatória Binomial",
+      "The probability of an attacker catching up": "A probabilidade de um atacante recuperar-se",
+      "probability an honest node finds": "probabilidade de um nó honesto encontrar",
+      "Given our assumption": "Dada a nossa suposição",
+      "We now consider how long": "Vamos agora considerar quanto tempo",
+      "The receiver generates a new key pair": "O receptor gera um novo par de chaves",
+      "Once the transaction is sent": "Uma vez que a transação é enviada",
+      "The recipient waits until": "O destinatário espera até que",
+      "Poisson distribution": "distribuição de Poisson",
+      "we multiply the Poisson density": "multiplicamos a densidade de Poisson",
+      "Rearranging to avoid": "Rearranjando para evitar",
+      "Converting to C code": "Convertendo para código C",
+      "Running some results": "Rodando alguns resultados",
+      "Solving for P less than": "Resolvendo para P menor que",
+      "coins made from digital signatures": "moedas feitas de assinaturas digitais",
+      "incomplete without a way": "incompleto sem uma maneira",
+      "we proposed a peer-to-peer network": "propusemos uma rede peer-to-peer",
+      "quickly becomes computationally impractical": "rapidamente se torna computacionalmente impraticável",
+      "The network is robust": "A rede é robusta",
+      "They do not need to be identified": "Eles não precisam ser identificados",
+      "Nodes can leave and rejoin": "Os nós podem sair e voltar",
+      "They vote with their CPU power": "Eles votam com seu poder de CPU",
+      "Any needed rules and incentives": "Todas as regras e incentivos necessários",
+      "payee can't verify that one": "beneficiário não poder confirmar",
+      "If they're generated too fast": "Se eles são gerados muito rápido",
+      "He can't check the transaction": "Não se pode verificar a transação por si"
+    }
+  }
+}

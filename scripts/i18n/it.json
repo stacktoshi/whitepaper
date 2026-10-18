@@ -1,0 +1,968 @@
+{
+  "paper": {
+    "sections": [
+      {
+        "id": "title",
+        "label": "Copertina",
+        "scene": "coin",
+        "items": [
+          {
+            "t": "title",
+            "lines": [
+              "{Bitcoin|Bitcoin:}",
+              "{un sistema di|un sistema di}",
+              "{moneta elettronica|moneta elettronica}",
+              "{peer-to-peer|peer to peer.}"
+            ]
+          },
+          {
+            "t": "byline",
+            "text": "Satoshi {Nakamoto|Nakamoto.} {satoshin@gmx.com|} {www.bitcoin.org|}"
+          }
+        ]
+      },
+      {
+        "id": "abstract",
+        "label": "Sommario",
+        "scene": "p2p",
+        "items": [
+          {
+            "t": "abs1",
+            "text": "{Sommario.|Sommario.} Una versione puramente peer-to-peer di denaro elettronico permetterebbe di spedire direttamente pagamenti online da un'entità ad un'altra senza passare tramite un'istituzione finanziaria. Le firme digitali offrono una soluzione parziale al problema, ma i benefici principali sono persi se una terza persona di fiducia è ancora richiesta per prevenire la doppia spesa."
+          },
+          {
+            "t": "abs2",
+            "text": "Proponiamo una soluzione al problema della doppia spesa mediante l'utilizzo di una rete peer-to-peer. La rete stampa un marcatore temporale sulle transazioni facendo hashing sulle stesse e incatenandole in una catena di proof-of-work basata sugli hash, formando una registrazione che non può essere modificata senza rifare la proof-of-work. La catena più lunga non solo serve come prova della sequenza di eventi ai quali si è assistito, ma anche come prova che essa proviene dal gruppo più grande di potenza CPU. Fintanto che la maggior parte della potenza CPU è controllata da nodi che non cooperano per attaccare la rete, questi genereranno la catena più lunga e supereranno gli utenti malintenzionati. La rete stessa richiede una struttura minimale. I messaggi sono trasmessi su base best effort, e i nodi possono lasciare e ricongiungersi con la rete a loro piacimento, accettando la catena proof-of-work più lunga come prova di quello che è avvenuto mentre non erano presenti."
+          }
+        ]
+      },
+      {
+        "id": "s1",
+        "num": "1",
+        "label": "Introduzione",
+        "scene": "trust",
+        "items": [
+          {
+            "t": "h",
+            "text": "{1.|Uno.} Introduzione"
+          },
+          {
+            "t": "p",
+            "text": "Il commercio su Internet fa affidamento quasi esclusivamente sulle istituzioni finanziarie che servono come terze parti di fiducia per elaborare i pagamenti elettronici. Nonostante il sistema funzioni abbastanza bene per la maggior parte delle transazioni, esso soffre ancora delle debolezze intrinseche di un modello basato sulla fiducia. Transazioni totalmente irreversibili non sono realmente possibili, dal momento che le istituzioni finanziarie non possono evitare le dispute di mediazione. Il costo dell'intermediazione aumenta i costi di transazione, limitando la dimensione minima delle transazioni praticabili ed escludendo la possibilità di piccole transazioni occasionali, e c'è un costo più ampio collegato alla perdita della capacità di effettuare pagamenti irreversibili per quei servizi che sono anch'essi irreversibili. Con la possibilità di reversibilità, si diffonde la necessità di fiducia. I commercianti devono diffidare dei loro clienti, tormentandoli con maggiori richieste di informazioni rispetto a quanto non sarebbe altrimenti necessario. Una certa percentuale di frodi è accettata come inevitabile. Tali costi e le incertezze di pagamento possono essere evitati utilizzando moneta fisica di persona, ma non esiste alcun meccanismo per effettuare pagamenti attraverso un mezzo di comunicazione senza un'entità di fiducia."
+          },
+          {
+            "t": "p",
+            "text": "È dunque necessario un sistema di pagamento elettronico basato su prova crittografica invece che sulla fiducia, che consenta a due controparti qualsiasi negoziare direttamente tra loro senza la necessità di una terza parte di fiducia. Le transazioni che sono computazionalmente impraticabili da invertire proteggerebbero i venditori dalle frodi, e meccanismi consuetudinari di deposito di garanzia potrebbero essere facilmente implementati per proteggere gli acquirenti. In questo lavoro, proponiamo una soluzione al problema della doppia spesa utilizzando un server di marcatura temporale distribuito peer-to-peer per generare la prova computazionale dell'ordine cronologico delle transazioni. Il sistema è sicuro fintanto che i nodi onesti controllano collettivamente più potenza CPU rispetto a qualsiasi gruppo collaborativo di nodi attaccanti."
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "num": "2",
+        "label": "Le Transazioni",
+        "scene": "txchain",
+        "items": [
+          {
+            "t": "h",
+            "text": "{2.|Due.} Le Transazioni"
+          },
+          {
+            "t": "p",
+            "text": "Definiamo come valuta elettronica una catena di firme digitali. Ciascun proprietario trasferisce valuta al successivo firmando digitalmente un hash della transazione precedente e la chiave pubblica del proprietario successivo e aggiungendo le stesse alla fine della valuta. Colui che riceve un pagamento può verificare le firme digitali per validare la catena di proprietà."
+          },
+          {
+            "t": "fig",
+            "scene": "txchain",
+            "h": 250
+          },
+          {
+            "t": "p",
+            "text": "Il problema, naturalmente, è che il beneficiario non può verificare che ciascuno dei proprietari precedenti non abbia speso due volte lo stesso ammontare di valuta. Una soluzione comune è quella di introdurre un'autorità fiduciaria centrale, o zecca, che controlli tutte le transazioni. Dopo ogni transazione, la moneta deve essere restituita alla zecca, la quale emette una nuova moneta, e si crede che solo le monete emesse direttamente dalla zecca non siano state spese due volte. Il problema di questa soluzione è che il destino di tutto il sistema monetario dipende dalla società che gestisce la zecca, e ogni transazione deve passare attraverso di essa, proprio come una banca."
+          },
+          {
+            "t": "p",
+            "text": "Abbiamo bisogno di un modo per far sì che il beneficiario sappia che i precedenti proprietari non abbiano firmato alcuna transazione precedente a quella che lo riguarda. Per i nostri scopi, la prima operazione è quella che conta, e non ci importa nulla dei tentativi successivi di doppia spesa. L'unico modo per confermare l'assenza di una transazione è di essere a conoscenza di tutte le transazioni. Nel modello basato sulla zecca, questa era a conoscenza di tutte le transazioni e decideva quale era avvenuta per prima. Per fare lo stesso ma senza un'autorità di fiducia, le transazioni devono essere annunciate pubblicamente {[1]|}, e abbiamo bisogno di un sistema attraverso il quale i partecipanti concordino su un singolo passato dell'ordine in cui esse sono state ricevute. Il beneficiario ha bisogno di una prova che, al momento di ogni transazione, la maggior parte dei nodi è d'accordo che essa è la prima ricevuta."
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "num": "3",
+        "label": "Server di marcatura temporale",
+        "scene": "timestamp",
+        "items": [
+          {
+            "t": "h",
+            "text": "{3.|Tre.} Server di marcatura temporale"
+          },
+          {
+            "t": "p",
+            "text": "La soluzione proposta parte da un server di marcatura temporale. Un server di marcatura temporale agisce facendo hash di un blocco di oggetti in modo che siano marcati temporalmente e poi pubblica l'hash, ad esempio su un quotidiano o in un post su Usenet {[2-5]|}. La marcatura temporale prova ovviamente che i dati devono essere esistiti in quella determinata data, visto che sono finiti nell'hash. Ogni marcatura temporale comprende quella precedente nel suo hash, formando una vera e propria catena, e ogni marcatura temporale ovviamente rafforza quelle precedenti."
+          },
+          {
+            "t": "fig",
+            "scene": "timestamp",
+            "h": 170
+          }
+        ]
+      },
+      {
+        "id": "s4",
+        "num": "4",
+        "label": "Proof-of-Work",
+        "scene": "pow",
+        "items": [
+          {
+            "t": "h",
+            "text": "{4.|Quattro.} Proof-of-Work"
+          },
+          {
+            "t": "p",
+            "text": "Per implementare un server di marcatura temporale distribuito su base peer-to-peer, avremo bisogno di usare un sistema simile a quello di Hashcash di Adam Back {[6]|}, piuttosto che basarci sui messaggi di quotidiani o Usenet. La proof-of-work comporta la ricerca di un valore che, una volta sottoposto ad hash (ad esempio con {SHA-256,|S H A due cinque sei,}), restituisca un hash che inizia con un numero di zero bit. Il lavoro medio richiesto è esponenzialmente proporzionale al numero di zero bit richiesti e può essere verificato eseguendo un unico hash."
+          },
+          {
+            "t": "p",
+            "text": "Per la nostra rete di marcatura temporale, implementiamo la proof-of-work incrementando un nonce nel blocco fino a quando è trovato un valore che dà all'hash del blocco gli zero bits necessari. Una volta che l'impegno della CPU è stato speso per soddisfare la proof-of-work, il blocco non può essere modificato senza rifare il lavoro. Poiché i blocchi successivi sono incatenati dopo di esso, il lavoro necessario per cambiare il blocco dovrebbe includere il rifacimento di tutti i blocchi successivi."
+          },
+          {
+            "t": "fig",
+            "scene": "pow",
+            "h": 170
+          },
+          {
+            "t": "p",
+            "text": "La proof-of-work risolve anche il problema della determinazione della rappresentatività in un sistema di decisioni prese a maggioranza. Se la maggioranza fosse basata sul principio “un indirizzo IP-un-voto”, potrebbe essere sovvertita da chiunque fosse in grado di allocare molti {IPs.|i pes.} La proof-of-work invece segue essenzialmente il principio “una CPU-un voto”. La decisione di maggioranza è rappresentata dalla catena più lunga, su cui è stato speso il massimo sforzo di proof-of-work. Se la maggioranza di potenza della CPU è controllata da nodi onesti, la catena onesta crescerà più velocemente e supererà eventuali catene concorrenti. Per modificare un blocco passato, un utente malintenzionato dovrebbe rifare la proof-of-work del blocco e di tutti i blocchi successivi ad esso e poi raggiungere e superare il lavoro dei nodi onesti. Mostreremo in seguito che la probabilità che un utente malintenzionato raggiunga il lavoro dei nodi onesti diminuisce in modo esponenziale a mano a mano che vengono aggiunti blocchi successivi."
+          },
+          {
+            "t": "p",
+            "text": "Per compensare l'aumento della velocità dell'hardware e il variare dell'interesse dei nodi operativi col tempo, la difficoltà della proof-of-work è determinata da una media mobile che ha come obiettivo la creazione di un numero medio di blocchi ogni ora. Se i blocchi vengono generati troppo velocemente, la difficoltà aumenta."
+          }
+        ]
+      },
+      {
+        "id": "s5",
+        "num": "5",
+        "label": "La Rete",
+        "scene": "network",
+        "items": [
+          {
+            "t": "h",
+            "text": "{5.|Cinque.} La Rete"
+          },
+          {
+            "t": "p",
+            "text": "I passi per far girare la rete sono i seguenti:"
+          },
+          {
+            "t": "li",
+            "text": "{1)|Uno.} Le nuove transazioni sono trasmesse a tutti i nodi."
+          },
+          {
+            "t": "li",
+            "text": "{2)|Due.} Ogni nodo immagazzina le nuove transazioni in un blocco."
+          },
+          {
+            "t": "li",
+            "text": "{3)|Tre.} Ogni nodo lavora per trovare una proof-of-work difficile per il suo blocco."
+          },
+          {
+            "t": "li",
+            "text": "{4)|Quattro.} Quando un nodo trova un proof-of-work, trasmette il blocco a tutti gli altri nodi."
+          },
+          {
+            "t": "li",
+            "text": "{5)|Cinque.} I nodi accettano il blocco solo se tutte le transazioni in esso sono valide e non sono già state spese."
+          },
+          {
+            "t": "li",
+            "text": "{6)|Sei.} I nodi esprimono l'accettazione del blocco mediante il tentativo di creare il prossimo blocco nella catena, utilizzando l'hash del blocco accettato come hash precedente."
+          },
+          {
+            "t": "p",
+            "text": "I nodi considerano sempre come corretta la catena più lunga e continueranno a lavorare per allungarla. Se due nodi trasmettono diverse versioni del blocco successivo contemporaneamente, alcuni nodi possono ricevere l'una o l'altra prima. In tal caso, questi lavorano sul primo che hanno ricevuto, ma salvano l'altra ramificazione nel caso diventi più lunga. Questo impasse sarà risolto quando la proof-of-work successiva viene trovata e una delle ramificazioni diventa più lunga; i nodi che stavano lavorando sull'altra ramificazione a quel punto si sposteranno su quella più lunga."
+          },
+          {
+            "t": "p",
+            "text": "Le trasmissioni delle nuove transazioni non devono necessariamente raggiungere tutti i nodi. Fintanto che raggiungono numerosi nodi, non ci vorrà molto affinché vengano inserite in un blocco. Le trasmissioni dei blocchi tollerano anche i messaggi troncati. Se un nodo non riceve un blocco, lo richiederà quando riceverà il blocco successivo e capirà di averne saltato uno."
+          }
+        ]
+      },
+      {
+        "id": "s6",
+        "num": "6",
+        "label": "L'Incentivo",
+        "scene": "incentive",
+        "items": [
+          {
+            "t": "h",
+            "text": "{6.|Sei.} L'Incentivo"
+          },
+          {
+            "t": "p",
+            "text": "Per convenzione, la prima transazione in un blocco è una transazione speciale che “conia” una nuova moneta di proprietà del creatore del blocco. Questo fornisce un incentivo ai nodi affinché sostengano la rete, e fornisce un modo per la distribuzione iniziale di monete in circolazione, dato che non vi è alcuna autorità centrale che possa emetterle. L'aggiunta costante di una data quantità di nuove monete è analoga al processo dei minatori d'oro, che spendono risorse per incrementare la quantità di oro in circolazione. Nel nostro caso, viene spesa potenza CPU e viene consumata energia elettrica."
+          },
+          {
+            "t": "p",
+            "text": "L'incentivo può essere anche finanziato con costi di transazione. Se il valore di uscita di una transazione è inferiore al suo valore di ingresso, la differenza è una tassa di transazione che viene aggiunta al valore di incentivazione del blocco contenente la transazione. Nel momento in cui sia entrato in circolazione un ammontare predeterminato di monete, l'incentivo può migrare interamente ai costi di transazione e essere completamente privo di effetti inflazionari."
+          },
+          {
+            "t": "p",
+            "text": "L'incentivo può contribuire ad incoraggiare i nodi a rimanere onesti. Se un utente malintenzionato fosse avidamente in grado di assemblare più potenza di CPU rispetto a tutti i nodi onesti, dovrebbe scegliere tra un utilizzo truffaldino (ritornando al mittente tutti i suoi pagamenti), o un utilizzo volto a coniare nuove monete. Dovrà necessariamente trovare più redditizio giocare secondo le regole, dato che tali regole lo favoriscono con più monete nuove di tutti gli altri messi insieme, piuttosto che minare la sicurezza del sistema e la validità della propria ricchezza."
+          }
+        ]
+      },
+      {
+        "id": "s7",
+        "num": "7",
+        "label": "Rivendicare Spazio sul Disco",
+        "scene": "merkle",
+        "items": [
+          {
+            "t": "h",
+            "text": "{7.|Sette.} Rivendicare Spazio sul Disco"
+          },
+          {
+            "t": "p",
+            "text": "Una volta che l'ultima transazione in una moneta è sepolta sotto un numero sufficiente di blocchi, le transazioni spese prima di essa possono essere tralasciate al fine di risparmiare spazio sul disco. Per facilitare ciò senza rompere l'hash del blocco, le transazioni vengono sottoposte ad hash in un albero di Merkle {[7][2][5],|,} la cui sola radice è inclusa nell'hash del blocco. I vecchi blocchi possono a quel punto essere compattati mediante la rimozione di ramificazioni dell'albero. Non c'è bisogno di immagazzinare in memoria gli hash interni."
+          },
+          {
+            "t": "fig",
+            "scene": "merkle",
+            "h": 300
+          },
+          {
+            "t": "p",
+            "text": "La grandezza dell'intestazione di un blocco senza transazioni dovrebbe essere di circa 80 bytes. Se supponiamo che i blocchi siano generati ogni 10 minuti, {80 bytes * 6 * 24 * 365 = 4.2MB|80 bytes, per 6, per 24, per 365, equivale a 4,2 megabyte} all'anno. Dato che nel 2008 sono in vendita computer con circa {2GB|2 gigabyte} di RAM, e la Legge di Moore predice una crescita di {1.2GB|1,2 gigabyte} per anno, lo spazio di archiviazione non dovrebbe rappresentare un problema anche se le intestazioni dei blocchi devono essere immagazzinate in memoria."
+          }
+        ]
+      },
+      {
+        "id": "s8",
+        "num": "8",
+        "label": "Verifica Semplificata dei Pagamenti",
+        "scene": "spv",
+        "items": [
+          {
+            "t": "h",
+            "text": "{8.|Otto.} Verifica Semplificata dei Pagamenti"
+          },
+          {
+            "t": "p",
+            "text": "È possibile verificare i pagamenti senza far girare un nodo dell'intera rete. Un utente ha solo bisogno di conservare una copia delle intestazioni dei blocchi della catena proof-of-work più lunga, che può ottenere interrogando i nodi di rete finché è convinto di avere la catena più lunga, e ottenere il ramo Merkle che collega la transazione al blocco in cui è marcata temporalmente. L'utente non può controllare autonomamente la transazione, ma collegandola ad un posto nella catena, può vedere che un nodo di rete l'ha accettata, e i blocchi aggiunti successivamente ad essa confermano ulteriormente che la rete l'ha accettata."
+          },
+          {
+            "t": "fig",
+            "scene": "spv",
+            "h": 250
+          },
+          {
+            "t": "p",
+            "text": "Come tale, la verifica è affidabile fintanto che nodi onesti controllano la rete, ma è più vulnerabile se la rete è sopraffatta da un utente malintenzionato. Mentre i nodi di rete sono in grado di verificare le transazioni autonomamente, il metodo semplificato può essere ingannato da transazioni fabbricate da un utente malintenzionato fintanto che questi riesce a continuare a superare in potenza la rete. Una strategia per la protezione contro questo sarebbe accettare allarmi da nodi di rete quando rilevano un blocco non valido, spingendo il software dell'utente a scaricare il blocco completo e le transazioni dubbie per confermarne l'inconsistenza. Le aziende che ricevono pagamenti frequenti probabilmente vorrebbero ancora far girare i propri nodi per una sicurezza più indipendente e una verifica più veloce."
+          }
+        ]
+      },
+      {
+        "id": "s9",
+        "num": "9",
+        "label": "Aggregare e Suddividere Valore",
+        "scene": "inout",
+        "items": [
+          {
+            "t": "h",
+            "text": "{9.|Nove.} Aggregare e Suddividere Valore"
+          },
+          {
+            "t": "p",
+            "text": "Anche se fosse possibile movimentare le monete individualmente, non sarebbe saggio effettuare una transazione separata per ogni centesimo coinvolto in un trasferimento. Per far sì che il valore possa essere aggregato e suddiviso, le transazioni contengono molteplici input ed output. Normalmente ci sarà un singolo input a partire da una grande transazione precedente o più input che raggruppano quantità più piccole, e al massimo due output: uno per il pagamento, e uno per dare un eventuale resto al mittente."
+          },
+          {
+            "t": "fig",
+            "scene": "inout",
+            "h": 190
+          },
+          {
+            "t": "p",
+            "text": "Notiamo a questo punto che il \"fan-out\", laddove una singola transazione dipende da molte altre, e queste altre dipendono ancora da altrettante, non è un problema. Non c'è mai bisogno di estrarre una copia completa della storia di una transazione."
+          }
+        ]
+      },
+      {
+        "id": "s10",
+        "num": "10",
+        "label": "Privacy",
+        "scene": "privacy",
+        "items": [
+          {
+            "t": "h",
+            "text": "{10.|Dieci.} Privacy"
+          },
+          {
+            "t": "p",
+            "text": "Il modello bancario tradizionale consegue un certo livello di privacy limitando l'accesso alle informazioni alle parti coinvolte e alla terza controparte fiduciaria. La necessità di annunciare pubblicamente tutte le transazioni preclude tale metodo, ma la privacy può essere ancora mantenuta rompendo il flusso di informazioni in un altro luogo: ovvero mantenendo anonime le chiavi pubbliche. Il pubblico può vedere che qualcuno sta inviando un certo importo a qualcun altro, ma senza informazioni che collegano la transazione ad un utente specifico. Questo è simile al livello delle informazioni rilasciate dai mercati azionari, dove il tempo e la dimensione dei singoli scambi - il \"nastro\" - è reso pubblico, ma senza che si riveli l'identità delle controparti."
+          },
+          {
+            "t": "fig",
+            "scene": "privacy",
+            "h": 210
+          },
+          {
+            "t": "p",
+            "text": "Come ulteriore schermo protettivo, una nuova coppia di chiavi deve essere utilizzata per ogni singola transazione, in modo da impedire che essa sia ricondotta ad un singolo proprietario. Qualche collegamento è ancora inevitabile nelle transazioni multi-input, che necessariamente rivelano che i loro input erano di proprietà dello stesso individuo. Il rischio è che, se il proprietario di una chiave fosse rivelato, si possa risalire ad altre transazioni effettuate dallo stesso."
+          }
+        ]
+      },
+      {
+        "id": "s11",
+        "num": "11",
+        "label": "Calcoli",
+        "scene": "calc",
+        "items": [
+          {
+            "t": "h",
+            "text": "{11.|Undici.} Calcoli"
+          },
+          {
+            "t": "p",
+            "text": "Consideriamo ora lo scenario in cui un utente malintenzionato cerchi di generare una catena alternativa più veloce di quella onesta. Anche se ciò avvenisse, questo non rende il sistema vulnerabile a modifiche arbitrarie, come la creazione di valore dal nulla o l'appropriazione di denaro che non apparteneva all'utente malintenzionato. I nodi non accetterebbero una transazione non valida come forma di pagamento, e i nodi onesti non accetterebbero mai un blocco che la contiene. Un utente malintenzionato può solo cercare di cambiare una delle sue transazioni in modo da recuperare soldi che ha recentemente speso."
+          },
+          {
+            "t": "p",
+            "text": "La gara tra la catena onesta e la catena di un utente malintenzionato può essere caratterizzata come una Passeggiata Aleatoria Binomiale (Binomial Random Walk). L'evento “successo” è che la catena onesta sia estesa di un blocco, aumentando il suo vantaggio di {+1,|più uno,} e l'evento “fallimento” è che la catena dell'utente malintenzionato sia estesa di un blocco, riducendo il divario di {-1.|meno uno.}"
+          },
+          {
+            "t": "p",
+            "text": "La probabilità che un utente malintenzionato recuperi un determinato deficit è analoga al problema della “Rovina del Giocatore” (Gambler's Ruin). Supponiamo che un giocatore d'azzardo con credito illimitato parta da una situazione di deficit e giochi potenzialmente un numero infinito di puntate per cercare di raggiungere una situazione di pareggio. Siamo in grado di calcolare la probabilità che egli possa mai raggiungere il pareggio, o che un utente malintenzionato possa mai raggiungere la catena onesta, come {[8]|} segue:"
+          },
+          {
+            "t": "def",
+            "text": "{p =|p equivale a} probabilità che un nodo onesto generi il prossimo blocco"
+          },
+          {
+            "t": "def",
+            "text": "{q =|q equivale a} probabilità che un utente malintenzionato generi il prossimo blocco"
+          },
+          {
+            "t": "def",
+            "text": "{q_z =|q sub z equivale a} probabilità che un utente malintenzionato possa mai recuperare partendo da z blocchi dietro"
+          },
+          {
+            "t": "math",
+            "id": "qz",
+            "say": "q sub z equivale a uno, se p è minore o uguale a q. Oppure q su p, elevato a z, se p è maggiore di q."
+          },
+          {
+            "t": "p",
+            "text": "Data la nostra ipotesi che {p > q,|p è maggiore di q,} la probabilità cala esponenzialmente man mano che aumenta il numero di blocchi che l'utente malintenzionato deve raggiungere. Con tutte le probabilità contro di lui, se non fa un affondo fortunato nella fase iniziale, le sue possibilità diventano irrisorie tanto più rimane indietro."
+          },
+          {
+            "t": "p",
+            "text": "Adesso consideriamo quanto tempo il destinatario di una nuova transazione deve attendere prima di essere sufficientemente certo che il mittente non possa cambiare la transazione. Assumiamo che il mittente sia un utente malintenzionato che vuole fare credere per un po' al destinatario di averlo pagato, e quindi cambiare la transazione per ripagare sé stesso dopo che sia trascorso un certo lasso di tempo. Il beneficiario sarà avvisato quando ciò accade, ma il mittente spera che a quel punto sia troppo tardi."
+          },
+          {
+            "t": "p",
+            "text": "Il beneficiario genera una nuova coppia di chiavi e dà la chiave pubblica al mittente poco prima di firmare. Questo impedisce al mittente di preparare una catena di blocchi in anticipo lavorando su di essa in continuazione fino a che non ha la fortuna di andare abbastanza avanti, quindi eseguire l'operazione in quel momento. Una volta che la transazione viene inviata, il mittente disonesto inizia a lavorare in segreto su una catena parallela contenente una versione alternativa della sua transazione."
+          },
+          {
+            "t": "p",
+            "text": "Il destinatario attende che la transazione sia stata aggiunta ad un blocco e che z blocchi siano stati successivamente collegati ad esso. Non conosce l'ammontare esatto del progresso che l'utente malintenzionato ha compiuto, ma assumendo che ci sia voluto il tempo medio atteso per un blocco onesto, il progresso possibile dell'utente malintenzionato sarà una Distribuzione di Poisson con valore atteso:"
+          },
+          {
+            "t": "math",
+            "id": "lambda",
+            "say": "lambda equivale a z per q su p."
+          },
+          {
+            "t": "p",
+            "text": "Per ottenere la probabilità che un utente malintenzionato possa ancora recuperare in quel punto, moltiplichiamo la funzione di densità di probabilità Poisson per ciascun ammontare di progresso che egli può avere compiuto per la probabilità che possa recuperare da quel punto:"
+          },
+          {
+            "t": "math",
+            "id": "sum",
+            "say": "La somma, da k uguale a zero a infinito, di lambda elevato a k, per e elevato a meno lambda, diviso k fattoriale, per q su p elevato a z meno k, se k è minore o uguale a z. Oppure uno, se k è maggiore di z."
+          },
+          {
+            "t": "p",
+            "text": "Riordinando per evitare di sommare la coda infinita della distribuzione..."
+          },
+          {
+            "t": "math",
+            "id": "rearr",
+            "say": "Uno, meno la somma, da k uguale a zero a z, di lambda elevato a k, per e elevato a meno lambda, diviso k fattoriale, per uno meno q su p, elevato a z meno k."
+          },
+          {
+            "t": "p",
+            "text": "Scritto in linguaggio C..."
+          },
+          {
+            "t": "code",
+            "hold": 5
+          },
+          {
+            "t": "p",
+            "text": "Dai risultati, vediamo come la probabilità tenda esponenzialmente a zero all'aumentare di z."
+          },
+          {
+            "t": "results",
+            "hold": 5.5
+          },
+          {
+            "t": "p",
+            "text": "Risolvendo per P minore di {0.1%...|0,1 per cento.}"
+          },
+          {
+            "t": "ztable",
+            "head": "{P < 0.001|P minore di 0.001.}",
+            "rows": [
+              [
+                "{q=0.10|q uguale a 0.10,}",
+                "{z=5|z uguale a 5.}"
+              ],
+              [
+                "{q=0.15|q uguale a 0.15,}",
+                "{z=8|z uguale a 8.}"
+              ],
+              [
+                "{q=0.20|q uguale a 0.20,}",
+                "{z=11|z uguale a 11.}"
+              ],
+              [
+                "{q=0.25|q uguale a 0.25,}",
+                "{z=15|z uguale a 15.}"
+              ],
+              [
+                "{q=0.30|q uguale a 0.30,}",
+                "{z=24|z uguale a 24.}"
+              ],
+              [
+                "{q=0.35|q uguale a 0.35,}",
+                "{z=41|z uguale a 41.}"
+              ],
+              [
+                "{q=0.40|q uguale a 0.40,}",
+                "{z=89|z uguale a 89.}"
+              ],
+              [
+                "{q=0.45|q uguale a 0.45,}",
+                "{z=340|z uguale a 340.}"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "s12",
+        "num": "12",
+        "label": "Conclusione",
+        "scene": "conclusion",
+        "items": [
+          {
+            "t": "h",
+            "text": "{12.|Dodici.} Conclusione"
+          },
+          {
+            "t": "p",
+            "text": "Abbiamo proposto un sistema per le transazioni elettroniche non basato sulla fiducia. Abbiamo iniziato con il framework abituale delle valute basate su firme digitali, che prevede un forte controllo sulla proprietà, ma è incompleto non avendo modo di prevenire la doppia spesa. Per risolvere questo problema, abbiamo proposto una rete peer-to-peer che utilizza la proof-of-work per registrare una storia pubblica delle transazioni, la cui modifica diventa rapidamente computazionalmente impraticabile per un utente malintenzionato se i nodi onesti controllano la maggioranza della potenza della CPU. La rete è robusta nella sua semplicità non strutturata. I nodi lavorano tutti insieme con poca coordinazione. Non hanno bisogno di essere identificati, dal momento che i messaggi non vengono instradati in qualche direzione particolare ma vengono solo consegnati su base best effort. I nodi possono lasciare e ricongiungersi con la rete a piacimento, accettando la catena proof-of-work come prova di quello che è successo mentre erano assenti. Essi votano con la loro potenza di CPU, esprimendo la loro accettazione di blocchi validi mediante il lavoro che compiono sulla loro estensione e respingendo i blocchi non validi tramite il rifiuto di lavorare sugli stessi. Tutte le regole e gli incentivi necessari possono essere applicati mediante questo meccanismo di consenso."
+          }
+        ]
+      },
+      {
+        "id": "refs",
+        "label": "Riferimenti",
+        "scene": null,
+        "items": [
+          {
+            "t": "refs",
+            "list": [
+              "W. Dai, \"b-money,\" http://www.weidai.com/bmoney.txt, 1998.",
+              "H. Massias, X.S. Avila, and J.-J. Quisquater, \"Design of a secure timestamping service with minimal trust requirements,\" In 20th Symposium on Information Theory in the Benelux, May 1999.",
+              "S. Haber, W.S. Stornetta, \"How to time-stamp a digital document,\" In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.",
+              "D. Bayer, S. Haber, W.S. Stornetta, \"Improving the efficiency and reliability of digital time-stamping,\" In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.",
+              "S. Haber, W.S. Stornetta, \"Secure names for bit-strings,\" In Proceedings of the 4th ACM Conference on Computer and Communications Security, pages 28-35, April 1997.",
+              "A. Back, \"Hashcash - a denial of service counter-measure,\" http://www.hashcash.org/papers/hashcash.pdf, 2002.",
+              "R.C. Merkle, \"Protocols for public key cryptosystems,\" In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, pages 122-133, April 1980.",
+              "W. Feller, \"An introduction to probability theory and its applications,\" 1957."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "ui": {
+    "labels": {
+      "ringText": "UN SISTEMA DI MONETA ELETTRONICA PEER-TO-PEER ✦ SATOSHI NAKAMOTO ✦ MMVIII ✦",
+      "releaseDate": "31 ottobre 2008 · bitcoin.org",
+      "finInstitution": "Istituzione\nfinanziaria",
+      "sameCoinTwice": "la stessa moneta, due volte?",
+      "signed": "firmato",
+      "customer": "Cliente",
+      "merchant": "Commerciante",
+      "bank": "Banca",
+      "reversed": "annullato",
+      "fees": "commissioni",
+      "tooSmall": "troppo piccole per valersene",
+      "prying": "Nome? Indirizzo?\nTelefono? ID?",
+      "fraud": "frode,",
+      "pricedIn": "prezzo incluso",
+      "inPersonOk": "di persona: il contante semplicemente funziona",
+      "onlineTrusted": "online: una parte di fiducia in mezzo",
+      "irrevEscrow": "irreversibile per i venditori · deposito di garanzia per gli acquirenti",
+      "distributedTs": "un server di marcatura temporale distribuito",
+      "attackers": "utenti malintenzionati",
+      "honestNodes": "nodi onesti",
+      "transaction": "Transazione",
+      "hash": "Hash",
+      "ownerPubKey": "Chiave Pubblica\ndel Proprietario {n}",
+      "ownerSig": "Firma del\nProprietario {n}",
+      "ownerPrivKey": "Chiave Privata\ndel Proprietario {n}",
+      "verify": "Verifica",
+      "sign": "Firma",
+      "signedAgainBy": "firmata di nuovo\ndal Proprietario {n}",
+      "doubleSpend": "doppia spesa?",
+      "mint": "ZECCA",
+      "bankCaps": "BANCA",
+      "oneCompany": "tutto dipende da una sola società",
+      "timeAxis": "tempo",
+      "firstTx": "prima",
+      "laterTx": "successiva",
+      "itemLabel": "Oggetto",
+      "newspaper": "LA  MARCATURA  TEMPORALE  QUOTIDIANA",
+      "notice": "AVVISO · hash del blocco",
+      "existed": "ESISTEVA",
+      "block": "Blocco",
+      "prevHash": "Hash Prec.",
+      "nonce": "Nonce",
+      "nonceN": "Nonce {n}",
+      "hashLower": "hash",
+      "expectedTries": "tentativi attesi",
+      "zero": "zero",
+      "zeros": "zeri",
+      "oneVote": "1 voto",
+      "onePerson": "una persona",
+      "honestChain": "catena onesta",
+      "attackerChain": "catena del malintenzionato",
+      "easy": "facile",
+      "hard": "difficile",
+      "difficulty": "difficoltà",
+      "targetRate": "obiettivo: circa 6 blocchi all'ora",
+      "tooFast": "troppo veloce → servono più zeri",
+      "editedHash": "modificato → l'hash non inizia più con zeri",
+      "foundHash": "✓ trovato: verificare costa un solo hash",
+      "sendMissed": "inviami quello che mi sono perso",
+      "blockCreator": "creatore del blocco",
+      "goldMiners": "i minatori d'oro spendono risorse…",
+      "btcEnergy": "…Bitcoin spende tempo di CPU ed elettricità",
+      "txIn": "input",
+      "txOut": "output",
+      "feeFlow": "input − output = 0.02 di commissione → il creatore del blocco",
+      "cap21": "limite di 21.000.000",
+      "halving": "monete in circolazione · una riduzione a metà ogni 210.000 blocchi",
+      "nowBlock": "ora · blocco {h} · {m}M minate",
+      "newCoin": "moneta nuova → creatore",
+      "defraud": "defraudare la gente",
+      "mintNew": "coniare nuove monete",
+      "yourTx": "la tua transazione",
+      "blockPlus": "blocco +{n}",
+      "blockHeaderHash": "Intestazione del Blocco (Hash del Blocco)",
+      "rootHash": "Hash Rad.",
+      "blockHeader": "Intestazione del Blocco",
+      "approx80": "≈ 80 bytes",
+      "perYear": "bytes · all'ora · al giorno · all'anno",
+      "ram2gb": "2 GB di RAM (2008)",
+      "oneYearHeaders": "↑ un anno di intestazioni",
+      "moore": "+1,2 GB per anno (Legge di Moore)",
+      "merkleRoot": "Rad. Merkle",
+      "lightClient": "client leggero",
+      "fullNode": "nodo completo",
+      "everyBlock": "ogni blocco, ogni transazione",
+      "headersOnly": "solo intestazioni di blocco · 80 bytes ciascuna",
+      "attackerMoreCpu": "catena del malintenzionato, più potenza CPU",
+      "alertInvalid": "allarme: blocco non valido",
+      "businessesNode": "aziende: nodo proprio",
+      "everyCent": "una transazione per ogni centesimo?",
+      "payee": "beneficiario",
+      "payment": "pagamento",
+      "changeBack": "resto, di nuovo al mittente",
+      "fanoutOk": "il fan-out va bene: non serve la storia completa",
+      "identities": "Identità",
+      "transactions": "Transazioni",
+      "trustedThird": "Terza Parte\nfidata",
+      "counterparty": "Controparte",
+      "publicStr": "Pubblico",
+      "tradPrivacy": "Modello Tradizionale di Privacy",
+      "newPrivacy": "Nuovo Modello di Privacy",
+      "nowPublic": "ora deve essere pubblico…",
+      "keyN": "chiave {n}",
+      "sameOwner": "stesso proprietario",
+      "revealed": "rivelato!",
+      "noCreate": "creare valore dal nulla",
+      "noSteal": "prendere denaro che non era suo",
+      "onlyTakeBack": "solo: riprendersi il suo stesso pagamento",
+      "honestLead": "vantaggio onesto",
+      "blocksAxis": "blocchi →",
+      "attackerBehind": "malintenzionato: z blocchi indietro",
+      "walkLegend": "+1 blocco onesto (p)   −1 blocco del malintenzionato (q)",
+      "defP": "probabilità che un nodo onesto generi il prossimo blocco",
+      "defQ": "probabilità che il malintenzionato generi il prossimo blocco",
+      "defQz": "probabilità che il malintenzionato possa mai recuperare da z blocchi indietro",
+      "ifPLEQ": "se p ≤ q",
+      "ifPGT": "se p > q",
+      "zBehindAxis": "z (blocchi indietro) →",
+      "recipient": "destinatario",
+      "sender": "mittente",
+      "freshKey": "chiave nuova",
+      "secretChain": "catena parallela segreta: la sua transazione alternativa",
+      "finiteSum": "somma finita: solo k = 0 … z",
+      "attackerProb": "probabilità di successo del malintenzionato",
+      "blocksWait": "blocchi da attendere per P < 0,1%",
+      "trustedThirdCaps": "TERZA PARTE FIDATA",
+      "twice": "due volte?",
+      "consensus": "CONSENSO",
+      "byCpu": "per potenza CPU"
+    },
+    "chrome": {
+      "docTitle": "Bitcoin: un sistema di denaro elettronico peer-to-peer · narrato",
+      "kick": "Una lettura narrata · Satoshi Nakamoto · 2008",
+      "begin": "Inizia",
+      "replay": "Ripeti",
+      "loading": "Caricamento della narrazione…",
+      "narrationMissing": "La narrazione per questa lingua non è ancora pronta — scegli un'altra lingua nel menu delle impostazioni.",
+      "narratedBy": "Narrato da {voice} · {minutes} min · {hint}",
+      "clickWord": "fai clic su una parola per saltare lì",
+      "blockHeight": "Altezza del blocco",
+      "price": "Prezzo di Bitcoin",
+      "btcusd": "BTC/USD",
+      "connecting": "connessione…",
+      "unavailable": "non disponibile",
+      "justNow": "proprio ora",
+      "minAgo": "{n} min fa",
+      "playAria": "Riproduci / pausa",
+      "ovTitle": "Poster completo (O)",
+      "ovAria": "Mostra il poster completo",
+      "voiceTitle": "Lingua e voce",
+      "voiceAria": "Lingua e voce",
+      "findTitle": "Trova nel documento (Ctrl+F)",
+      "findAria": "Trova nel documento",
+      "findPlaceholder": "Trova nel documento…",
+      "findCloseAria": "Chiudi la ricerca",
+      "findInputAria": "Cerca nel documento",
+      "findPrevAria": "Corrispondenza precedente",
+      "findNextAria": "Corrispondenza successiva",
+      "languageHeading": "Lingua",
+      "narratorHeading": "Narratore",
+      "confirmationsN": "{n} conferme",
+      "fsTitle": "Schermo intero (F)",
+      "fsAria": "Schermo intero",
+      "theme": "Tema",
+      "themeAuto": "Auto",
+      "themeLight": "Chiaro",
+      "themeDark": "Scuro",
+      "readerMode": "Lettura",
+      "posterMode": "Poster",
+      "about": "Informazioni",
+      "aboutClose": "Chiudi"
+    },
+    "caps": {
+      "coin": [
+        "Bitcoin",
+        "Un sistema di moneta elettronica peer-to-peer",
+        "Satoshi Nakamoto · 31 ottobre 2008"
+      ],
+      "p2p": [
+        "I pagamenti online passano da un'istituzione finanziaria",
+        "Peer-to-peer: direttamente da una parte all'altra",
+        "Le firme digitali provano chi sta pagando…",
+        "…ma chi impedisce che la stessa moneta venga spesa due volte?",
+        "La soluzione: una rete peer-to-peer",
+        "Le transazioni vengono sottoposte ad hash in una catena continua",
+        "La storia non può cambiare senza rifare la proof-of-work",
+        "La catena più lunga è la registrazione di ciò che è accaduto",
+        "…e prova che proviene dalla maggiore potenza CPU",
+        "Una maggioranza onesta supera gli utenti malintenzionati",
+        "I messaggi sono trasmessi su base best effort",
+        "I nodi lasciano e ricongiungono a piacere…",
+        "…accettando la catena più lunga come prova di ciò che si sono persi"
+      ],
+      "trust": [
+        "Il commercio online si affida a terze parti di fiducia",
+        "I pagamenti possono sempre essere annullati: le banche mediano le dispute",
+        "La mediazione aggiunge costi e uccide i piccoli pagamenti occasionali",
+        "I commercianti devono diffidare dei loro clienti",
+        "Una certa percentuale di frode è accettata",
+        "Di persona, il contante fisico non richiede intermediari",
+        "Online non esiste contante: solo una parte di fiducia",
+        "Necessario: prova crittografica invece della fiducia",
+        "Pagamenti irreversibili proteggono i venditori; il deposito protegge gli acquirenti",
+        "Un server di marcatura temporale peer-to-peer prova l'ordine delle transazioni",
+        "Sicuro finché i nodi onesti controllano più potenza CPU"
+      ],
+      "txchain": [
+        "Una moneta elettronica è una catena di firme digitali",
+        "Ciascun proprietario firma un hash della transazione precedente e della chiave pubblica del successivo",
+        "…e le aggiunge alla fine della moneta",
+        "Il beneficiario verifica ogni firma lungo la catena",
+        "…ma non può dire se un proprietario abbia speso due volte la moneta",
+        "Soluzione comune: una zecca centrale controlla ogni transazione",
+        "Così l'intero sistema dipende da chi gestisce la zecca",
+        "…proprio come una banca",
+        "Solo la prima transazione è quella che conta",
+        "Quindi ogni transazione deve essere annunciata pubblicamente",
+        "Tutti concordano su un'unica storia dell'ordine",
+        "Prova che la maggior parte dei nodi l'ha vista prima"
+      ],
+      "timestamp": [
+        "Un server di marcatura temporale parte da un blocco di oggetti",
+        "…calcola l'hash dell'intero blocco…",
+        "…e pubblica l'hash ampiamente, come su un quotidiano",
+        "Prova che i dati esistevano in quel momento",
+        "Ogni marcatura temporale include la precedente nel suo hash…",
+        "…formando una catena",
+        "Ogni nuova marcatura temporale rafforza quelle precedenti"
+      ],
+      "pow": [
+        "Proof-of-work, presa in prestito dall'Hashcash di Adam Back",
+        "Trovare un valore il cui hash SHA-256 inizi con bit a zero",
+        "Ogni zero in più moltiplica il lavoro per sedici…",
+        "…eppure chiunque può verificarlo con un solo hash",
+        "Incrementa il nonce finché l'hash non ha abbastanza zeri",
+        "Cambia il blocco e la sua proof-of-work si rompe",
+        "…e ogni blocco successivo va rifatto anch'esso",
+        "Un voto per IP? Chiunque può accumulare molti IP",
+        "La proof-of-work è un voto per CPU",
+        "La catena più lunga porta il maggior lavoro: la maggioranza",
+        "Un malintenzionato deve rifare i blocchi, poi raggiungere e superare",
+        "La difficoltà segue una media mobile: circa 6 blocchi l'ora",
+        "Blocchi troppo veloci? La difficoltà sale"
+      ],
+      "network": [
+        "La rete: nodi, collegati in modo lasco",
+        "1 · Le nuove transazioni sono trasmesse a tutti i nodi",
+        "2 · Ogni nodo raccoglie le nuove transazioni in un blocco",
+        "3 · Ogni nodo lavora a una proof-of-work difficile",
+        "4 · Il primo che la trova trasmette il suo blocco",
+        "5 · I nodi lo accettano solo se ogni transazione è valida",
+        "6 · …e costruiscono il blocco successivo sopra di esso",
+        "La catena più lunga è sempre quella corretta",
+        "Due blocchi insieme: la rete si divide",
+        "Ogni lato conserva l'altra ramificazione, per prudenza",
+        "Il blocco successivo rompe il pareggio; tutti passano a quella più lunga",
+        "Le trasmissioni non devono raggiungere ogni nodo",
+        "Perso un blocco? Chiedilo quando arriva il successivo"
+      ],
+      "incentive": [
+        "Per convenzione, la prima transazione di un blocco è speciale",
+        "Crea una moneta completamente nuova per il creatore del blocco",
+        "Un incentivo a sostenere la rete, e un modo per emettere monete",
+        "Come i minatori d'oro che aggiungono oro, ma spendendo tempo di CPU ed elettricità",
+        "Commissioni: ciò con cui gli input eccedono gli output va al creatore del blocco",
+        "Offerta fissa, poi solo commissioni: senza inflazione",
+        "L'incentivo incoraggia anche i nodi a restare onesti",
+        "Giocare secondo le regole paga meglio che minarle"
+      ],
+      "merkle": [
+        "Quando una transazione è sepolta sotto abbastanza blocchi…",
+        "…le transazioni spese prima di essa possono essere tralasciate",
+        "Le transazioni vengono sottoposte ad hash a coppie, su un albero di Merkle",
+        "Solo la radice entra nell'hash del blocco",
+        "I vecchi blocchi si riducono rimuovendo ramificazioni",
+        "Gli hash interni non vanno conservati",
+        "Un'intestazione di blocco da sola pesa circa 80 bytes",
+        "Una ogni 10 minuti sono solo 4,2 MB l'anno",
+        "Un nulla accanto a 2 GB di RAM: le intestazioni stanno in memoria",
+        {
+          "fig": "Transazioni sottoposte ad hash in un Albero di Merkle"
+        }
+      ],
+      "spv": [
+        "I pagamenti possono essere verificati senza far girare un nodo completo",
+        "Conserva solo le intestazioni dei blocchi della catena più lunga",
+        "Interroga i nodi di rete finché sei convinto che sia la più lunga",
+        "Ottieni il ramo Merkle che collega la transazione al suo blocco",
+        "Non può controllare la transazione da sé…",
+        "…ma ogni blocco aggiunto dopo la conferma",
+        "Un malintenzionato che sopraffà la rete può ingannarla",
+        "Difesa: gli allarmi dei nodi attivano un download completo",
+        "Le aziende più attive fanno comunque girare il proprio nodo",
+        {
+          "fig": "Catena proof-of-work più lunga"
+        }
+      ],
+      "inout": [
+        "Gestire le monete una a una sarebbe ingombrante",
+        "Quindi le transazioni hanno più input e output",
+        "O un singolo input da una transazione precedente più grande…",
+        "…o più input che raggruppano importi più piccoli",
+        "Al massimo due output: il pagamento ed eventualmente il resto",
+        "Il fan-out non è un problema: non serve la storia completa"
+      ],
+      "privacy": [
+        "Le banche mantengono la privacy limitando chi vede le informazioni",
+        "Bitcoin deve annunciare ogni transazione pubblicamente…",
+        "…così il muro si sposta: le chiavi pubbliche restano anonime",
+        "Il pubblico vede gli importi, ma non chi",
+        "Come il \"nastro\" di una borsa: orari e dimensioni, senza nomi",
+        "Usa una nuova coppia di chiavi per ogni transazione",
+        "Le transazioni multi-input rivelano un proprietario comune",
+        "Rivelare un proprietario può esporre le transazioni collegate"
+      ],
+      "calc": [
+        "Un malintenzionato cerca di generare una catena alternativa più veloce di quella onesta",
+        "Anche se vince, non può creare valore né rubare…",
+        "…può solo cercare di riprendersi denaro appena speso",
+        "La gara è una passeggiata aleatoria binomiale: +1 o −1 per blocco",
+        "Recuperare da dietro è il problema della Rovina del Giocatore",
+        "p: un nodo onesto genera il prossimo blocco · q: lo fa il malintenzionato",
+        "Se p > q, le probabilità del malintenzionato sono (q/p)ᶻ",
+        "Le probabilità calano esponenzialmente a ogni blocco di ritardo",
+        "Quanto deve attendere il destinatario prima di fidarsi di un pagamento?",
+        "Una nuova coppia di chiavi, poco prima di firmare, impedisce catene preconfezionate",
+        "Il mittente disonesto mina in segreto una catena parallela",
+        "Il destinatario attende z blocchi sopra",
+        "Il progresso del malintenzionato segue una Distribuzione di Poisson",
+        "Ogni esito si pondera per la sua probabilità di recupero",
+        "Riordinata per evitare di sommare la coda infinita",
+        "Convertita in codice C…",
+        "Risultati: la probabilità cala esponenzialmente",
+        "Quanti blocchi attendere per meno dello 0,1%?"
+      ],
+      "conclusion": [
+        "Transazioni elettroniche senza fare affidamento sulla fiducia",
+        "Le monete fatte di firme digitali danno un forte controllo della proprietà…",
+        "…ma hanno bisogno di un modo per prevenire la doppia spesa",
+        "Una rete peer-to-peer registra una storia pubblica con la proof-of-work",
+        "Diventa rapidamente impraticabile da cambiare per un malintenzionato",
+        "Robusta nella sua semplicità non strutturata",
+        "I nodi non richiedono identità; i messaggi non richiedono route",
+        "I nodi lasciano e ricongiungono a piacere, poi accettano la catena più lunga",
+        "Votano con la potenza CPU: estendono i blocchi validi, ignorano gli invalidi",
+        "Regole e incentivi, fatti rispettare dal consenso"
+      ]
+    },
+    "cues": {
+      "PEER-TO-PEER": "peer-to-peer",
+      "Satoshi": "Satoshi",
+      "directly from one party": "spedire direttamente pagamenti online",
+      "Digital signatures provide": "Le firme digitali offrono",
+      "the main benefits are lost": "i benefici principali sono persi",
+      "We propose a solution": "Proponiamo una soluzione",
+      "timestamps transactions by hashing": "stampa un marcatore temporale sulle transazioni facendo hashing",
+      "cannot be changed without redoing": "non può essere modificata senza rifare",
+      "The longest chain not only": "La catena più lunga non solo serve",
+      "largest pool of CPU power": "gruppo più grande di potenza CPU",
+      "generate the longest chain and outpace": "genereranno la catena più lunga",
+      "Messages are broadcast": "I messaggi sono trasmessi",
+      "nodes can leave and rejoin": "i nodi possono lasciare e ricongiungersi",
+      "accepting the longest": "accettando la catena proof-of-work più lunga",
+      "Completely non-reversible transactions": "Transazioni totalmente irreversibili",
+      "The cost of mediation": "Il costo dell'intermediazione",
+      "Merchants must be wary": "I commercianti devono diffidare",
+      "A certain percentage of fraud": "Una certa percentuale di frodi",
+      "avoided in person": "utilizzando moneta fisica di persona",
+      "no mechanism exists": "non esiste alcun meccanismo",
+      "What is needed": "sistema di pagamento elettronico basato",
+      "computationally impractical to reverse": "computazionalmente impraticabili da invertire",
+      "distributed timestamp server": "server di marcatura temporale distribuito",
+      "The system is secure": "Il sistema è sicuro",
+      "digitally signing a hash": "firmando digitalmente un hash",
+      "adding these to the end": "aggiungendo le stesse alla fine",
+      "A payee can verify": "Colui che riceve un pagamento può verificare",
+      "trusted central authority, or mint": "autorità fiduciaria centrale, o zecca",
+      "the fate of the entire money system": "il destino di tutto il sistema monetario",
+      "just like a bank": "proprio come una banca",
+      "We need a way": "Abbiamo bisogno di un modo",
+      "publicly announced": "annunciate pubblicamente",
+      "agree on a single history": "concordino su un singolo passato",
+      "the majority of nodes agreed": "la maggior parte dei nodi è d'accordo",
+      "taking a hash of a block": "facendo hash di un blocco",
+      "widely publishing the hash": "poi pubblica l'hash",
+      "The timestamp proves": "La marcatura temporale prova",
+      "Each timestamp includes the previous": "Ogni marcatura temporale comprende quella precedente",
+      "forming a chain": "formando una vera e propria catena",
+      "reinforcing the ones before": "rafforza quelle precedenti",
+      "scanning for a value": "comporta la ricerca di un valore",
+      "The average work required": "Il lavoro medio richiesto",
+      "verified by executing a single hash": "verificato eseguendo un unico hash",
+      "incrementing a nonce": "incrementando un nonce",
+      "the block cannot be changed": "il blocco non può essere modificato",
+      "redoing all the blocks after it": "rifacimento di tutti i blocchi successivi",
+      "one-IP-address-one-vote": "un indirizzo IP-un-voto",
+      "Proof-of-work is essentially": "La proof-of-work invece segue essenzialmente",
+      "The majority decision is represented": "La decisione di maggioranza è rappresentata",
+      "To modify a past block": "Per modificare un blocco passato",
+      "To compensate for increasing hardware": "Per compensare l'aumento della velocità dell'hardware",
+      "If they're generated too fast": "Se i blocchi vengono generati troppo velocemente",
+      "New transactions are broadcast": "Le nuove transazioni sono trasmesse",
+      "Each node collects new transactions": "Ogni nodo immagazzina le nuove transazioni",
+      "Each node works on finding": "Ogni nodo lavora per trovare",
+      "When a node finds": "Quando un nodo trova",
+      "Nodes accept the block only": "I nodi accettano il blocco solo",
+      "Nodes express their acceptance": "I nodi esprimono l'accettazione",
+      "Nodes always consider the longest": "I nodi considerano sempre come corretta la catena più lunga",
+      "If two nodes broadcast": "Se due nodi trasmettono",
+      "save the other branch": "salvano l'altra ramificazione",
+      "The tie will be broken": "Questo impasse sarà risolto",
+      "New transaction broadcasts do not": "Le trasmissioni delle nuove transazioni non",
+      "If a node does not receive": "Se un nodo non riceve un blocco",
+      "a special transaction that starts": "una transazione speciale che",
+      "This adds an incentive": "Questo fornisce un incentivo",
+      "analogous to gold miners": "analoga al processo dei minatori d'oro",
+      "The incentive can also be funded": "L'incentivo può essere anche finanziato",
+      "Once a predetermined number": "un ammontare predeterminato di monete",
+      "The incentive may help": "L'incentivo può contribuire",
+      "He ought to find it more profitable": "Dovrà necessariamente trovare più redditizio",
+      "the spent transactions before it": "le transazioni spese prima di essa",
+      "transactions are hashed in a Merkle": "sottoposte ad hash in un albero di Merkle",
+      "with only the root included": "la cui sola radice è inclusa",
+      "Old blocks can then be compacted": "I vecchi blocchi possono a quel punto essere compattati",
+      "The interior hashes do not": "bisogno di immagazzinare in memoria gli hash interni",
+      "A block header with no transactions": "dell'intestazione di un blocco senza transazioni",
+      "If we suppose blocks are generated": "Se supponiamo che i blocchi siano generati",
+      "With computer systems typically": "Dato che nel 2008 sono in vendita computer",
+      "keep a copy of the block headers": "conservare una copia delle intestazioni dei blocchi",
+      "querying network nodes": "interrogando i nodi di rete",
+      "obtain the Merkle branch": "ottenere il ramo Merkle",
+      "He can't check the transaction": "non può controllare autonomamente la transazione",
+      "blocks added after it": "i blocchi aggiunti successivamente",
+      "more vulnerable if the network is overpowered": "più vulnerabile se la rete è sopraffatta",
+      "accept alerts from network nodes": "accettare allarmi da nodi di rete",
+      "Businesses that receive frequent": "Le aziende che ricevono pagamenti frequenti",
+      "To allow value to be split": "Per far sì che il valore possa essere aggregato e suddiviso",
+      "a single input from a larger": "un singolo input a partire da una grande transazione precedente",
+      "multiple inputs combining smaller": "più input che raggruppano quantità più piccole",
+      "at most two outputs": "al massimo due output",
+      "It should be noted that fan-out": "Notiamo a questo punto che il fan-out",
+      "The necessity to announce": "La necessità di annunciare pubblicamente",
+      "by keeping public keys anonymous": "mantenendo anonime le chiavi pubbliche",
+      "The public can see": "Il pubblico può vedere",
+      "stock exchanges": "mercati azionari",
+      "a new key pair should be used": "una nuova coppia di chiavi deve essere utilizzata",
+      "Some linking is still unavoidable": "Qualche collegamento è ancora inevitabile",
+      "The risk is that if the owner": "Il rischio è che, se il proprietario di una chiave fosse rivelato",
+      "it does not throw the system open": "non rende il sistema vulnerabile a modifiche arbitrarie",
+      "An attacker can only try": "Un utente malintenzionato può solo cercare",
+      "Binomial Random Walk": "Passeggiata Aleatoria Binomiale",
+      "The probability of an attacker catching up": "La probabilità che un utente malintenzionato recuperi",
+      "probability an honest node finds": "probabilità che un nodo onesto generi",
+      "Given our assumption": "Data la nostra ipotesi",
+      "We now consider how long": "Adesso consideriamo quanto tempo",
+      "The receiver generates a new key pair": "Il beneficiario genera una nuova coppia di chiavi",
+      "Once the transaction is sent": "Una volta che la transazione viene inviata",
+      "The recipient waits until": "Il destinatario attende che",
+      "Poisson distribution": "Distribuzione di Poisson",
+      "we multiply the Poisson density": "moltiplichiamo la funzione di densità di probabilità Poisson",
+      "Rearranging to avoid": "Riordinando per evitare di sommare",
+      "Converting to C code": "Scritto in linguaggio C",
+      "Running some results": "Dai risultati, vediamo",
+      "Solving for P less than": "Risolvendo per P minore di",
+      "coins made from digital signatures": "valute basate su firme digitali",
+      "incomplete without a way": "incompleto non avendo modo di prevenire",
+      "we proposed a peer-to-peer network": "abbiamo proposto una rete peer-to-peer",
+      "quickly becomes computationally impractical": "diventa rapidamente computazionalmente impraticabile",
+      "The network is robust": "La rete è robusta",
+      "They do not need to be identified": "Non hanno bisogno di essere identificati",
+      "Nodes can leave and rejoin": "I nodi possono lasciare e ricongiungersi",
+      "They vote with their CPU power": "Essi votano con la loro potenza di CPU",
+      "Any needed rules and incentives": "Tutte le regole e gli incentivi necessari",
+      "payee can't verify that one": "beneficiario non può verificare"
+    }
+  }
+}

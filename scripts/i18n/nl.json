@@ -1,0 +1,968 @@
+{
+  "paper": {
+    "sections": [
+      {
+        "id": "title",
+        "label": "Titel",
+        "scene": "coin",
+        "items": [
+          {
+            "t": "title",
+            "lines": [
+              "{Bitcoin|Bitcoin:}",
+              "{Een|een} {peer-to-peer|peer to peer}",
+              "elektronisch geld",
+              "{systeem|systeem.}"
+            ]
+          },
+          {
+            "t": "byline",
+            "text": "Satoshi {Nakamoto|Nakamoto.} {satoshin@gmx.com|} {www.bitcoin.org|}"
+          }
+        ]
+      },
+      {
+        "id": "abstract",
+        "label": "Samenvatting",
+        "scene": "p2p",
+        "items": [
+          {
+            "t": "abs1",
+            "text": "{Inhoud.|Inhoud.} Een pure Peer-to-Peer versie van elektronisch geld wat online betalingen mogelijk maakt om van de ene naar de andere partij over te maken zonder inmenging van een financiële instelling. Digitale handtekeningen zijn een deel van de oplossing, maar de belangrijkste voordelen gaan verloren als er alsnog een vertrouwde derde partij wordt vereist om dubbele betalingen te voorkomen."
+          },
+          {
+            "t": "abs2",
+            "text": "We bieden een oplossing voor het probleem met behulp van een Peer-to-Peer netwerk. Het netwerk timestampt transacties door ze in een doorlopende keten (chain) van op hash-gebaseerde Proof-of-Work te plaatsen wat een log vormt dat niet kan worden gewijzigd zonder de Proof-of-Work opnieuw uit te voeren. De langste chain dient niet alleen als bewijs van de volgorde van gebeurtenissen, maar ook als bewijs dat deze afkomstig was van de grootste pool van CPU-kracht. Zolang een meerderheid van de CPU-kracht wordt bestuurd door nodes die niet samenwerken om het netwerk aan te vallen, genereren ze de langste chain en laten ze aanvallers achterwege. Het netwerk zelf vereist een minimale structuur. Berichten worden op de best mogelijke manier uitgezonden en nodes kunnen wanneer dan ook het netwerk verlaten en weer meedoen door de langste Proof-of-Work-chain te accepteren als bewijs van wat er gebeurde toen ze weg waren."
+          }
+        ]
+      },
+      {
+        "id": "s1",
+        "num": "1",
+        "label": "Introductie",
+        "scene": "trust",
+        "items": [
+          {
+            "t": "h",
+            "text": "{1.|Een.} Introductie"
+          },
+          {
+            "t": "p",
+            "text": "Handel op het internet is bijna volledig afhankelijk geworden van financiële instellingen die als vertrouwde derde partijen dienen om elektronische betalingen te verwerken. Hoewel het systeem voor de meeste transacties goed genoeg werkt, heeft het nog steeds te lijden van de inherente zwakheden van het op vertrouwen gebaseerde model. Volledig niet-omkeerbare transacties zijn niet echt mogelijk omdat financiële instellingen er niet omheen kunnen bemiddelen bij disputen. De kosten van bemiddelingen verhogen de transactiekosten, beperken de minimale praktische transactiegrootte en sluiten de mogelijkheid voor kleine casuele transacties af, en er is een bredere kost in het verlies van het vermogen om niet-omkeerbare betalingen te doen voor niet-omkeerbare diensten. Met de mogelijkheid van omkeerbare betalingen spreidt de behoefte aan vertrouwen zich uit. Handelaren moeten op hun hoede zijn voor hun klanten, ze lastigvallen voor meer informatie dan ze anders nodig zouden hebben. Een bepaald percentage van fraude wordt als onvermijdelijk geaccepteerd. Deze kosten en betalingsonzekerheden kunnen persoonlijk worden vermeden door fysieke valuta te gebruiken, maar er bestaat geen mechanisme om betalingen via een communicatiekanaal uit te voeren zonder een vertrouwde partij."
+          },
+          {
+            "t": "p",
+            "text": "Wat nodig is, is een elektronisch betalingssysteem gebaseerd op cryptografisch bewijs in plaats van vertrouwen, waardoor twee bereidwillige partijen rechtstreeks met elkaar transacties kunnen maken zonder de noodzaak van een vertrouwde derde partij. Transacties die computationeel onpraktisch zijn om terug te draaien beschermen verkopers tegen fraude, en routinematige escrowmechanismen kunnen eenvoudig worden geïmplementeerd om kopers te beschermen. In dit artikel bieden we een oplossing voor het probleem van de dubbele uitgaven met behulp van een Peer-to-Peer gedistribueerde timestampserver om computationeel bewijs van de chronologische volgorde van transacties te genereren. Het systeem is beveiligd zolang eerlijke nodes gezamenlijk meer CPU-kracht besturen dan elke samenwerkende groep aanvallende nodes."
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "num": "2",
+        "label": "Transacties",
+        "scene": "txchain",
+        "items": [
+          {
+            "t": "h",
+            "text": "{2.|Twee.} Transacties"
+          },
+          {
+            "t": "p",
+            "text": "We definiëren een elektronische coin als een chain van digitale handtekeningen. Elke eigenaar (E) draagt de munt over naar de volgende door een hash van de vorige transactie en de publieke sleutel (Public Key) van de volgende eigenaar digitaal te ondertekenen en toe te voegen aan het einde van de coin."
+          },
+          {
+            "t": "fig",
+            "h": 250,
+            "scene": "txchain"
+          },
+          {
+            "t": "p",
+            "text": "Het probleem is natuurlijk dat de ontvanger niet kan verifiëren dat een van de eigenaren de munt niet dubbel heeft uitgegeven. Een veelvoorkomende oplossing is om een vertrouwde centrale autoriteit of munt te introduceren die elke transactie controleert op dubbele uitgaven. Na elke transactie moet de munt naar de mint worden teruggebracht om een nieuwe munt uit te geven, en alleen munten die rechtstreeks uit de mint zijn uitgegeven worden niet dubbel uitgegeven. Het probleem met deze oplossing is dat het lot van het hele geldsysteem afhangt van het bedrijf dat de munt beheert, waarbij elke transactie net als een bank door hen heen moet gaan."
+          },
+          {
+            "t": "p",
+            "text": "We hebben een manier nodig voor de ontvanger om te weten dat de vorige eigenaren geen eerdere transacties hebben ondertekend. Voor onze doeleinden is de vroegste transactie de transactie die telt, dus we geven niet om latere pogingen om een dubbele besteding uit te voeren. De enige manier om de afwezigheid van een transactie te bevestigen, is om op de hoogte te zijn van alle transacties. In het mintgebaseerde model was de mint op de hoogte van alle transacties en besliste welke als eerste arriveerde. Om dit zonder een vertrouwde partij te bereiken, moeten transacties openbaar worden aangekondigd {[1]|}, en we hebben een systeem nodig voor deelnemers om overeenstemming te bereiken over een enkele geschiedenis van de volgorde waarin ze zijn ontvangen. De ontvanger moet bewijzen dat op het tijdstip van elke transactie de meerderheid van de nodes was overeengekomen dat het de eerste was die werd ontvangen."
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "num": "3",
+        "label": "Timestamp Server",
+        "scene": "timestamp",
+        "items": [
+          {
+            "t": "h",
+            "text": "{3.|Drie.} Timestamp Server"
+          },
+          {
+            "t": "p",
+            "text": "De oplossing die we bieden begint met een tijdstempelserver (timestamp server). Een timestamp server werkt door een hash te nemen van een blok met items om vervolgens een timestamp te krijgen en de hash op grote schaal te publiceren (zoals een krant of Usenet-bericht {[2-5]|}). De timestamp bewijst dat de gegevens op dat moment bestonden, uiteraard om in de hash te komen. Elke timestamp bevat de vorige timestamp in zijn hash waardoor een chain wordt gevormd, waarbij elke extra timestamp de eerdere tijdstip versterkt."
+          },
+          {
+            "t": "fig",
+            "h": 170,
+            "scene": "timestamp"
+          }
+        ]
+      },
+      {
+        "id": "s4",
+        "num": "4",
+        "label": "Proof-of-Work",
+        "scene": "pow",
+        "items": [
+          {
+            "t": "h",
+            "text": "{4.|Vier.} Proof-of-Work"
+          },
+          {
+            "t": "p",
+            "text": "Om een gedistribueerde timestampserver op een Peer-to-Peer-basis te implementeren zullen we een Proof-of-Work-systeem moeten gebruiken dat vergelijkbaar is met Adam Back's Hashcash {[6]|} in plaats van kranten- of Usenet-berichten. Proof-of-Work betreft het zoeken naar een waarde dat wanneer hashed, zoals bij {SHA-256,|S H A twee zesenvijftig,} de hash begint met een aantal nul-bits. Het vereiste gemiddelde werk is exponentieel in het aantal vereiste nul bits en kan worden geverifieerd door het uitvoeren van een enkele hash."
+          },
+          {
+            "t": "p",
+            "text": "Voor onze timestamp-netwerk implementeren we de Proof-of-Work door een nonce in het blok toe te voegen totdat een waarde wordt gevonden die de hash van het blok de vereiste nul bits geeft. Zodra de inspanning van de CPU is besteed om deze te laten voldoen aan de Proof-of-Work kan het blok niet worden gewijzigd zonder het werk opnieuw uit te voeren. Naarmate latere blokken erachter worden geketend, omvat het werk om het blok te veranderen ook het opnieuw doen van alle blokken erna."
+          },
+          {
+            "t": "fig",
+            "h": 170,
+            "scene": "pow"
+          },
+          {
+            "t": "p",
+            "text": "Het proof-of-work lost ook het probleem op van het bepalen van representatie bij het nemen van meerderheidsbeslissingen. Als de meerderheid was gebaseerd op {één-IP-adres-één-stem,|één I P adres, één stem,} zou het kunnen worden ondermijnd door iemand die veel {IP's.|I P's.} Proof-of-work is in essentie {één-CPU-één-stem.|één C P U, één stem.} De meerderheidsbeslissing wordt vertegenwoordigd door de langste chain die de grootste Proof of Work heeft geïnvesteerd. Als een meerderheid van de CPU-energie wordt gecontroleerd door eerlijke nodes, zullen de eerlijke nodes het snelst groeien en de concurrerende nodes overtreffen. Om een blok uit het verleden te wijzigen moet een aanvaller de Proof of Work van het blok en alle blokken erna opnieuw uitvoeren en vervolgens het werk van de eerlijke nodes inhalen en overtreffen. We zullen later laten zien dat de kans dat een langzamere aanvaller inhaalt exponentieel afneemt naarmate volgende blokken worden toegevoegd."
+          },
+          {
+            "t": "p",
+            "text": "Om de toenemende hardwaresnelheid en de variërende interesse in lopende nodes in de loop van de tijd te compenseren, wordt de moeilijkheidsgraad van het werk bepaald door een voortschrijdend gemiddelde dat is gericht op een gemiddeld aantal blokken per uur. Als ze te snel worden gegenereerd, neemt de moeilijkheidsgraad toe."
+          }
+        ]
+      },
+      {
+        "id": "s5",
+        "num": "5",
+        "label": "Netwerk",
+        "scene": "network",
+        "items": [
+          {
+            "t": "h",
+            "text": "{5.|Vijf.} Netwerk"
+          },
+          {
+            "t": "p",
+            "text": "De stappen voor het uitvoeren van het netwerk zijn als volgt:"
+          },
+          {
+            "t": "li",
+            "text": "{1)|Een.} Nieuwe transacties worden uitgezonden naar alle nodes."
+          },
+          {
+            "t": "li",
+            "text": "{2)|Twee.} Elke node verzamelt nieuwe transacties in een blok."
+          },
+          {
+            "t": "li",
+            "text": "{3)|Drie.} Elke node werkt aan het vinden van een moeilijk Proof-of-Work voor zijn blok."
+          },
+          {
+            "t": "li",
+            "text": "{4)|Vier.} Wanneer een node een Proof-of-Work vindt, zendt het het blok naar alle nodes."
+          },
+          {
+            "t": "li",
+            "text": "{5)|Vijf.} Nodes accepteren het blok alleen als alle transacties daarin geldig zijn en nog niet zijn uitgegeven."
+          },
+          {
+            "t": "li",
+            "text": "{6)|Zes.} Nodes drukken hun acceptatie van het blok uit door te werken aan het creëren van het volgende blok in de chain met behulp van de hash van het geaccepteerde blok als de vorige hash."
+          },
+          {
+            "t": "p",
+            "text": "Nodes beschouwen de langste chain altijd als de juiste en blijven werken aan de uitbreiding ervan. Als twee nodes tegelijkertijd verschillende versies van het volgende blok uitzenden, kunnen sommige nodes het een of ander eerst ontvangen. In dat geval werken ze aan de eerste die ze hebben ontvangen, maar bewaren ze de andere tak voor het geval het langer wordt. De das wordt verbroken wanneer de volgende Proof-of-Work wordt gevonden en een tak langer wordt; de nodes die aan de andere tak werkten schakelen dan over naar de langere tak."
+          },
+          {
+            "t": "p",
+            "text": "Nieuwe transactie-uitzendingen hoeven niet noodzakelijk alle nodes te bereiken. Zolang ze vele nodes bereiken komen ze al snel in een blok. Blokuitzendingen zijn ook tolerant ten aanzien van gevallen berichten. Als een node geen blok ontvangt, vraagt het dit aan wanneer het de volgende blok ontvangt en realiseert dat het een heeft gemist."
+          }
+        ]
+      },
+      {
+        "id": "s6",
+        "num": "6",
+        "label": "Incentive",
+        "scene": "incentive",
+        "items": [
+          {
+            "t": "h",
+            "text": "{6.|Zes.} Incentive"
+          },
+          {
+            "t": "p",
+            "text": "Volgens afspraak is de eerste transactie in een blok een speciale transactie waarbij een nieuwe munt wordt gestart die eigendom is van de maker van het blok. Dit voegt een stimulans toe voor nodes om het netwerk te ondersteunen en biedt een manier om eerst munten in omloop te brengen, aangezien er geen centrale autoriteit is om ze uit te geven. De gestage toevoeging van een constante hoeveelheid nieuwe munten is analoog aan goudzoekers die middelen besteden om goud aan de circulatie toe te voegen. In ons geval is het CPU-tijd en elektriciteit die wordt verbruikt."
+          },
+          {
+            "t": "p",
+            "text": "De incentive kan ook worden gefinancieerd met transactiekosten. Als de output van een transactie kleiner is dan de input, is het verschil de transactiekosten die worden toegevoegd aan de stimuleringswaarde van het blok dat de transactie bevat. Zodra een vooraf bepaald aantal munten in omloop zijn gekomen, kan de stimulans volledig overgaan op transactiekosten en volledig inflatie-vrij zijn."
+          },
+          {
+            "t": "p",
+            "text": "De incentive kan helpen om nodes aan te moedigen om eerlijk te blijven. Als een hebzuchtige aanvaller in staat is meer CPU-kracht te verzamelen dan alle eerlijke nodes, zou hij moeten kiezen tussen het gebruik ervan om mensen te bedriegen door zijn betalingen te stelen of het te gebruiken om nieuwe munten te genereren. Hij zou het winstgevender moeten vinden om volgens de regels te spelen, zoals regels die hem bevoordelen met meer nieuwe munten dan alle anderen gecombineerd, dan om het systeem en de geldigheid van zijn eigen rijkdom te ondermijnen."
+          }
+        ]
+      },
+      {
+        "id": "s7",
+        "num": "7",
+        "label": "Schijfruimte terugwinnen",
+        "scene": "merkle",
+        "items": [
+          {
+            "t": "h",
+            "text": "{7.|Zeven.} Schijfruimte terugwinnen"
+          },
+          {
+            "t": "p",
+            "text": "Zodra de laatste transactie in een munt onder voldoende blokken is begraven, kunnen de gebruikte transacties daarvoor weggegooid worden om schijfruimte te besparen. Om dit te vergemakkelijken zonder de hash van het blok te verbreken worden transacties gehasht in een Merkle Tree {[7][2][5]|} met alleen de root in de hash van het blok. Oude blokken kunnen vervolgens worden samengeperst door takken van de boom af te stoten. De binnenbehuizingen hoeven niet te worden opgeslagen."
+          },
+          {
+            "t": "fig",
+            "h": 300,
+            "scene": "merkle"
+          },
+          {
+            "t": "p",
+            "text": "Een block-header zonder transacties zou ongeveer 80 bytes zijn. Als we er van uit gaan dat blokken elke 10 minuten worden gegenereerd, {80 bytes * 6 * 24 * 365 = 4,2MB|80 bytes, keer 6, keer 24, keer 365, is gelijk aan 4,2 megabytes} per jaar. Omdat computersystemen gewoonlijk vanaf 2008 met {2 GB|2 gigabytes} RAM verkopen en de wet van Moore een huidige groei van {1,2 GB|1,2 gigabytes} per jaar voorspelt, zou opslag geen probleem moeten zijn, zelfs als de blokheaders in het geheugen moeten worden bewaard."
+          }
+        ]
+      },
+      {
+        "id": "s8",
+        "num": "8",
+        "label": "Vereenvoudigde betalingsverificatie",
+        "scene": "spv",
+        "items": [
+          {
+            "t": "h",
+            "text": "{8.|Acht.} Vereenvoudigde betalingsverificatie"
+          },
+          {
+            "t": "p",
+            "text": "Het is mogelijk om betalingen te verifiëren zonder een volledige node te gebruiken. Een gebruiker hoeft alleen een kopie te bewaren van de block-headers van de langste proof-of-work-keten, die hij kan krijgen door netwerknodes te ondervragen totdat hij overtuigd is dat hij de langste ketting heeft, en de Merkle-tak verkrijgt die de transactie aan het blok koppelt die voorzien is van een tijdstempel. Hij kan de transactie niet voor zichzelf controleren, maar door hem te koppelen aan een plaats in de chain kan hij zien dat een netwerknode het heeft geaccepteerd, en blokken die zijn toegevoegd nadat deze hebben bevestigd dat het netwerk het heeft geaccepteerd."
+          },
+          {
+            "t": "fig",
+            "h": 250,
+            "scene": "spv"
+          },
+          {
+            "t": "p",
+            "text": "Als zodanig is de verificatie betrouwbaar zolang eerlijke nodes het netwerk besturen, maar kwetsbaarder is als het netwerk wordt overmeesterd door een aanvaller. Hoewel netwerknodes transacties voor zichzelf kunnen verifiëren, kan de vereenvoudigde methode worden misleid door de verzonnen transacties van een aanvaller zolang de aanvaller het netwerk kan blijven overmeesteren. Eén strategie om hiertegen te beschermen zou zijn om waarschuwingen van netwerknodes te accepteren wanneer ze een ongeldig blok detecteren, waarbij de software van de gebruiker wordt gevraagd om het volledige blok en gealigneerde transacties te downloaden om de inconsistentie te bevestigen. Bedrijven die veelvuldig worden betaald willen waarschijnlijk nog steeds hun eigen nodes gebruiken voor meer onafhankelijke beveiliging en snellere verificatie."
+          }
+        ]
+      },
+      {
+        "id": "s9",
+        "num": "9",
+        "label": "Waarde combineren en splitsen",
+        "scene": "inout",
+        "items": [
+          {
+            "t": "h",
+            "text": "{9.|Negen.} Waarde combineren en splitsen"
+          },
+          {
+            "t": "p",
+            "text": "Hoewel het mogelijk zou zijn om munten afzonderlijk te behandelen, zou het onpraktisch zijn om voor elke cent in een overdracht een afzonderlijke transactie te doen. Om de waarde te kunnen splitsen en combineren bevatten transacties meerdere inputs en outputs. Normaal gesproken zal er of een enkele invoer zijn van een grotere eerdere transactie of meerdere inputs die kleinere bedragen combineren, en maximaal twee outputs: één voor de betaling en één die de wijziging, indien aanwezig, terugstuurt naar de afzender."
+          },
+          {
+            "t": "fig",
+            "h": 190,
+            "scene": "inout"
+          },
+          {
+            "t": "p",
+            "text": "Het moet opgemerkt worden dat fan-out, waarbij een transactie afhankelijk is van verschillende transacties, en die transacties afhankelijk zijn van veel meer, hier geen probleem is. Het is nooit nodig om een volledig op zichzelf staande kopie van de geschiedenis van een transactie te extraheren."
+          }
+        ]
+      },
+      {
+        "id": "s10",
+        "num": "10",
+        "label": "Privacy",
+        "scene": "privacy",
+        "items": [
+          {
+            "t": "h",
+            "text": "{10.|Tien.} Privacy"
+          },
+          {
+            "t": "p",
+            "text": "Het traditionele bankmodel bereikt een niveau van privacy door de toegang tot informatie te beperken tot de betrokken partijen en de vertrouwde derde partij. De noodzaak om alle transacties publiekelijk aan te kondigen sluit deze methode uit, maar privacy kan nog steeds worden gehandhaafd door de informatiestroom op een andere plaats te doorbreken: door openbare sleutels anoniem te houden. Het publiek kan zien dat iemand een bedrag naar iemand anders stuurt, maar zonder informatie die de transactie aan iemand linkt. Dit is vergelijkbaar met het niveau van informatie vrijgegeven door beurzen, waar de tijd en omvang van individuele transacties (de \"tape\") openbaar wordt gemaakt, maar zonder te vertellen wie de partijen waren."
+          },
+          {
+            "t": "fig",
+            "h": 210,
+            "scene": "privacy"
+          },
+          {
+            "t": "p",
+            "text": "Als extra firewall moet voor elke transactie een nieuw sleutelpaar worden gebruikt om te voorkomen dat ze aan een gemeenschappelijke eigenaar worden gekoppeld. Sommige koppelingen zijn nog steeds onvermijdelijk bij transacties met meerdere inputs die noodzakelijkerwijs onthullen dat hun invoer eigendom was van dezelfde eigenaar. Het risico is dat als de eigenaar van een sleutel wordt onthuld, het linken zou andere transacties kunnen onthullen die toebehoorden aan dezelfde eigenaar."
+          }
+        ]
+      },
+      {
+        "id": "s11",
+        "num": "11",
+        "label": "Berekeningen",
+        "scene": "calc",
+        "items": [
+          {
+            "t": "h",
+            "text": "{11.|Elf.} Berekeningen"
+          },
+          {
+            "t": "p",
+            "text": "We beschouwen het scenario van een aanvaller die sneller een alternatieve chain probeert te genereren dan de eerlijke chain. Zelfs als dit wordt bereikt, gooit het het systeem niet open voor arbitraire veranderingen, zoals het creëren van waarde uit het niets of het nemen van geld dat nooit aan de aanvaller toebehoorde. Nodes accepteren geen ongeldige transactie als betaling en eerlijke nodes accepteren nooit een blok dat deze bevat. Een aanvaller kan alleen proberen om een van zijn eigen transacties te wijzigen om geld terug te nemen dat hij onlangs heeft uitgegeven."
+          },
+          {
+            "t": "p",
+            "text": "De race tussen de eerlijke chain en een aanvallende chain kan worden gekarakteriseerd als een binominale willekeurige wandeling. De succesgebeurtenis is dat de eerlijke chain wordt verlengd met één blok, waardoor de voorsprong met {+1,|plus één,} toeneemt, en de foutgebeurtenis is de chain van de aanvaller die wordt uitgebreid met één blok, waardoor de kloof met {-1.|min één.} wordt verkleind."
+          },
+          {
+            "t": "p",
+            "text": "De kans dat een aanvaller een bepaald tekort inhaalt is analoog aan het probleem van een Gambler's Ruin. Stel dat een gokker met onbeperkt krediet begint met een tekort en mogelijk een oneindig aantal pogingen doet om break-even te worden. We kunnen de waarschijnlijkheid berekenen dat hij ooit breakeven bereikt, of dat een aanvaller ooit de eerlijke chain inhaalt. Het gaat als volgt {[8]:|:}"
+          },
+          {
+            "t": "def",
+            "text": "{p =|p is gelijk aan} kans dat een eerlijke node het volgende blok vindt"
+          },
+          {
+            "t": "def",
+            "text": "{q =|q is gelijk aan} kans dat de aanvaller het volgende blok vindt"
+          },
+          {
+            "t": "def",
+            "text": "{q_z =|q sub z is gelijk aan} kans dat de aanvaller ooit inhaalt vanuit z blokken achterstand"
+          },
+          {
+            "t": "math",
+            "id": "qz",
+            "say": "q sub z is gelijk aan één, als p kleiner of gelijk is aan q. Of q gedeeld door p, tot de macht z, als p groter is dan q."
+          },
+          {
+            "t": "p",
+            "text": "Gegeven onze aanname dat {p > q,|p groter is dan q,} daalt de kans exponentieel als het aantal blokken dat de aanvaller moet inhalen stijgt. Met de tegenvaller bij hem, als hij geen geluk maakt om vroeg naar voren te komen, worden zijn kansen verdwijnend klein naarmate hij verder achterop raakt."
+          },
+          {
+            "t": "p",
+            "text": "We gaan nu na hoe lang de ontvanger op een nieuwe transactie moet wachten voordat hij voldoende zeker is dat de verzender de transactie niet kan wijzigen. We gaan ervan uit dat de afzender een aanvaller is die de ontvanger wil laten geloven dat hij een tijdje heeft betaald, en vervolgens overschakelt om zichzelf na enige tijd terug te betalen. De ontvanger zal worden gewaarschuwd wanneer dat gebeurt, maar de afzender hoopt dat het te laat zal zijn."
+          },
+          {
+            "t": "p",
+            "text": "De ontvanger genereert een nieuw sleutelpaar en geeft de public key aan de afzender kort voordat hij ondertekent. Dit voorkomt dat de zender van tevoren een reeks blokken voorbereidt door er continu aan te werken totdat hij genoeg geluk heeft om ver genoeg vooruit te komen en vervolgens de transactie op dat moment uit te voeren. Zodra de transactie is verzonden, begint de oneerlijke afzender in het geheim te werken aan een parallelle ketting met een alternatieve versie van zijn transactie."
+          },
+          {
+            "t": "p",
+            "text": "De ontvanger wacht totdat de transactie aan een blok is toegevoegd en er z-blokken achter zijn gekoppeld. Hij weet niet precies hoeveel vooruitgang de aanvaller heeft geboekt, maar gaat er van uit dat de eerlijke blokken de gemiddelde verwachte tijd per blok hebben genomen, is de potentiële voortgang van de aanvaller een Poisson-verdeling met verwachte waarde:"
+          },
+          {
+            "t": "math",
+            "id": "lambda",
+            "say": "lambda is gelijk aan z keer q gedeeld door p."
+          },
+          {
+            "t": "p",
+            "text": "Om de waarschijnlijkheid te krijgen dat de aanvaller nu nog kan inhalen, vermenigvuldigen we de Poisson-dichtheid voor elke vooruitgang die hij gemaakt zou kunnen hebben door de waarschijnlijkheid dat hij vanaf dat punt kon inhalen:"
+          },
+          {
+            "t": "math",
+            "id": "sum",
+            "say": "De som, van k gelijk aan nul tot oneindig, van lambda tot de k, keer e tot de min lambda, gedeeld door k faculteit, keer q gedeeld door p tot de macht z min k, als k kleiner of gelijk is aan z. Of één, als k groter is dan z."
+          },
+          {
+            "t": "p",
+            "text": "Herinrichten om te voorkomen dat de oneindige staart van de verdeling wordt opgeteld ..."
+          },
+          {
+            "t": "math",
+            "id": "rearr",
+            "say": "Eén, min de som, van k gelijk aan nul tot z, van lambda tot de k, keer e tot de min lambda, gedeeld door k faculteit, keer één min q gedeeld door p tot de macht z min k."
+          },
+          {
+            "t": "p",
+            "text": "Converteren naar C code..."
+          },
+          {
+            "t": "code",
+            "hold": 5
+          },
+          {
+            "t": "p",
+            "text": "Als we wat resultaten uitvoeren, zien we dat de kans exponentieel afneemt met z."
+          },
+          {
+            "t": "results",
+            "hold": 5.5
+          },
+          {
+            "t": "p",
+            "text": "Oplossing voor P minder dan {0,1%...|0,1 procent.}"
+          },
+          {
+            "t": "ztable",
+            "head": "{P < 0.001|P minder dan 0,001.}",
+            "rows": [
+              [
+                "{q=0.10|q gelijk aan 0,1,}",
+                "{z=5|z gelijk aan 5.}"
+              ],
+              [
+                "{q=0.15|q gelijk aan 0,15,}",
+                "{z=8|z gelijk aan 8.}"
+              ],
+              [
+                "{q=0.20|q gelijk aan 0,2,}",
+                "{z=11|z gelijk aan 11.}"
+              ],
+              [
+                "{q=0.25|q gelijk aan 0,25,}",
+                "{z=15|z gelijk aan 15.}"
+              ],
+              [
+                "{q=0.30|q gelijk aan 0,3,}",
+                "{z=24|z gelijk aan 24.}"
+              ],
+              [
+                "{q=0.35|q gelijk aan 0,35,}",
+                "{z=41|z gelijk aan 41.}"
+              ],
+              [
+                "{q=0.40|q gelijk aan 0,4,}",
+                "{z=89|z gelijk aan 89.}"
+              ],
+              [
+                "{q=0.45|q gelijk aan 0,45,}",
+                "{z=340|z gelijk aan 340.}"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "id": "s12",
+        "num": "12",
+        "label": "Conclusie",
+        "scene": "conclusion",
+        "items": [
+          {
+            "t": "h",
+            "text": "{12.|Twaalf.} Conclusie"
+          },
+          {
+            "t": "p",
+            "text": "We hebben een systeem voor elektronische transacties voorgesteld die trouweloos is. We zijn begonnen met het gebruikelijke kader van munten die bestaat uit digitale handtekeningen, die sterke controle over eigendom biedt, maar onvolledig is zonder een manier om dubbele uitgaven te voorkomen. Om dit op te lossen hebben we een Peer-to-Peer-netwerk met gebruik van Proof-of-Work aangeboden om een openbare geschiedenis van transacties vast te leggen die snel rekenkundig onpraktisch wordt voor een aanvaller om te veranderen als eerlijke nodes de meerderheid van de CPU-kracht besturen. Het netwerk is robuust in zijn ongestructureerde eenvoud. Nodes werken allemaal tegelijk met weinig coördinatie. Ze hoeven niet te worden geïdentificeerd omdat berichten niet naar een bepaalde plaats worden gerouteerd en alleen op de best mogelijke manier moeten worden afgeleverd. Nodes kunnen vertrekken en naar believen weer samenkomen in het netwerk, en accepteren de Proof-of-Work als bewijs van wat er gebeurde toen ze weg waren. Ze stemmen met hun CPU-kracht en drukken hun acceptatie van geldige blokken uit door eraan te werken, deze uit te breiden en ongeldige blokken te verwerpen door te weigeren om eraan te werken. Alle benodigde regels en incentives kunnen worden afgedwongen met dit consensusmechanisme."
+          }
+        ]
+      },
+      {
+        "id": "refs",
+        "label": "Referenties",
+        "scene": null,
+        "items": [
+          {
+            "t": "refs",
+            "list": [
+              "W. Dai, \"b-money,\" http://www.weidai.com/bmoney.txt, 1998.",
+              "H. Massias, X.S. Avila, and J.-J. Quisquater, \"Design of a secure timestamping service with minimal trust requirements,\" In 20th Symposium on Information Theory in the Benelux, May 1999.",
+              "S. Haber, W.S. Stornetta, \"How to time-stamp a digital document,\" In Journal of Cryptology, vol 3, no 2, pages 99-111, 1991.",
+              "D. Bayer, S. Haber, W.S. Stornetta, \"Improving the efficiency and reliability of digital time-stamping,\" In Sequences II: Methods in Communication, Security and Computer Science, pages 329-334, 1993.",
+              "S. Haber, W.S. Stornetta, \"Secure names for bit-strings,\" In Proceedings of the 4th ACM Conference on Computer and Communications Security, pages 28-35, April 1997.",
+              "A. Back, \"Hashcash - a denial of service counter-measure,\" http://www.hashcash.org/papers/hashcash.pdf, 2002.",
+              "R.C. Merkle, \"Protocols for public key cryptosystems,\" In Proc. 1980 Symposium on Security and Privacy, IEEE Computer Society, pages 122-133, April 1980.",
+              "W. Feller, \"An introduction to probability theory and its applications,\" 1957."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "ui": {
+    "labels": {
+      "ringText": "EEN PEER-TO-PEER ELEKTRONISCH GELDSYSTEEM ✦ SATOSHI NAKAMOTO ✦ MMVIII ✦",
+      "releaseDate": "31 oktober 2008 · bitcoin.org",
+      "finInstitution": "Financiële\ninstelling",
+      "sameCoinTwice": "dezelfde munt, twee keer?",
+      "signed": "ondertekend",
+      "customer": "Klant",
+      "merchant": "Handelaar",
+      "bank": "Bank",
+      "reversed": "teruggedraaid",
+      "fees": "transactiekosten",
+      "tooSmall": "te klein om mee bezig te zijn",
+      "prying": "Naam? Adres?\nTelefoon? ID?",
+      "fraud": "fraude,",
+      "pricedIn": "in de prijs verwerkt",
+      "inPersonOk": "in persoon: contant geld werkt gewoon",
+      "onlineTrusted": "online: een vertrouwde partij in het midden",
+      "irrevEscrow": "onomkeerbaar voor verkopers · escrow voor kopers",
+      "distributedTs": "een gedistribueerde timestampserver",
+      "attackers": "aanvallers",
+      "honestNodes": "eerlijke nodes",
+      "transaction": "Transactie",
+      "hash": "Hash",
+      "ownerPubKey": "Publieke sleutel\nvan eigenaar {n}",
+      "ownerSig": "Handtekening\nvan eigenaar {n}",
+      "ownerPrivKey": "Privésleutel\nvan eigenaar {n}",
+      "verify": "Verifiëren",
+      "sign": "Ondertekenen",
+      "signedAgainBy": "opnieuw ondertekend\ndoor eigenaar {n}",
+      "doubleSpend": "dubbele uitgave?",
+      "mint": "MUNT",
+      "bankCaps": "BANK",
+      "oneCompany": "alles rust op één bedrijf",
+      "timeAxis": "tijd",
+      "firstTx": "eerste",
+      "laterTx": "latere",
+      "itemLabel": "Item",
+      "newspaper": "DE  DAGELIJKSE  TIMESTAMP",
+      "notice": "MEDEDELING · blokhash",
+      "existed": "BESTOND",
+      "block": "Blok",
+      "prevHash": "Vorige Hash",
+      "nonce": "Nonce",
+      "nonceN": "Nonce {n}",
+      "hashLower": "hash",
+      "expectedTries": "verwachte pogingen",
+      "zero": "nul",
+      "zeros": "nullen",
+      "oneVote": "1 stem",
+      "onePerson": "één persoon",
+      "honestChain": "eerlijke chain",
+      "attackerChain": "chain van de aanvaller",
+      "easy": "gemakkelijk",
+      "hard": "moeilijk",
+      "difficulty": "moeilijkheidsgraad",
+      "targetRate": "doel: ongeveer 6 blokken per uur",
+      "tooFast": "te snel → er zijn meer nullen nodig",
+      "editedHash": "gewijzigd → hash begint niet meer met nullen",
+      "foundHash": "✓ gevonden: verifiëren kost slechts één hash",
+      "sendMissed": "stuur me degene die ik miste",
+      "blockCreator": "maker van het blok",
+      "goldMiners": "goudzoekers besteden moeite…",
+      "btcEnergy": "…Bitcoin besteedt CPU-tijd en elektriciteit",
+      "txIn": "in",
+      "txOut": "uit",
+      "feeFlow": "invoer − uitvoer = 0.02 aan kosten → de maker van het blok",
+      "cap21": "limiet van 21.000.000",
+      "halving": "munten in omloop · een halvering elke 210.000 blokken",
+      "nowBlock": "nu · blok {h} · {m}M gedolven",
+      "newCoin": "nieuwe munt → maker",
+      "defraud": "mensen bedriegen",
+      "mintNew": "nieuwe munten genereren",
+      "yourTx": "jouw transactie",
+      "blockPlus": "blok +{n}",
+      "blockHeaderHash": "Blokheader (Blokhash)",
+      "rootHash": "Root Hash",
+      "blockHeader": "Blokheader",
+      "approx80": "≈ 80 bytes",
+      "perYear": "bytes · per uur · per dag · per jaar",
+      "ram2gb": "2 GB RAM (2008)",
+      "oneYearHeaders": "↑ één jaar aan headers",
+      "moore": "+1,2 GB per jaar (wet van Moore)",
+      "merkleRoot": "Merkle Root",
+      "lightClient": "lichte client",
+      "fullNode": "volledige node",
+      "everyBlock": "elk blok, elke transactie",
+      "headersOnly": "alleen blokheaders · 80 bytes per stuk",
+      "attackerMoreCpu": "chain van de aanvaller, meer CPU-kracht",
+      "alertInvalid": "waarschuwing: ongeldig blok",
+      "businessesNode": "bedrijven: eigen node",
+      "everyCent": "een aparte transactie voor elke cent?",
+      "payee": "ontvanger",
+      "payment": "betaling",
+      "changeBack": "wisselgeld, terug naar de afzender",
+      "fanoutOk": "fan-out is geen probleem: geen volledige geschiedenis nodig",
+      "identities": "Identiteiten",
+      "transactions": "Transacties",
+      "trustedThird": "Vertrouwde\nDerde Partij",
+      "counterparty": "Tegenpartij",
+      "publicStr": "Publiek",
+      "tradPrivacy": "Traditioneel Privacy Model",
+      "newPrivacy": "Nieuw Privacy Model",
+      "nowPublic": "moet nu openbaar worden…",
+      "keyN": "sleutel {n}",
+      "sameOwner": "dezelfde eigenaar",
+      "revealed": "onthuld!",
+      "noCreate": "waarde uit het niets creëren",
+      "noSteal": "geld nemen dat nooit van hem was",
+      "onlyTakeBack": "alleen: zijn eigen betaling terugnemen",
+      "honestLead": "eerlijke voorsprong",
+      "blocksAxis": "blokken →",
+      "attackerBehind": "aanvaller: z blokken achter",
+      "walkLegend": "+1 eerlijk blok (p)   −1 blok van de aanvaller (q)",
+      "defP": "kans dat een eerlijke node het volgende blok vindt",
+      "defQ": "kans dat de aanvaller het volgende blok vindt",
+      "defQz": "kans dat de aanvaller ooit inhaalt vanuit z blokken achterstand",
+      "ifPLEQ": "als p ≤ q",
+      "ifPGT": "als p > q",
+      "zBehindAxis": "z (blokken achter) →",
+      "recipient": "ontvanger",
+      "sender": "afzender",
+      "freshKey": "nieuwe sleutel",
+      "secretChain": "geheime parallelle chain: zijn alternatieve transactie",
+      "finiteSum": "eindige som: alleen k = 0 … z",
+      "attackerProb": "kans op succes van de aanvaller",
+      "blocksWait": "blokken wachten voor P < 0,1%",
+      "trustedThirdCaps": "VERTROUWDE DERDE PARTIJ",
+      "twice": "twee keer?",
+      "consensus": "CONSENSUS",
+      "byCpu": "op CPU-kracht"
+    },
+    "chrome": {
+      "docTitle": "Bitcoin: Een peer-to-peer elektronisch geldsysteem · voorgelezen",
+      "kick": "Een voorgelezen versie · Satoshi Nakamoto · 2008",
+      "begin": "Beginnen",
+      "replay": "Opnieuw",
+      "loading": "Narratie laden…",
+      "narrationMissing": "De narratie voor deze taal is nog niet klaar — kies een andere taal in het instellingenmenu.",
+      "narratedBy": "Voorgelezen door {voice} · {minutes} min · {hint}",
+      "clickWord": "klik op een woord om daarheen te springen",
+      "blockHeight": "Blokhoogte",
+      "price": "Bitcoinprijs",
+      "btcusd": "BTC/USD",
+      "connecting": "verbinden…",
+      "unavailable": "niet beschikbaar",
+      "justNow": "net nu",
+      "minAgo": "{n} min geleden",
+      "playAria": "Afspelen / pauzeren",
+      "ovTitle": "Hele poster (O)",
+      "ovAria": "Hele-poster-weergave aan/uit",
+      "voiceTitle": "Taal & stem",
+      "voiceAria": "Taal & stem",
+      "findTitle": "Zoeken in het document (Ctrl+F)",
+      "findAria": "Zoeken in het document",
+      "findPlaceholder": "Zoeken in het document…",
+      "findCloseAria": "Zoeken sluiten",
+      "findInputAria": "Zoek in het document",
+      "findPrevAria": "Vorige match",
+      "findNextAria": "Volgende match",
+      "languageHeading": "Taal",
+      "narratorHeading": "Verteller",
+      "confirmationsN": "{n} bevestigingen",
+      "fsTitle": "Volledig scherm (F)",
+      "fsAria": "Volledig scherm",
+      "theme": "Thema",
+      "themeAuto": "Auto",
+      "themeLight": "Licht",
+      "themeDark": "Donker",
+      "readerMode": "Lezer",
+      "posterMode": "Poster",
+      "about": "Over",
+      "aboutClose": "Sluiten"
+    },
+    "caps": {
+      "coin": [
+        "Bitcoin",
+        "Een peer-to-peer elektronisch geldsysteem",
+        "Satoshi Nakamoto · 31 oktober 2008"
+      ],
+      "p2p": [
+        "Online betalingen lopen via een financiële instelling",
+        "Peer-to-peer: rechtstreeks van de ene naar de andere partij",
+        "Digitale handtekeningen bewijzen wie er betaalt…",
+        "…maar wie voorkomt dat dezelfde munt twee keer wordt uitgegeven?",
+        "De oplossing: een peer-to-peer netwerk",
+        "Transacties worden gehasht in een doorlopende chain",
+        "De geschiedenis verandert niet zonder de Proof-of-Work opnieuw te doen",
+        "De langste chain is het verslag van wat er gebeurde",
+        "…en bewijs dat deze afkomstig is van de meeste CPU-kracht",
+        "Een eerlijke meerderheid laat aanvallers achter zich",
+        "Berichten worden uitgezonden op basis van best effort",
+        "Nodes verlaten het netwerk en keren terug wanneer ze willen…",
+        "…en accepteren de langste chain als bewijs van wat ze misten"
+      ],
+      "trust": [
+        "Online handel is afhankelijk van vertrouwde derde partijen",
+        "Betalingen kunnen altijd worden teruggedraaid: banken bemiddelen geschillen",
+        "Bemiddeling kost geld en doodt kleine, losse betalingen",
+        "Handelaren moeten op hun hoede zijn voor hun klanten",
+        "Een bepaald percentage fraude wordt geaccepteerd",
+        "In persoon werkt contant geld zonder tussenpersoon",
+        "Online is er geen contant geld: alleen een vertrouwde partij",
+        "Nodig: cryptografisch bewijs in plaats van vertrouwen",
+        "Onomkeerbare betalingen beschermen verkopers; escrow beschermt kopers",
+        "Een peer-to-peer timestampserver bewijst de volgorde van transacties",
+        "Veilig zolang eerlijke nodes meer CPU-kracht beheersen"
+      ],
+      "txchain": [
+        "Een elektronische munt is een chain van digitale handtekeningen",
+        "Elke eigenaar ondertekent een hash van de vorige transactie en de publieke sleutel van de volgende",
+        "…en voegt ze toe aan het einde van de munt",
+        "De ontvanger verifieert elke handtekening in de chain",
+        "…maar ziet niet of een eigenaar de munt twee keer uitgaf",
+        "Gebruikelijke oplossing: een centrale munt controleert elke transactie",
+        "Dan hangt het hele geldsysteem af van wie de munt beheert",
+        "…net als bij een bank",
+        "Alleen de vroegste transactie telt",
+        "Dus elke transactie moet openbaar worden aangekondigd",
+        "Iedereen is het eens over één enkele geschiedenis van de volgorde",
+        "Bewijs dat de meerderheid van de nodes hem eerst zag"
+      ],
+      "timestamp": [
+        "Een timestampserver begint met een blok items",
+        "…neemt de hash van het hele blok…",
+        "…en publiceert de hash op grote schaal, zoals in een krant",
+        "Bewijs dat de gegevens op dat moment bestonden",
+        "Elke timestamp bevat de vorige in zijn hash…",
+        "…en vormt zo een chain",
+        "Elke nieuwe timestamp versterkt de eerdere"
+      ],
+      "pow": [
+        "Proof-of-Work, geleend van Adam Backs Hashcash",
+        "Zoek een waarde waarvan de SHA-256 hash begint met nul-bits",
+        "Elke extra nul vermenigvuldigt het werk met zestien…",
+        "…en toch controleert iedereen het met één enkele hash",
+        "Voeg de nonce toe tot de hash genoeg nullen heeft",
+        "Wijzig het blok en zijn Proof-of-Work is gebroken",
+        "…en elk blok erna moet ook opnieuw worden gedaan",
+        "Eén-IP-adres-één-stem? Iedereen kan veel IP's bemachtigen",
+        "Proof-of-Work is in essentie één-CPU-één-stem",
+        "De langste chain draagt het meeste werk: de meerderheid",
+        "Een aanvaller moet blokken overdoen en dan inhalen en voorbijgaan",
+        "De moeilijkheidsgraad volgt een voortschrijdend gemiddelde: ongeveer 6 blokken per uur",
+        "Blokken te snel? De moeilijkheidsgraad stijgt"
+      ],
+      "network": [
+        "Het netwerk: nodes, losjes verbonden",
+        "1 · Nieuwe transacties worden uitgezonden naar alle nodes",
+        "2 · Elke node verzamelt nieuwe transacties in een blok",
+        "3 · Elke node werkt aan een moeilijke Proof-of-Work",
+        "4 · Wie er als eerste een vindt, zendt zijn blok uit",
+        "5 · Nodes accepteren het alleen als elke transactie geldig is",
+        "6 · …en bouwen het volgende blok erop voort",
+        "De langste chain is altijd de juiste",
+        "Twee blokken tegelijk: het netwerk splitst",
+        "Elke kant bewaart de andere tak, voor de zekerheid",
+        "Het volgende blok verbreekt de das; iedereen schakelt over",
+        "Uitzendingen hoeven niet elke node te bereiken",
+        "Een blok gemist? Vraag ernaar zodra de volgende arriveert"
+      ],
+      "incentive": [
+        "Volgens afspraak is de eerste transactie in een blok bijzonder",
+        "Hij creëert een gloednieuwe munt voor de maker van het blok",
+        "Een stimulans om het netwerk te steunen, en een manier om munten uit te geven",
+        "Zoals goudzoekers goud toevoegen, maar CPU-tijd en elektriciteit besteden",
+        "Transactiekosten: wat de invoer boven de uitvoer uitsteekt, gaat naar de maker van het blok",
+        "Een vaste voorraad, waarna alleen de kosten betalen: inflatievrij",
+        "De stimulans moedigt nodes ook aan om eerlijk te blijven",
+        "Volgens de regels spelen levert meer op dan ze ondermijnen"
+      ],
+      "merkle": [
+        "Als een transactie onder genoeg blokken begraven ligt…",
+        "…kunnen de gebruikte transacties ervoor worden weggegooid",
+        "Transacties worden per paar gehasht, omhoog door een Merkle Tree",
+        "Alleen de root gaat in de hash van het blok",
+        "Oude blokken krimpen door takken af te stoten",
+        "De interne hashes hoeven niet bewaard te worden",
+        "Een blokheader alleen is ongeveer 80 bytes",
+        "Eén per 10 minuten is slechts 4,2 MB per jaar",
+        "Een splinter naast 2 GB RAM, dus headers passen in het geheugen",
+        {
+          "fig": "Transacties gehasht in een Merkle Tree"
+        }
+      ],
+      "spv": [
+        "Betalingen kunnen worden geverifieerd zonder een volledige node te draaien",
+        "Bewaar alleen de blokheaders van de langste chain",
+        "Vraag netwerknodes tot je overtuigd bent dat het de langste is",
+        "Haal de Merkle-tak op die de transactie aan zijn blok koppelt",
+        "Hij kan de transactie niet zelf controleren…",
+        "…maar elk blok dat erna wordt toegevoegd bevestigt hem",
+        "Een aanvaller die het netwerk overmeestert kan het misleiden",
+        "Verdediging: waarschuwingen van nodes starten een volledige download",
+        "Drukke bedrijven draaien toch hun eigen node",
+        {
+          "fig": "Langste Proof-of-Work chain"
+        }
+      ],
+      "inout": [
+        "Munten één voor één behandelen zou onhandelbaar zijn",
+        "Daarom hebben transacties meerdere inputs en outputs",
+        "Of één invoer uit een grotere eerdere transactie…",
+        "…of meerdere inputs die kleinere bedragen combineren",
+        "Hooguit twee outputs: de betaling en eventueel wisselgeld",
+        "Fan-out is geen probleem: geen losse geschiedenis nodig"
+      ],
+      "privacy": [
+        "Banken houden het privé door te beperken wie de informatie ziet",
+        "Bitcoin moet elke transactie openbaar aankondigen…",
+        "…dus de muur verschuift: openbare sleutels blijven anoniem",
+        "Het publiek ziet bedragen, maar niet wie",
+        "Zoals de \"band\" van een beurs: tijden en groottes, geen namen",
+        "Gebruik een nieuw sleutelpaar voor elke transactie",
+        "Transacties met meerdere inputs onthullen een gemeenschappelijke eigenaar",
+        "Onthul één eigenaar en gekoppelde transacties kunnen volgen"
+      ],
+      "calc": [
+        "Een aanvaller probeert een alternatieve chain sneller te bouwen dan de eerlijke",
+        "Zelfs als hij wint, kan hij geen waarde creëren of stelen…",
+        "…hij kan alleen proberen geld terug te nemen dat hij net uitgaf",
+        "De race is een binomiale willekeurige wandeling: +1 of −1 per blok",
+        "Inhalen vanuit achterstand is het Gambler's Ruin probleem",
+        "p: een eerlijke node vindt het volgende blok · q: de aanvaller",
+        "Als p > q, zijn kansen van de aanvaller (q/p)ᶻ",
+        "De kansen dalen exponentieel met elk blok achterstand",
+        "Hoe lang moet de ontvanger wachten voordat hij een betaling vertrouwt?",
+        "Een nieuw sleutelpaar, kort voor het ondertekenen, stopt vooraf gebouwde chains",
+        "De oneerlijke afzender mijnt in het geheim een parallelle chain",
+        "De ontvanger wacht op z blokken erbovenop",
+        "De voortgang van de aanvaller volgt een Poisson-verdeling",
+        "Elke uitkomst wordt gewogen naar zijn inhaalkans",
+        "Herschikt om de oneindige staart niet op te tellen",
+        "Omgezet naar C code…",
+        "Resultaten: de kans daalt exponentieel",
+        "Hoeveel blokken wachten voor minder dan 0,1% kans"
+      ],
+      "conclusion": [
+        "Elektronische transacties zonder vertrouwen nodig te hebben",
+        "Munten van digitale handtekeningen geven sterk eigendomsbewijs…",
+        "…maar hebben een manier nodig om dubbele uitgaven te voorkomen",
+        "Een peer-to-peer netwerk legt een openbare geschiedenis vast met Proof-of-Work",
+        "Veranderen wordt voor een aanvaller al snel onpraktisch",
+        "Robuust in zijn ongestructureerde eenvoud",
+        "Nodes hebben geen identiteit nodig; berichten hoeven niet gerouteerd",
+        "Nodes vertrekken en keren terug wanneer ze willen, en accepteren de langste chain",
+        "Ze stemmen met CPU-kracht: geldige blokken verlengen, ongeldige negeren",
+        "Regels en stimulansen, afgedwongen door consensus"
+      ]
+    },
+    "cues": {
+      "PEER-TO-PEER": "peer-to-peer",
+      "Satoshi": "Satoshi",
+      "directly from one party": "van de ene naar de andere partij",
+      "Digital signatures provide": "Digitale handtekeningen zijn een deel",
+      "the main benefits are lost": "de belangrijkste voordelen gaan verloren",
+      "We propose a solution": "We bieden een oplossing",
+      "timestamps transactions by hashing": "timestampt transacties door ze",
+      "cannot be changed without redoing": "niet kan worden gewijzigd zonder",
+      "The longest chain not only": "De langste chain dient niet alleen",
+      "largest pool of CPU power": "grootste pool van CPU-kracht",
+      "generate the longest chain and outpace": "genereren ze de langste chain",
+      "Messages are broadcast": "Berichten worden op de best mogelijke manier uitgezonden",
+      "nodes can leave and rejoin": "het netwerk verlaten en weer meedoen",
+      "accepting the longest": "de langste Proof-of-Work-chain te accepteren",
+      "Completely non-reversible transactions": "Volledig niet-omkeerbare transacties",
+      "The cost of mediation": "De kosten van bemiddelingen",
+      "Merchants must be wary": "Handelaren moeten op hun hoede zijn",
+      "A certain percentage of fraud": "Een bepaald percentage van fraude",
+      "avoided in person": "kunnen persoonlijk worden vermeden",
+      "no mechanism exists": "er bestaat geen mechanisme",
+      "What is needed": "Wat nodig is",
+      "computationally impractical to reverse": "computationeel onpraktisch zijn om terug te draaien",
+      "distributed timestamp server": "gedistribueerde timestampserver",
+      "The system is secure": "Het systeem is beveiligd",
+      "digitally signing a hash": "digitaal te ondertekenen",
+      "adding these to the end": "toe te voegen aan het einde",
+      "A payee can verify": "de ontvanger niet kan verifiëren",
+      "trusted central authority, or mint": "een vertrouwde centrale autoriteit of munt",
+      "the fate of the entire money system": "het lot van het hele geldsysteem",
+      "just like a bank": "net als een bank",
+      "We need a way": "We hebben een manier nodig",
+      "publicly announced": "openbaar worden aangekondigd",
+      "agree on a single history": "over een enkele geschiedenis",
+      "the majority of nodes agreed": "de meerderheid van de nodes was overeengekomen",
+      "taking a hash of a block": "een hash te nemen van een blok",
+      "widely publishing the hash": "de hash op grote schaal te publiceren",
+      "The timestamp proves": "De timestamp bewijst",
+      "Each timestamp includes the previous": "Elke timestamp bevat de vorige timestamp",
+      "forming a chain": "een chain wordt gevormd",
+      "reinforcing the ones before": "de eerdere tijdstip versterkt",
+      "scanning for a value": "het zoeken naar een waarde",
+      "The average work required": "Het vereiste gemiddelde werk",
+      "verified by executing a single hash": "door het uitvoeren van een enkele hash",
+      "incrementing a nonce": "door een nonce in het blok toe te voegen",
+      "the block cannot be changed": "kan het blok niet worden gewijzigd",
+      "redoing all the blocks after it": "het opnieuw doen van alle blokken erna",
+      "one-IP-address-one-vote": "één-IP-adres-één-stem",
+      "Proof-of-work is essentially": "Proof-of-work is in essentie",
+      "The majority decision is represented": "De meerderheidsbeslissing wordt vertegenwoordigd",
+      "To modify a past block": "Om een blok uit het verleden te wijzigen",
+      "To compensate for increasing hardware": "Om de toenemende hardwaresnelheid",
+      "New transactions are broadcast": "Nieuwe transacties worden uitgezonden",
+      "Each node collects new transactions": "Elke node verzamelt nieuwe transacties",
+      "Each node works on finding": "Elke node werkt aan het vinden",
+      "When a node finds": "Wanneer een node een Proof-of-Work vindt",
+      "Nodes accept the block only": "Nodes accepteren het blok alleen",
+      "Nodes express their acceptance": "Nodes drukken hun acceptatie",
+      "Nodes always consider the longest": "Nodes beschouwen de langste chain altijd",
+      "If two nodes broadcast": "Als twee nodes tegelijkertijd",
+      "save the other branch": "bewaren ze de andere tak",
+      "The tie will be broken": "De das wordt verbroken",
+      "New transaction broadcasts do not": "Nieuwe transactie-uitzendingen hoeven niet",
+      "If a node does not receive": "Als een node geen blok ontvangt",
+      "a special transaction that starts": "een speciale transactie waarbij een nieuwe munt wordt gestart",
+      "This adds an incentive": "Dit voegt een stimulans toe",
+      "analogous to gold miners": "analoog aan goudzoekers",
+      "The incentive can also be funded": "De incentive kan ook worden gefinancieerd",
+      "Once a predetermined number": "Zodra een vooraf bepaald aantal munten",
+      "The incentive may help": "De incentive kan helpen",
+      "He ought to find it more profitable": "Hij zou het winstgevender moeten vinden",
+      "the spent transactions before it": "de gebruikte transacties daarvoor",
+      "transactions are hashed in a Merkle": "transacties gehasht in een Merkle Tree",
+      "with only the root included": "met alleen de root in de hash",
+      "Old blocks can then be compacted": "Oude blokken kunnen vervolgens worden samengeperst",
+      "The interior hashes do not": "De binnenbehuizingen hoeven niet",
+      "A block header with no transactions": "Een block-header zonder transacties",
+      "If we suppose blocks are generated": "Als we er van uit gaan dat blokken",
+      "With computer systems typically": "Omdat computersystemen gewoonlijk",
+      "keep a copy of the block headers": "een kopie te bewaren van de block-headers",
+      "querying network nodes": "door netwerknodes te ondervragen",
+      "obtain the Merkle branch": "de Merkle-tak verkrijgt",
+      "blocks added after it": "blokken die zijn toegevoegd nadat",
+      "more vulnerable if the network is overpowered": "kwetsbaarder is als het netwerk wordt overmeesterd",
+      "accept alerts from network nodes": "waarschuwingen van netwerknodes te accepteren",
+      "Businesses that receive frequent": "Bedrijven die veelvuldig worden betaald",
+      "To allow value to be split": "Om de waarde te kunnen splitsen",
+      "a single input from a larger": "een enkele invoer zijn van een grotere",
+      "multiple inputs combining smaller": "meerdere inputs die kleinere bedragen combineren",
+      "at most two outputs": "maximaal twee outputs",
+      "It should be noted that fan-out": "Het moet opgemerkt worden dat fan-out",
+      "The necessity to announce": "De noodzaak om alle transacties",
+      "by keeping public keys anonymous": "door openbare sleutels anoniem te houden",
+      "The public can see": "Het publiek kan zien",
+      "stock exchanges": "beurzen",
+      "a new key pair should be used": "moet voor elke transactie een nieuw sleutelpaar worden gebruikt",
+      "Some linking is still unavoidable": "Sommige koppelingen zijn nog steeds onvermijdelijk",
+      "The risk is that if the owner": "Het risico is dat als de eigenaar",
+      "it does not throw the system open": "gooit het het systeem niet open",
+      "An attacker can only try": "Een aanvaller kan alleen proberen",
+      "Binomial Random Walk": "binominale willekeurige wandeling",
+      "The probability of an attacker catching up": "De kans dat een aanvaller",
+      "probability an honest node finds": "kans dat een eerlijke node het volgende blok vindt",
+      "Given our assumption": "Gegeven onze aanname",
+      "We now consider how long": "We gaan nu na hoe lang",
+      "The receiver generates a new key pair": "De ontvanger genereert een nieuw sleutelpaar",
+      "Once the transaction is sent": "Zodra de transactie is verzonden",
+      "The recipient waits until": "De ontvanger wacht totdat",
+      "Poisson distribution": "Poisson-verdeling",
+      "we multiply the Poisson density": "vermenigvuldigen we de Poisson-dichtheid",
+      "Rearranging to avoid": "Herinrichten om te voorkomen",
+      "Converting to C code": "Converteren naar C code",
+      "Running some results": "Als we wat resultaten uitvoeren",
+      "Solving for P less than": "Oplossing voor P minder dan",
+      "coins made from digital signatures": "munten die bestaat uit digitale handtekeningen",
+      "incomplete without a way": "onvolledig is zonder een manier",
+      "we proposed a peer-to-peer network": "hebben we een Peer-to-Peer-netwerk",
+      "quickly becomes computationally impractical": "snel rekenkundig onpraktisch wordt",
+      "The network is robust": "Het netwerk is robuust",
+      "They do not need to be identified": "Ze hoeven niet te worden geïdentificeerd",
+      "Nodes can leave and rejoin": "Nodes kunnen vertrekken en naar believen weer samenkomen",
+      "They vote with their CPU power": "Ze stemmen met hun CPU-kracht",
+      "Any needed rules and incentives": "Alle benodigde regels en incentives",
+      "payee can't verify that one": "een van de eigenaren de munt niet dubbel heeft uitgegeven",
+      "If they're generated too fast": "Als ze te snel worden gegenereerd",
+      "He can't check the transaction": "Hij kan de transactie niet voor zichzelf controleren"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "bitcoin-whitepaper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The Bitcoin whitepaper — a narrated, interactive, fully translated edition of Satoshi Nakamoto's 2008 paper.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build:i18n": "node scripts/i18n/build-locale.mjs es zh ja ko fr de pt ru ar it hi pl nl he",
+    "extract-strings": "node scripts/i18n/extract-strings.mjs",
+    "build:narration": "node scripts/build-narration.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261015.1",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.151.0"
+  },
+  "packageManager": "pnpm@10.18.0"
+}
