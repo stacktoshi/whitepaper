@@ -529,7 +529,7 @@
       "notice": "AVIS · empreinte du bloc",
       "existed": "EXISTAIT",
       "block": "Bloc",
-      "prevHash": "Empreinte précédente",
+      "prevHash": "Empreinte\nPrécédente",
       "nonce": "Nonce",
       "nonceN": "Nonce {n}",
       "hashLower": "empreinte",
