@@ -3086,7 +3086,10 @@ function applyVoice(idx) {
   $('#begin').disabled = false;
   $('#vmenu').querySelectorAll('button[data-v]').forEach((b) => b.classList.toggle('on', +b.dataset.v === idx));
   const rate = audio.playbackRate; // changing src can reset it
-  audio.src = `whitepaper/narration.mp3?lang=${window.WP_LANG}&voice=${v.id}&v=2`;
+  // static hosting: point straight at the pack's audio file (no ?lang= route);
+  // English keeps its three narrators at the legacy names
+  const AUDIO_FILES = { 'en:ru': 'whitepaper/narration.mp3', 'en:br': 'whitepaper/narration-brian.mp3', 'en:al': 'whitepaper/narration-alistair.mp3' };
+  audio.src = AUDIO_FILES[`${window.WP_LANG}:${v.id}`] || (window.WP_LANG === 'en' ? 'whitepaper/narration.mp3' : `whitepaper/i18n/${window.WP_LANG}/narration.mp3`);
   audio.playbackRate = rate;
 }
 const tFromX = (x) => { const r = track.getBoundingClientRect(); return clamp((x - r.left) / r.width) * DUR; };

@@ -7,8 +7,8 @@
 // alignment, then mapped onto the paper's own tokens. The cache key includes the
 // full TTS config (voice + language), so re-voicing or re-langing re-fetches.
 // Output:
-//   en      -> public/whitepaper/narration*.audio + narration*.js (legacy names)
-//   <lang>  -> public/whitepaper/i18n/<lang>/narration.audio + narration.js
+//   en      -> public/whitepaper/narration*.mp3 + narration*.js (legacy names)
+//   <lang>  -> public/whitepaper/i18n/<lang>/narration.mp3 + narration.js
 //              (narration.js = window.NARRATION_PACK = [{ id, name, nar }])
 import fs from 'node:fs';
 import path from 'node:path';
@@ -310,7 +310,7 @@ const duration = pcm.length / 2 / RATE;
 const pcmFile = path.join(CACHE, 'narration.pcm');
 fs.writeFileSync(pcmFile, pcm);
 execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 's16le', '-ar', String(RATE), '-ac', '1', '-i', pcmFile,
-  '-codec:a', 'libmp3lame', '-b:a', '64k', '-f', 'mp3', path.join(OUT, stem + '.audio')]);
+  '-codec:a', 'libmp3lame', '-b:a', '64k', '-f', 'mp3', path.join(OUT, stem + '.mp3')]);
 fs.unlinkSync(pcmFile);
 
 const narration = {
@@ -325,7 +325,7 @@ if (lang === 'en') {
   fs.writeFileSync(path.join(OUT, stem + '.js'), `window.NARRATION_PACK_LANG = ${JSON.stringify(lang)};\nwindow.NARRATION_PACK = ${JSON.stringify(pack)};\n`);
 }
 
-const mb = (fs.statSync(path.join(OUT, stem + '.audio')).size / 1e6).toFixed(1);
+const mb = (fs.statSync(path.join(OUT, stem + '.mp3')).size / 1e6).toFixed(1);
 console.log(`[${lang}/${TTS.voiceId}] ${stem}.audio: ${Math.floor(duration / 60)}m${Math.round(duration % 60)}s, ${mb} MB`);
 console.log(`[${lang}/${TTS.voiceId}] new API usage this run: ${stats.ttsChars} TTS characters`);
 if (weak.length) console.log('low-confidence alignments (interpolated):\n  ' + weak.join('\n  '));
