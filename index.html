@@ -156,6 +156,25 @@
   .bub .chg { font-style: normal; }
   .stat.right { text-align: right; }
   .stat.right .lbl { justify-content: flex-end; }
+  .stat .val.cur { cursor: pointer; }
+  .stat .val.cur:hover { color: var(--orange); text-decoration: underline dotted; text-underline-offset: 6px; }
+  .stat .val.cur:focus-visible { outline: 1px dashed var(--orange); outline-offset: 5px; }
+  .cv { display: none; font: 600 9px var(--display); color: var(--ink3); margin-inline-start: 1px; transform: translateY(-2px); transition: color .2s; }
+  @media (hover: hover) and (pointer: fine) { .cv { display: inline-block; } }
+  .stat:hover .cv, .stat.cur-open .cv { color: var(--orange); }
+  .cmenu {
+    position: absolute; top: calc(100% + 10px); right: 0; z-index: 45; min-width: 118px; padding: 5px 5px 6px;
+    border: 1px solid var(--ink); outline: 1px solid rgba(var(--ink-rgb), .25); outline-offset: 3px;
+    background: var(--paper2) var(--grain); box-shadow: 0 12px 30px rgba(52, 38, 22, .3);
+    opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .2s, transform .2s, visibility 0s .2s;
+    pointer-events: none;
+  }
+  .cmenu.open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition: opacity .2s, transform .2s, visibility 0s; }
+  .cmenu button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; border: 0; background: none; padding: 7px 9px; cursor: pointer; font: 600 11.5px var(--display); letter-spacing: .12em; color: var(--ink); text-align: start; transition: background .2s; }
+  .cmenu button:hover, .cmenu button:focus-visible { background: rgba(201, 122, 44, .14); outline: none; }
+  .cmenu button i { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); opacity: 0; }
+  .cmenu button.on i { opacity: 1; }
+  .stat.cur-open .bub { opacity: 0; visibility: hidden; }
   .live { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 0 rgba(201, 122, 44, .6); animation: live 2.4s infinite; }
   .live.off { background: var(--ink3); animation: none; }
   @keyframes live { 0% { box-shadow: 0 0 0 0 rgba(201, 122, 44, .55); } 70% { box-shadow: 0 0 0 9px rgba(201, 122, 44, 0); } 100% { box-shadow: 0 0 0 0 rgba(201, 122, 44, 0); } }
@@ -465,6 +484,7 @@
   html[dir="rtl"] .stat.right .lbl { justify-content: flex-start; }
   html[dir="rtl"] .stat.left .bub { left: auto; right: 0; }
   html[dir="rtl"] .stat.right .bub { right: auto; left: 0; }
+  html[dir="rtl"] .stat.right .cmenu { right: auto; left: 0; }
   html[dir="rtl"] #panel { right: auto; left: 22px; transform: translateX(calc(-100% - 60px)); }
   html[dir="rtl"] body.reading:not(.overview) #panel { transform: none; }
   html[dir="rtl"] body.finding #panel { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -523,8 +543,9 @@
   </div>
   <div class="stat right">
     <div class="lbl"><span id="pLbl">Bitcoin price</span><span class="live off" id="pLive"></span></div>
-    <div class="valr"><span class="val" id="pVal">———</span><span class="ibtn" id="pBtn" role="button" tabindex="0" aria-label="Where the price comes from">i</span></div>
+    <div class="valr"><span class="val cur" id="pVal" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Change currency">———</span><span class="cv" aria-hidden="true">▾</span><span class="ibtn" id="pBtn" role="button" tabindex="0" aria-label="Where the price comes from">i</span></div>
     <div class="bub" id="pBub" role="tooltip"><div class="tt">BTC/USD</div><i id="pBubBody">connecting…</i></div>
+    <div class="cmenu" id="pMenu" role="menu" aria-label="Currency"></div>
   </div>
 </header>
 <div id="topActionsHost"></div>
@@ -3232,59 +3253,94 @@ addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); openFind(); }
   else if (findBar.classList.contains('open') && (e.key === 'F3' || (e.ctrlKey && e.key === 'g'))) { e.preventDefault(); if (e.shiftKey) prevFind(); else nextFind(); }
 });
-// Tries GET /api/market first (only available when a server provides one), which
-// should return { height, price, change24h, ... } refreshed at most every 5 min.
-// Without it, hits mempool.space directly from the browser, throttled the same
-// way; the source of the shown price is reflected under the stat and its tooltip.
-const MARKET = { height: null, price: null, change: null, heightAt: 0, priceAt: 0, source: '' };
+// Market data comes straight from mempool.space — this is a static site, so there
+// is no /api proxy — refreshed at most every 5 min and cached in localStorage.
+// Its /api/v1/prices quotes several fiat currencies at once; clicking the price
+// picks one, and the choice is remembered in localStorage (wp-cur).
+const MARKET = { height: null, price: null, prices: null, change: null, heightAt: 0, priceAt: 0, source: '' };
 const FIVE_MIN = 5 * 60 * 1000;
-const shown = { height: null, price: null };
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'CHF', 'AUD', 'JPY'];
+let currency = 'USD';
+try { const c = localStorage.getItem('wp-cur'); if (CURRENCIES.includes(c)) currency = c; } catch {}
+const shown = { height: null, price: null, cur: null };
+let moneyFmt = null, moneyCur = '';
+function money(n, cur = currency) {
+  if (!moneyFmt || moneyCur !== cur) {
+    moneyCur = cur;
+    try {
+      // USD stays a bare "$" even where the locale would disambiguate it as "US$"
+      const currencyDisplay = cur === 'USD' ? 'narrowSymbol' : 'symbol';
+      moneyFmt = new Intl.NumberFormat(BCP47, { style: 'currency', currency: cur, currencyDisplay, maximumFractionDigits: 0 });
+    } catch { moneyFmt = { format: (v) => cur + ' ' + fmtInt(v) }; }
+  }
+  return moneyFmt.format(n);
+}
+const animSeq = new WeakMap();
 function animateNumber(el, from, to, fmt) {
+  const seq = (animSeq.get(el) || 0) + 1; animSeq.set(el, seq);
   el.classList.add('flash');
   const t0 = performance.now(), dur = from == null ? 900 : 1400;
   const f = () => {
+    if (animSeq.get(el) !== seq) return;
     const u = clamp((performance.now() - t0) / dur), v = from == null ? to : lerp(from, to, easeOut(u));
     el.textContent = fmt(v);
-    if (u < 1) requestAnimationFrame(f); else setTimeout(() => el.classList.remove('flash'), 200);
+    if (u < 1) requestAnimationFrame(f); else setTimeout(() => { if (animSeq.get(el) === seq) el.classList.remove('flash'); }, 200);
   };
   f();
 }
 const ago = (ms) => { const m = Math.round((Date.now() - ms) / 60000); return m <= 0 ? CHX('justNow') : F(CHX('minAgo'), { n: m }); };
 function setBub(id, tt, body) { const el = $(id); if (!el) return; el.querySelector('.tt').textContent = tt; el.querySelector('i').innerHTML = body; }
+// The selected currency, or USD when the source only quoted dollars.
+function quote() {
+  if (MARKET.prices) {
+    if (MARKET.prices[currency] != null) return { v: MARKET.prices[currency], cur: currency };
+    if (MARKET.prices.USD != null) return { v: MARKET.prices.USD, cur: 'USD' };
+  }
+  if (MARKET.price != null && currency === 'USD') return { v: MARKET.price, cur: 'USD' };
+  return { v: null, cur: currency };
+}
 function renderMarket() {
   if (MARKET.height != null && MARKET.height !== shown.height) { animateNumber($('#hVal'), shown.height, MARKET.height, fmtInt); shown.height = MARKET.height; }
-  if (MARKET.price != null && MARKET.price !== shown.price) { animateNumber($('#pVal'), shown.price, MARKET.price, (v) => '$' + fmtInt(v)); shown.price = MARKET.price; }
+  const q = quote();
+  if (q.v != null && (q.v !== shown.price || q.cur !== shown.cur)) {
+    // a currency switch is not a price move: don't animate between unrelated numbers
+    if (shown.price == null || q.cur === shown.cur) animateNumber($('#pVal'), shown.price, q.v, (v) => money(v, q.cur));
+    else $('#pVal').textContent = money(q.v, q.cur);
+    shown.price = q.v; shown.cur = q.cur;
+  }
+  const pair = 'BTC/' + q.cur;
+  $('#pVal').setAttribute('aria-label', CHX('price') + ' · ' + pair);
   $('#hLive').classList.toggle('off', MARKET.height == null);
-  $('#pLive').classList.toggle('off', MARKET.price == null);
+  $('#pLive').classList.toggle('off', q.v == null);
   setBub('#hBub', CHX('blockHeight'), MARKET.height != null ? `mempool.space · ${ago(MARKET.heightAt)}` : CHX('unavailable'));
-  if (MARKET.price != null) {
+  if (q.v != null) {
     const c = MARKET.change;
-    setBub('#pBub', CHX('btcusd'), (c != null ? `<span class="chg ${c >= 0 ? 'up' : 'down'}">${c >= 0 ? '▲' : '▼'} ${Math.abs(c).toFixed(2)}%</span> 24h · ` : '') + `${MARKET.source || 'mempool.space'} · ${ago(MARKET.priceAt)}`);
-  } else setBub('#pBub', CHX('btcusd'), CHX('unavailable'));
+    setBub('#pBub', pair, (c != null ? `<span class="chg ${c >= 0 ? 'up' : 'down'}">${c >= 0 ? '▲' : '▼'} ${Math.abs(c).toFixed(2)}%</span> 24h · ` : '') + `${MARKET.source || 'mempool.space'} · ${ago(MARKET.priceAt)}`);
+  } else setBub('#pBub', pair, CHX('unavailable'));
 }
 async function fetchMarket() {
   let next = Date.now() + FIVE_MIN;
-  try {
-    if (!location.protocol.startsWith('http')) throw new Error('no server');
-    const r = await fetch('/api/market', { cache: 'no-store' });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
-    Object.assign(MARKET, { height: j.height, price: j.price, change: j.change24h, heightAt: j.heightAt, priceAt: j.priceAt, source: 'CoinMarketCap' });
-    next = Math.max(j.nextRefreshAt + 1500, Date.now() + 20000);
-  } catch {
-    let cache = null;
-    try { cache = JSON.parse(localStorage.getItem('wp-market') || 'null'); } catch {}
-    if (cache && Date.now() - cache.at < FIVE_MIN) { Object.assign(MARKET, cache.data); next = cache.at + FIVE_MIN + 1000; }
-    else {
-      const [h, p] = await Promise.allSettled([
-        fetch('https://mempool.space/api/blocks/tip/height').then((r) => r.text()).then(Number),
-        fetch('https://mempool.space/api/v1/prices').then((r) => r.json()).then((j) => j.USD),
-      ]);
-      const now = Date.now();
-      if (h.status === 'fulfilled' && Number.isFinite(h.value)) Object.assign(MARKET, { height: h.value, heightAt: now });
-      if (p.status === 'fulfilled' && Number.isFinite(p.value)) Object.assign(MARKET, { price: p.value, priceAt: now, change: null, source: 'mempool.space' });
-      try { localStorage.setItem('wp-market', JSON.stringify({ at: now, data: { ...MARKET } })); } catch {}
-    }
+  let cache = null;
+  try { cache = JSON.parse(localStorage.getItem('wp-market') || 'null'); } catch {}
+  const cached = cache && cache.data && Date.now() - cache.at < FIVE_MIN ? cache : null;
+  // A fresh cache carrying the whole quote map saves the round trip. Entries written
+  // before multi-currency support hold only a USD price, so refetch rather than let
+  // them mask every other currency.
+  if (cached && cached.data.prices) {
+    Object.assign(MARKET, cached.data);
+    next = cache.at + FIVE_MIN + 1000;
+  } else {
+    const [h, p] = await Promise.allSettled([
+      fetch('https://mempool.space/api/blocks/tip/height').then((r) => r.text()).then(Number),
+      fetch('https://mempool.space/api/v1/prices').then((r) => r.json()),
+    ]);
+    const now = Date.now();
+    let got = false;
+    if (h.status === 'fulfilled' && Number.isFinite(h.value)) { Object.assign(MARKET, { height: h.value, heightAt: now }); got = true; }
+    if (p.status === 'fulfilled' && p.value && Number.isFinite(p.value.USD)) { Object.assign(MARKET, { price: p.value.USD, prices: p.value, priceAt: now, change: null, source: 'mempool.space' }); got = true; }
+    // offline: a USD-only legacy cache still beats showing nothing
+    if (!got && cached) Object.assign(MARKET, cached.data);
+    if (got) try { localStorage.setItem('wp-market', JSON.stringify({ at: now, data: { ...MARKET } })); } catch {}
   }
   renderMarket();
   setTimeout(fetchMarket, Math.max(20000, next - Date.now()));
@@ -3301,13 +3357,80 @@ for (const stat of document.querySelectorAll('#hud .stat')) {
       const on = !stat.classList.contains('open');
       closeBubs(on ? stat : null);
       stat.classList.toggle('open', on);
+      if (on) closeCur();
     });
     ib.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ib.click(); } });
   }
   stat.addEventListener('mouseenter', () => closeBubs());
 }
-document.addEventListener('click', (e) => { if (!e.target.closest('#hud')) closeBubs(); });
-addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBubs(); });
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#pMenu') && !e.target.closest('#pVal')) closeCur();
+  if (!e.target.closest('#hud')) closeBubs();
+});
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBubs(); closeCur(); } });
+
+// -- price currency menu -------------------------------------------------------
+// The price doubles as a button: click it (or press Enter) for the fiat list.
+const pValEl = $('#pVal'), pMenu = $('#pMenu'), pStat = pValEl.closest('.stat');
+pMenu.innerHTML = CURRENCIES.map((c) => `<button role="menuitemradio" data-cur="${c}" aria-checked="false">${c}<i></i></button>`).join('');
+let curOpen = false;
+function syncCur() {
+  pMenu.querySelectorAll('button').forEach((b) => {
+    const on = b.dataset.cur === currency;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', String(on));
+  });
+}
+function closeCur() {
+  if (!curOpen) return;
+  curOpen = false;
+  pMenu.classList.remove('open');
+  pStat.classList.remove('cur-open');
+  pValEl.setAttribute('aria-expanded', 'false');
+}
+function openCur(focus) {
+  curOpen = true;
+  closeBubs();
+  syncCur();
+  pMenu.classList.add('open');
+  pStat.classList.add('cur-open');
+  pValEl.setAttribute('aria-expanded', 'true');
+  if (focus) {
+    // the menu is visibility:hidden until the class lands; flush styles first so focus sticks
+    void pMenu.offsetWidth;
+    (pMenu.querySelector('button.on') || pMenu.querySelector('button')).focus();
+  }
+}
+function setCurrency(c) {
+  if (!CURRENCIES.includes(c)) return;
+  currency = c;
+  try { localStorage.setItem('wp-cur', c); } catch {}
+  syncCur();
+  closeCur();
+  renderMarket();
+}
+pValEl.addEventListener('click', (e) => { e.stopPropagation(); if (curOpen) closeCur(); else openCur(false); });
+pValEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (curOpen) closeCur(); else openCur(true); }
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); openCur(true); }
+});
+pMenu.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-cur]');
+  if (!b) return;
+  e.stopPropagation();
+  setCurrency(b.dataset.cur);
+  pValEl.focus();
+});
+pMenu.addEventListener('keydown', (e) => {
+  const items = [...pMenu.querySelectorAll('button')];
+  const i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const d = e.key === 'ArrowDown' ? 1 : -1;
+    items[(i + d + items.length) % items.length].focus();
+  } else if (e.key === 'Escape') { e.preventDefault(); closeCur(); pValEl.focus(); }
+});
+syncCur();
 
 // ================================================================= boot + main loop
 // Chrome strings (HUD, intro, transport, find bar). English is in the markup;
