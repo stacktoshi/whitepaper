@@ -39,9 +39,13 @@ npx serve .
 
 ## Deploy (Cloudflare Pages)
 
-- **Build command:** none (static site)
-- **Build output directory:** the repo root (`.`, i.e. `index.html` + `whitepaper/`)
+- **Build command:** `pnpm run build` (stages `dist/`: `index.html` + `whitepaper/` assets)
+- **Build output directory:** `dist`
 - Every push to `main` deploys automatically.
+
+The app fetches its packs and audio relative to the document, so the deployed
+tree must be exactly `index.html` + `whitepaper/*` — which the build command
+assembles.
 
 ## Credits
 

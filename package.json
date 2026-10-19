@@ -6,8 +6,10 @@
   "description": "The Bitcoin whitepaper — a narrated, interactive, fully translated edition of Satoshi Nakamoto's 2008 paper.",
   "scripts": {
     "serve": "npx serve .",
+    "build": "mkdir -p dist/whitepaper && cp index.html dist/ && cp -R public/whitepaper/. dist/whitepaper/",
     "extract-strings": "node scripts/i18n/extract-strings.mjs",
     "build:i18n": "node scripts/i18n/build-locale.mjs es zh ja ko fr de pt ru ar it hi pl nl he",
     "build:narration": "node scripts/build-narration.mjs"
-  }
+  },
+  "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501"
 }

@@ -14,3 +14,4 @@ scripts/i18n/src/*.pdf
 .DS_Store
 .wrangler/
 .shots/
+dist/
