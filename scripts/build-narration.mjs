@@ -31,6 +31,7 @@ const EN_VOICES = {
   Rupert: { languageCode: 'en-GB' },
   Brian: { languageCode: 'en-GB' },
   Alistair: { languageCode: 'en-GB' },
+  Kelsey: { languageCode: 'en-US' },
 };
 // Default narrator per language (calm, native SYSTEM voices).
 const LANG_VOICES = {

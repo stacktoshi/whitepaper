@@ -275,6 +275,23 @@
   #tip i { color: var(--bubmut); }
   #track:hover #tip, #track.drag #tip { opacity: 1; }
   #track:hover #hover { opacity: .8; }
+  /* citation tooltips ("[1]", "[2-5]"): same treatment as the scrubber's */
+  #citeTip {
+    position: fixed; z-index: 70; width: max-content; max-width: min(360px, calc(100vw - 24px)); padding: 9px 13px 10px;
+    background: var(--ink); color: var(--paper); font: 14px/1.34 var(--serif); pointer-events: none;
+    opacity: 0; visibility: hidden; transform: translate(-50%, 4px); transition: opacity .15s, transform .15s, visibility 0s .15s;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .25);
+  }
+  #citeTip.open { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity .15s, transform .15s, visibility 0s; pointer-events: auto; }
+  #citeTip .tt { font: 600 10px var(--display); letter-spacing: .2em; color: var(--orange); text-transform: uppercase; margin-bottom: 5px; }
+  #citeTip i { font-style: normal; color: var(--bubmut); }
+  #citeTip .cr { display: block; margin-top: 7px; }
+  #citeTip .cr:first-child { margin-top: 0; }
+  #citeTip a { color: var(--orange); text-decoration: none; margin-inline-start: 5px; }
+  #citeTip a:hover, #citeTip a:focus-visible { text-decoration: underline; outline: none; }
+  .cite { cursor: help; }
+  .cite:hover, .cite.open { color: var(--orange); }
+  .cite:focus-visible { color: var(--orange); outline: 1px dotted var(--orange); outline-offset: 2px; }
   .speed { display: flex; border: 1px solid var(--ink); }
   .speed button { border: 0; background: none; padding: 8px 10px; cursor: pointer; font: 600 11px var(--display); letter-spacing: .06em; border-left: 1px solid rgba(var(--ink-rgb), .25); transition: background .2s, color .2s; }
   .speed button:first-child { border-left: 0; }
@@ -529,10 +546,11 @@
     <button class="ab-x" id="aboutClose" aria-label="Close">&times;</button>
     <div class="ab-tt" id="aboutTitle">About</div>
     <p class="ab-p">The layout and typography of this edition take inspiration from <a href="https://dailycoinpost.com/free-high-quality-bitcoin-whitepaper-poster/" target="_blank" rel="noopener">Daily Coin Post&rsquo;s free high-quality Bitcoin whitepaper poster</a>.</p>
-    <p class="ab-p"><a href="https://bitcoinwhitepaper.online/" target="_blank" rel="noopener">BitcoinWhitepaper.online</a> is an independent provenance record for the four known versions of the Bitcoin whitepaper &mdash; the lost August 2008 draft, the surviving 3 October 2008 draft, a January 2009 copy known only through the COPA v Wright court record, and the canonical 24 March 2009 file embedded in the block chain at block 230,009. It identifies any copy in seconds through plain-text tests &mdash; citation numbering, section text, PDF structure and embedded font subsets &mdash; and ships standard-library Python scripts that carve and verify the canonical bytes straight from the block chain. Its dating rests on content rather than file metadata: a citation the author had only just learned to make, and a transaction-fee paragraph that did not exist yet.</p>
-    <p class="ab-p">This narrated edition is open source &mdash; <a href="https://github.com/stacktoshi/whitepaper" target="_blank" rel="noopener">github.com/stacktoshi/whitepaper</a> &middot; live at <a href="https://bitcoinwhitepaper.art" target="_blank" rel="noopener">bitcoinwhitepaper.art</a>.</p>
+    <p class="ab-p"><a href="https://bitcoinwhitepaper.online/" target="_blank" rel="noopener">BitcoinWhitepaper.online</a> is an independent provenance record for the four known versions of the Bitcoin whitepaper: the lost August 2008 draft, the surviving 3 October 2008 draft, a January 2009 copy known only through the COPA v Wright court record, and the canonical 24 March 2009 file embedded in the block chain at block 230,009. It identifies any copy in seconds through plain-text tests (citation numbering, section text, PDF structure and embedded font subsets) and ships standard-library Python scripts that carve and verify the canonical bytes straight from the block chain. Its dating rests on content rather than file metadata: a citation the author had only just learned to make, and a transaction-fee paragraph that did not exist yet.</p>
+    <p class="ab-p">This narrated edition is open source at <a href="https://github.com/stacktoshi/whitepaper" target="_blank" rel="noopener">github.com/stacktoshi/whitepaper</a> and live at <a href="https://bitcoinwhitepaper.art" target="_blank" rel="noopener">bitcoinwhitepaper.art</a>. Satoshi announced the paper on the cryptography mailing list on 31 October 2008: <a href="https://www.metzdowd.com/pipermail/cryptography/2008-October/014810.html" target="_blank" rel="noopener">original announcement</a>.</p>
   </div>
 </div>
+<div id="citeTip" role="tooltip" aria-hidden="true"></div>
 <div class="fade" id="fadeTop"></div><div class="fade" id="fadeSide"></div><div class="fade" id="fadeBot"></div>
 
 <header id="hud">
@@ -630,6 +648,7 @@
 <script src="whitepaper/narration.js" onerror="window.NARRATION = null"></script>
 <script src="whitepaper/narration-brian.js" onerror="window.NARRATION_BRIAN = null"></script>
 <script src="whitepaper/narration-alistair.js" onerror="window.NARRATION_ALISTAIR = null"></script>
+<script src="whitepaper/narration-kelsey.js" onerror="window.NARRATION_KELSEY = null"></script>
 <script>
 (() => {
 'use strict';
@@ -657,6 +676,7 @@ const EN_VOICES = [
   { id: 'ru', name: 'Rupert', nar: window.NARRATION },
   { id: 'br', name: 'Brian', nar: window.NARRATION_BRIAN },
   { id: 'al', name: 'Alistair', nar: window.NARRATION_ALISTAIR },
+  { id: 'ke', name: 'Kelsey', nar: window.NARRATION_KELSEY },
 ];
 function voicesFor(lang) {
   const raw = lang === 'en' ? EN_VOICES : (window.NARRATION_PACK || []).map((v) => ({ id: v.id, name: v.name, nar: v.nar }));
@@ -811,7 +831,29 @@ const F = (s, o) => String(s).replace(/\{(\w+)\}/g, (_, k) => o[k] !== undefined
 let poster = $('#poster');
 let tokEl = new Array(NT).fill(null);
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const disp = (d) => esc(d).replace(/([A-Za-z])_([A-Za-z0-9])/g, '$1<sub>$2</sub>');
+// Citations ("[1]", "[2-5]", "[7][2][5]") become tooltip triggers. Each bracket group
+// is its own target; a range expands to every reference it names. Digit runs are read
+// in their own numeral system, so the Hindi pack's "[२-५]" resolves to 2..5.
+const CITE_RE = /\[(\p{Nd}+)(?:\s*[-–]\s*(\p{Nd}+))?\]/gu;
+const citeNum = (s) => [...s].reduce((n, ch) => {
+  const cp = ch.codePointAt(0);
+  let zero = cp;
+  while (cp - zero < 9 && /\p{Nd}/u.test(String.fromCodePoint(zero - 1))) zero--;
+  return n * 10 + (cp - zero);
+}, 0);
+function citeData() {
+  const sec = PAPER.sections.find((s) => s.items.some((it) => it.t === 'refs'));
+  const item = sec && sec.items.find((it) => it.t === 'refs');
+  return { label: (sec && sec.label) || '', list: (item && item.list) || [] };
+}
+const disp = (d) => esc(d)
+  .replace(CITE_RE, (m, a, b) => {
+    const list = citeData().list, from = citeNum(a), to = b ? citeNum(b) : from;
+    const lo = Math.min(from, to), hi = Math.min(Math.max(from, to), lo + 31), nums = [];
+    for (let n = lo; n <= hi; n++) if (n >= 1 && n <= list.length) nums.push(n);
+    return nums.length ? `<span class="cite" data-ref="${nums.join(',')}" tabindex="0">${m}</span>` : m;
+  })
+  .replace(/([A-Za-z])_([A-Za-z0-9])/g, '$1<sub>$2</sub>');
 function words(a, b, extra) {
   let h = '';
   for (let i = a; i < b; i++) {
@@ -856,6 +898,7 @@ const RES = {
 const resultsHTML = () => ['0.1', '0.3'].map((q) => `<div>q=${q}\n${RES[q].map(([z, p]) => `z=${String(z).padEnd(5)}P=${p}`).join('\n')}</div>`).join('');
 
 function renderPoster(target = poster) {
+  hideCite();
   tokEl = new Array(DOC.tokens.length).fill(null);
   let head = '', abs = '', body = '';
   for (const it of DOC.items) {
@@ -901,6 +944,7 @@ let rTokEl = [], rCur = -1, readerBuilt = false;
 let readerMode = false;
 const savedReaderMode = (() => { try { return localStorage.getItem('wp-mode') === 'reader'; } catch {} return false; })();
 function renderReader() {
+  hideCite();
   let out = '';
   for (const it of DOC.items) {
     const src = it.src, sec = PAPER.sections[it.sec];
@@ -3109,7 +3153,7 @@ function applyVoice(idx) {
   const rate = audio.playbackRate; // changing src can reset it
   // static hosting: point straight at the pack's audio file (no ?lang= route);
   // English keeps its three narrators at the legacy names
-  const AUDIO_FILES = { 'en:ru': 'whitepaper/narration.mp3', 'en:br': 'whitepaper/narration-brian.mp3', 'en:al': 'whitepaper/narration-alistair.mp3' };
+  const AUDIO_FILES = { 'en:ru': 'whitepaper/narration.mp3', 'en:br': 'whitepaper/narration-brian.mp3', 'en:al': 'whitepaper/narration-alistair.mp3', 'en:ke': 'whitepaper/narration-kelsey.mp3' };
   audio.src = AUDIO_FILES[`${window.WP_LANG}:${v.id}`] || (window.WP_LANG === 'en' ? 'whitepaper/narration.mp3' : `whitepaper/i18n/${window.WP_LANG}/narration.mp3`);
   audio.playbackRate = rate;
 }
@@ -3431,6 +3475,67 @@ pMenu.addEventListener('keydown', (e) => {
   } else if (e.key === 'Escape') { e.preventDefault(); closeCur(); pValEl.focus(); }
 });
 syncCur();
+
+// -- citations: hover, focus or tap a bracket group such as [2-5] ---------------
+// Reads look like the scrubber tip: small-caps source line over the quoted entries,
+// each with the same external link the references list carries. The tip lingers for a
+// second after the pointer leaves so those links can actually be clicked.
+const citeTip = $('#citeTip');
+let citeEl = null, citeTimer = 0;
+function cancelCiteHide() { clearTimeout(citeTimer); citeTimer = 0; }
+function hideCite() {
+  cancelCiteHide();
+  if (citeEl) citeEl.classList.remove('open');
+  citeEl = null;
+  citeTip.classList.remove('open');
+  citeTip.setAttribute('aria-hidden', 'true');
+}
+function scheduleCiteHide() { cancelCiteHide(); citeTimer = setTimeout(hideCite, 1000); }
+function showCite(el) {
+  const nums = (el.dataset.ref || '').split(',').map(Number).filter((n) => n > 0);
+  const { label, list } = citeData();
+  const refs = nums.map((n) => ({ text: list[n - 1], link: REF_LINKS[n - 1] })).filter((r) => r.text);
+  if (!refs.length) return;
+  cancelCiteHide();
+  citeTip.innerHTML = `<div class="tt">${esc(label)} · ${esc(el.textContent)}</div><i>${refs.map((r) => `<span class="cr">${esc(r.text)}${r.link ? ` <a href="${esc(r.link)}" target="_blank" rel="noopener" title="open source">↗</a>` : ''}</span>`).join('')}</i>`;
+  if (citeEl && citeEl !== el) citeEl.classList.remove('open');
+  citeEl = el;
+  el.classList.add('open');
+  citeTip.classList.add('open');
+  citeTip.setAttribute('aria-hidden', 'false');
+  const r = el.getBoundingClientRect(), t = citeTip.getBoundingClientRect();
+  citeTip.style.left = clamp(r.left + r.width / 2, t.width / 2 + 10, innerWidth - t.width / 2 - 10) + 'px';
+  const above = r.top - t.height - 10;
+  citeTip.style.top = (above < 8 ? r.bottom + 10 : above) + 'px';
+}
+const citeOf = (e) => e.target.closest && e.target.closest('.cite');
+document.addEventListener('pointerover', (e) => { if (e.pointerType !== 'touch' && !e.buttons) { const c = citeOf(e); if (c) showCite(c); } });
+document.addEventListener('pointerout', (e) => {
+  const c = citeOf(e);
+  if (c && !c.contains(e.relatedTarget) && e.pointerType !== 'touch') scheduleCiteHide();
+});
+document.addEventListener('click', (e) => {
+  const c = citeOf(e);
+  if (!c) return;
+  e.preventDefault(); e.stopPropagation(); // show the source rather than seeking narration
+  showCite(c);
+}, true);
+document.addEventListener('focusin', (e) => { const c = citeOf(e); if (c) showCite(c); });
+document.addEventListener('focusout', (e) => {
+  const c = citeOf(e);
+  if (!c || (e.relatedTarget && citeTip.contains(e.relatedTarget))) return;
+  scheduleCiteHide();
+});
+document.addEventListener('pointerdown', (e) => { if (!citeOf(e) && !citeTip.contains(e.target)) hideCite(); });
+document.addEventListener('pointermove', (e) => { if (citeEl && e.buttons && !citeTip.contains(e.target)) hideCite(); });
+citeTip.addEventListener('pointerenter', cancelCiteHide);
+citeTip.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'touch') scheduleCiteHide(); });
+citeTip.addEventListener('focusin', cancelCiteHide);
+citeTip.addEventListener('click', (e) => { if (e.target.closest('a')) hideCite(); });
+addEventListener('wheel', hideCite, { passive: true });
+addEventListener('scroll', hideCite, { passive: true, capture: true });
+addEventListener('resize', hideCite);
+addEventListener('keydown', (e) => { if (e.key === 'Escape') hideCite(); });
 
 // ================================================================= boot + main loop
 // Chrome strings (HUD, intro, transport, find bar). English is in the markup;
