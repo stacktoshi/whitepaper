@@ -1085,10 +1085,13 @@ function S(tag, attrs, parent) {
   return e;
 }
 const P = (p) => (p && p.g) || p;
-const rect = (p, x, y, w, h, cls = 'k f dr', rx = 2) => S('rect', { x, y, width: w, height: h, rx, class: cls, pathLength: 1 }, P(p));
-const circ = (p, cx, cy, r, cls = 'k f dr') => S('circle', { cx, cy, r, class: cls, pathLength: 1 }, P(p));
-const line = (p, x1, y1, x2, y2, cls = 'k dr') => S('line', { x1, y1, x2, y2, class: cls, pathLength: 1 }, P(p));
-const path = (p, d, cls = 'k dr') => S('path', { d, class: cls, pathLength: 1 }, P(p));
+// pathLength=1 powers the stroke-dashoffset draw-on for .dr elements; a dashed
+// (.dash) path must keep its real length or the dash pattern collapses to solid.
+const ink = (el, cls) => { if (/\bdr\b/.test(cls)) el.setAttribute('pathLength', 1); return el; };
+const rect = (p, x, y, w, h, cls = 'k f dr', rx = 2) => ink(S('rect', { x, y, width: w, height: h, rx, class: cls }, P(p)), cls);
+const circ = (p, cx, cy, r, cls = 'k f dr') => ink(S('circle', { cx, cy, r, class: cls }, P(p)), cls);
+const line = (p, x1, y1, x2, y2, cls = 'k dr') => ink(S('line', { x1, y1, x2, y2, class: cls }, P(p)), cls);
+const path = (p, d, cls = 'k dr') => ink(S('path', { d, class: cls }, P(p)), cls);
 function text(p, x, y, str, cls = 'lb', anchor = 'middle') {
   const lines = String(str).split('\n');
   const t = S('text', { x, y, class: cls, 'text-anchor': anchor }, P(p));
@@ -1628,7 +1631,7 @@ SCENES.trust = {
 };
 
 SCENES.txchain = {
-  figView: [0, 28, 640, 404],
+  figView: [0, 30, 640, 344],
   build(A) {
     const X = [108, 320, 532];
     const CH = A.g({ x: 0, y: 0 }, null, { w: 5, z: 0.95 });
@@ -1645,11 +1648,25 @@ SCENES.txchain = {
       arrow(t.inner, [[cx, 188], [cx, 224]], { head: 7 });
       t.prev = A.g({ d: 0 }, CH, { w: 7 });
       arrow(t.prev, [[k ? X[k - 1] + 88 : 4, 172], [cx - 43, 172]], { head: 7 });
-      t.priv = box(A, cx, 396, 128, 42, F(L('ownerPrivKey'), { n: k + 1 }), { parent: CH });
+      t.priv = box(A, cx, 340, 128, 42, F(L('ownerPrivKey'), { n: k + 1 }), { parent: CH });
       return t;
     });
-    const V = [0, 1].map((k) => { const v = A.g({ d: 0 }, CH, { w: 5 }); curve(v, X[k] + 70, 106, X[k] + 128, 128, X[k + 1] - 70, 238, { head: 7 }); text(v, X[k] + 117, 150, L('verify'), 'lb xs it dlab'); return v; });
-    const SG = [0, 1].map((k) => { const v = A.g({ d: 0 }, CH, { w: 5 }); curve(v, X[k] + 64, 390, X[k] + 128, 352, X[k + 1] - 70, 260, { head: 7 }); text(v, X[k] + 118, 338, L('sign'), 'lb xs it dlab'); return v; });
+    // Verify / Sign follow the paper's figure: straight dashed links labelled along them.
+    // Verify leaves the public-key box, drops beside Hash, then bends to the signature.
+    const diag = (pts, label, lf = 0.5) => {
+      const v = A.g({ o: 0 }, CH, { w: 5 });
+      arrow(v, pts, { cls: 'k dash', head: 7 });
+      const [x1, y1] = pts[pts.length - 2], [x2, y2] = pts[pts.length - 1];
+      const a = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      const nx = y2 - y1, ny = x1 - x2, nl = Math.hypot(nx, ny);
+      const px = x1 + (x2 - x1) * lf, py = y1 + (y2 - y1) * lf;
+      const lx = px + (nx / nl) * 15, ly = py + (ny / nl) * 15;
+      const t = text(v, lx, ly, label, 'lb xs it');
+      t.setAttribute('transform', `rotate(${a.toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)})`);
+      return v;
+    };
+    const V = [0, 1].map((k) => diag([[X[k] + 56, 119], [X[k] + 56, 178], [X[k + 1] - 70, 246]], L('verify')));
+    const SG = [0, 1].map((k) => diag([[X[k] + 30, 319], [X[k + 1] - 70, 267]], L('sign'), 0.72));
     const ghost = A.item(552, 196, CH, { r: 4 });
     ghost.g.classList.add('hot');
     rect(ghost, -88, -126, 176, 252, 'k f', 2);
@@ -1672,14 +1689,14 @@ SCENES.txchain = {
     const order = [0, 1, 2, 3].map((i) => { const b = box(A, 230 + i * 60, 400, 46, 30, String(i + 1), { tcls: 'lb sm b', spring: { w: 10, z: 0.6 } }); return b; });
     const votes = [0, 1, 2, 3, 4, 5, 7].map((i) => { const c = A.item(net.pos[i][0], net.pos[i][1] - 22); checkMark(c, 7, 'k thick hot'); return c; });
     const dots = A.dots();
-    const figState = () => { T.forEach((t, k) => { [t.box, t.pub, t.hash, t.sig, t.priv].forEach((it) => on(it)); t.inner.to({ d: 1 }); t.prev.to({ d: 1 }); }); V.forEach((v) => v.to({ d: 1 })); SG.forEach((v) => v.to({ d: 1 })); };
+    const figState = () => { T.forEach((t, k) => { [t.box, t.pub, t.hash, t.sig, t.priv].forEach((it) => on(it)); t.inner.to({ d: 1 }); t.prev.to({ d: 1 }); }); V.forEach((v) => v.to({ o: 1 })); SG.forEach((v) => v.to({ o: 1 })); };
     const chainUp = () => CH.to({ s: 0.6, x: 128, y: -6 });
     return {
       steps: [
         { cap: 'An electronic coin is a chain of digital signatures', go() { const t = T[0]; on(t.box); on(t.pub, 0.3); on(t.hash, 0.45); on(t.sig, 0.6); t.inner.to({ d: 1 }, 0.7); t.prev.to({ d: 1 }, 0.8); } },
-        { cue: 'digitally signing a hash', cap: 'Each owner signs a hash of the previous transaction and the next owner’s public key', go() { T.slice(0, 2).forEach((t, k) => { [t.box, t.pub, t.hash, t.sig].forEach((it, j) => on(it, k ? 0.15 * j : 0)); t.inner.to({ d: 1 }, k ? 0.7 : 0); t.prev.to({ d: 1 }, k ? 0.9 : 0); }); on(T[0].priv, 1.1); SG[0].to({ d: 1 }, 1.4); } },
-        { cue: 'adding these to the end', cap: '…and adds them to the end of the coin', go() { T.forEach((t, k) => { [t.box, t.pub, t.hash, t.sig].forEach((it, j) => on(it, k === 2 ? 0.15 * j : 0)); t.inner.to({ d: 1 }, k === 2 ? 0.6 : 0); t.prev.to({ d: 1 }, k === 2 ? 0.8 : 0); }); on(T[0].priv); on(T[1].priv, 1); SG[0].to({ d: 1 }); SG[1].to({ d: 1 }, 1.2); on(T[2].priv, 1.3); } },
-        { cue: 'A payee can verify', cap: 'A payee verifies each signature down the chain', go() { figState(); V.forEach((v, k) => { v.to({ d: 0 }); v.to({ d: 1 }, 0.2 + k * 0.6); }); } },
+        { cue: 'digitally signing a hash', cap: 'Each owner signs a hash of the previous transaction and the next owner’s public key', go() { T.slice(0, 2).forEach((t, k) => { [t.box, t.pub, t.hash, t.sig].forEach((it, j) => on(it, k ? 0.15 * j : 0)); t.inner.to({ d: 1 }, k ? 0.7 : 0); t.prev.to({ d: 1 }, k ? 0.9 : 0); }); on(T[0].priv, 1.1); SG[0].to({ o: 1 }, 1.4); } },
+        { cue: 'adding these to the end', cap: '…and adds them to the end of the coin', go() { T.forEach((t, k) => { [t.box, t.pub, t.hash, t.sig].forEach((it, j) => on(it, k === 2 ? 0.15 * j : 0)); t.inner.to({ d: 1 }, k === 2 ? 0.6 : 0); t.prev.to({ d: 1 }, k === 2 ? 0.8 : 0); }); on(T[0].priv); on(T[1].priv, 1); SG[0].to({ o: 1 }); SG[1].to({ o: 1 }, 1.2); on(T[2].priv, 1.3); } },
+        { cue: 'A payee can verify', cap: 'A payee verifies each signature down the chain', go() { figState(); V.forEach((v, k) => { v.to({ o: 0 }); v.to({ o: 1 }, 0.2 + k * 0.6); }); } },
         { cue: "payee can't verify that one", cap: '…but can’t tell if an owner signed the coin away twice', go() { figState(); on(ghost, 0.2, { r: 4 }); on(dsLbl, 0.6); } },
         { cue: 'trusted central authority, or mint', cap: 'Common fix: a central mint checks every transaction', go() { figState(); chainUp(); on(mint, 0.4); mintArrows.to({ d: 1 }, 0.8); mc.to({ o: 1 }, 1.1); } },
         { cue: 'the fate of the entire money system', cap: 'Then the whole system depends on whoever runs the mint', go() { figState(); chainUp(); on(mint); mint.to({ cls: { hot: true } }); mintArrows.to({ d: 1 }); mc.to({ o: 1 }); on(spof, 0.3); } },
@@ -2192,8 +2209,8 @@ SCENES.privacy = {
     const tapeT = text(tape, 0, 0, '', 'lb sm mono');
     const clip = S('clipPath', { id: 'tp' + ++UID }, tape.g); S('rect', { x: -296, y: -18, width: 592, height: 36 }, clip); tapeT.setAttribute('clip-path', `url(#tp${UID})`);
     const keys = [0, 1, 2, 3].map((i) => { const k = A.item(200 + i * 80, 400, null, { r: -30 }, { w: 10, z: 0.55 }); keyIcon(k, 1.1); text(k, 0, 22, F(L('keyN'), { n: i + 1 }), 'lb xs mono'); return k; });
-    const link = A.g({ d: 0 }, null, { w: 5 }); link.g.classList.add('hot');
-    curve(link, 200, 420, 240, 470, 280, 420, { head: 6 }); text(link, 240, 478, L('sameOwner'), 'lb xs it');
+    const link = A.g({ o: 0, d: 0 }, null, { w: 5 }); link.g.classList.add('hot');
+    curve(link, 200, 430, 240, 480, 280, 430, { head: 6 }); text(link, 240, 478, L('sameOwner'), 'lb xs it');
     const reveal = A.item(68, 386); text(reveal, 0, 0, L('revealed'), 'lb sm it hot');
     const fig = () => { r1.forEach((b) => on(b)); a1.to({ d: 1 }); wall1.to({ d: 1 }); on(t1); r2.forEach((b) => on(b)); wall2.to({ d: 1 }); a2.to({ d: 1 }); on(t2); };
     return {
@@ -2203,9 +2220,9 @@ SCENES.privacy = {
         { cue: 'by keeping public keys anonymous', cap: '…so the wall moves: public keys stay anonymous', go() { fig(); } },
         { cue: 'The public can see', cap: 'The public sees amounts, but not who', go() { fig(); on(seen, 0.2); } },
         { cue: 'stock exchanges', cap: 'Like a stock exchange’s “tape”: times and sizes, no names', go() { fig(); on(seen); on(tape, 0.2); } },
-        { cue: 'a new key pair should be used', cap: 'Use a new key pair for each transaction', go() { fig(); keys.forEach((k, i) => on(k, 0.2 + i * 0.25, { r: 0 })); } },
-        { cue: 'Some linking is still unavoidable', cap: 'Multi-input transactions reveal a common owner', go() { fig(); keys.forEach((k) => on(k, 0, { r: 0 })); link.to({ d: 1 }, 0.3); } },
-        { cue: 'The risk is that if the owner', cap: 'Reveal one owner and linked transactions can follow', go() { fig(); keys.forEach((k) => on(k, 0, { r: 0 })); link.to({ d: 1 }); r2[0].to({ cls: { hot: true } }); on(reveal, 0.2); [0, 1].forEach((i) => keys[i].to({ cls: { hot: true } }, 0.6 + i * 0.3)); } },
+        { cue: 'a new key pair should be used', cap: 'Use a new key pair for each transaction', go() { fig(); keys.forEach((k, i) => on(k, 0.2 + i * 0.25, { r: 0 })); link.to({ o: 1 }, 1); } },
+        { cue: 'Some linking is still unavoidable', cap: 'Multi-input transactions reveal a common owner', go() { fig(); keys.forEach((k) => on(k, 0, { r: 0 })); link.to({ o: 1, d: 1 }, 0.3); } },
+        { cue: 'The risk is that if the owner', cap: 'Reveal one owner and linked transactions can follow', go() { fig(); keys.forEach((k) => on(k, 0, { r: 0 })); link.to({ o: 1, d: 1 }); r2[0].to({ cls: { hot: true } }); on(reveal, 0.2); [0, 1].forEach((i) => keys[i].to({ cls: { hot: true } }, 0.6 + i * 0.3)); } },
       ],
       tick(t, dt, n, age, wall) {
         if (n === 4) {
