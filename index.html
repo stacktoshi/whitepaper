@@ -2754,19 +2754,33 @@ function togglePlay() { if (switchingLang) return; if (!started) return begin(0)
 const playIcon = $('#playIcon');
 const syncPlayIcon = () => { playIcon.innerHTML = audio.paused ? '<path d="M5 3l12 7-12 7z"/>' : '<path d="M5 3h3.6v14H5zM11.4 3H15v14h-3.6z"/>'; };
 audio.addEventListener('play', syncPlayIcon); audio.addEventListener('pause', syncPlayIcon);
-audio.addEventListener('ended', () => { overview = true; document.body.classList.add('overview', 'ended'); $('#begin').textContent = CHX('replay'); });
+// Leave fullscreen without ever rejecting on browsers that return no promise.
+const leaveFullscreen = () => {
+  if (!document.fullscreenElement) return;
+  const p = document.exitFullscreen && document.exitFullscreen();
+  if (p && p.catch) p.catch(() => {});
+  $('#ov').classList.remove('fs');
+};
+audio.addEventListener('ended', () => {
+  overview = true; document.body.classList.add('overview', 'ended');
+  $('#begin').textContent = CHX('replay');
+  leaveFullscreen();
+});
 $('#begin').addEventListener('click', () => begin(document.body.classList.contains('ended') ? 0 : null));
 $('#play').addEventListener('click', togglePlay);
 $('#ov').addEventListener('click', () => {
   // full screen wherever the platform supports it (overview stays on O)
   if (document.documentElement.requestFullscreen) {
-    if (document.fullscreenElement) document.exitFullscreen();
+    if (document.fullscreenElement) leaveFullscreen();
     else document.documentElement.requestFullscreen().catch(() => {});
     return;
   }
   free = null; overview = !overview; document.body.classList.toggle('overview', overview);
 });
 document.addEventListener('fullscreenchange', () => { $('#ov').classList.toggle('fs', !!document.fullscreenElement); });
+// Esc is handled by the browser to leave fullscreen; clear the button state even
+// if that happens before this handler runs.
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { leaveFullscreen(); $('#ov').classList.remove('fs'); } });
 if (!document.documentElement.requestFullscreen) $('#ov').style.display = 'none';
 // share (mobile toolbar): native share sheet — from there users can add the
 // app to the home screen. On http iOS exposes navigator.share but rejects it,
@@ -3212,7 +3226,7 @@ addEventListener('keydown', (e) => {
   else if (e.key === 'f' || e.key === 'F') {
     if (e.ctrlKey || e.metaKey || e.altKey) return; // Ctrl/Cmd+F is Find
     if (innerWidth >= 760 && document.documentElement.requestFullscreen) {
-      if (document.fullscreenElement) document.exitFullscreen();
+      if (document.fullscreenElement) leaveFullscreen();
       else document.documentElement.requestFullscreen().catch(() => {});
     }
   }
