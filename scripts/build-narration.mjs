@@ -3,9 +3,11 @@
 //   node scripts/build-narration.mjs [Voice]              (English; default Rupert)
 //   node scripts/build-narration.mjs --lang es            (language pack, default voice)
 //   node scripts/build-narration.mjs --lang es --voice Ignacio
-// Voices: Inworld TTS-2. Word timings come from Inworld's WORD timestamp
-// alignment, then mapped onto the paper's own tokens. The cache key includes the
-// full TTS config (voice + language), so re-voicing or re-langing re-fetches.
+//   node scripts/build-narration.mjs --lang gr --provider elevenlabs
+// Providers: Inworld TTS-2 (default) and ElevenLabs multilingual v2. Word timings
+// come from Inworld's WORD alignment or ElevenLabs' character alignment, then are
+// mapped onto the paper's own tokens. The cache key includes the full TTS config
+// (provider + voice + language), so re-voicing or re-langing re-fetches.
 // Output:
 //   en      -> public/whitepaper/narration*.mp3 + narration*.js (legacy names)
 //   <lang>  -> public/whitepaper/i18n/<lang>/narration.mp3 + narration.js
@@ -23,6 +25,9 @@ const LEAD_IN = 0.35;
 const GAP = { title: 0.5, byline: 1.1, abs1: 0.55, abs2: 0.9, h: 0.3, p: 0.55, li: 0.25, def: 0.25, math: 0.6, ztable: 0.6, code: 0, results: 0 };
 const SECTION_GAP = 0.6;
 const INWORLD = 'https://api.inworld.ai/tts/v1/voice';
+const ELEVENLABS = 'https://api.elevenlabs.io/v1/text-to-speech';
+const ELEVEN_MODEL = 'eleven_multilingual_v2';
+const ELEVEN_SETTINGS = { stability: 0.5, similarity_boost: 0.75, style: 0.0, use_speaker_boost: true, speed: 0.95 };
 
 // Per-voice TTS settings. Cache keys include this config, so a changed
 // instruction or rate re-fetches that voice's clips.
@@ -49,46 +54,62 @@ const LANG_VOICES = {
   pl: { voiceId: 'Szymon', languageCode: 'pl-PL' },
   nl: { voiceId: 'Lennart', languageCode: 'nl-NL' },
   he: { voiceId: 'Oren', languageCode: 'he-IL' },
+  gr: { voiceId: 'Tristan', languageCode: 'el-GR' },
+};
+// ElevenLabs native library voices (require a paid plan for API use).
+const ELEVEN_VOICES = {
+  gr: { voiceId: 'gFpOFEriJA3T1VbGi2Be', name: 'Theon' },
 };
 
 const args = process.argv.slice(2);
-let lang = 'en', voice = null;
+let lang = 'en', voice = null, provider = 'inworld';
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--lang') lang = args[++i];
   else if (args[i] === '--voice') voice = args[++i];
+  else if (args[i] === '--provider') provider = args[++i];
   else voice = args[i];
 }
+if (provider !== 'inworld' && provider !== 'elevenlabs') throw new Error(`unknown provider "${provider}" — options: inworld, elevenlabs`);
 const OUT = lang === 'en' ? path.join(ROOT, 'public', 'whitepaper') : path.join(ROOT, 'public', 'whitepaper', 'i18n', lang);
 const CACHE = path.join(ROOT, 'public', 'whitepaper', '.cache');
 
-let voiceId, languageCode, stem, globalName, shortId;
-if (lang === 'en') {
+let voiceId, voiceName, languageCode, stem, globalName, shortId;
+if (provider === 'elevenlabs') {
+  const def = ELEVEN_VOICES[lang];
+  if (!def) throw new Error(`no ElevenLabs voice configured for "${lang}" — options: ${Object.keys(ELEVEN_VOICES).join(', ')}`);
+  voiceId = voice || def.voiceId;
+  voiceName = voice && voice !== def.voiceId ? voice : def.name;
+  stem = 'narration';
+  shortId = lang === 'en' ? 'el' : `${lang}1`;
+} else if (lang === 'en') {
   voice = voice || 'Rupert';
   if (!EN_VOICES[voice]) throw new Error(`unknown English voice "${voice}" — options: ${Object.keys(EN_VOICES).join(', ')}`);
   languageCode = EN_VOICES[voice].languageCode;
-  voiceId = voice;
+  voiceId = voiceName = voice;
   stem = voice === 'Rupert' ? 'narration' : `narration-${voice.toLowerCase()}`;
   globalName = voice === 'Rupert' ? 'window.NARRATION' : `window.NARRATION_${voice.toUpperCase()}`;
   shortId = voice === 'Rupert' ? 'ru' : voice === 'Brian' ? 'br' : 'al';
 } else {
   const def = LANG_VOICES[lang];
   if (!def) throw new Error(`unknown language "${lang}" — options: ${Object.keys(LANG_VOICES).join(', ')}`);
-  voiceId = voice || def.voiceId;
+  voiceId = voiceName = voice || def.voiceId;
   languageCode = def.languageCode;
   stem = 'narration';
   shortId = `${lang}1`;
 }
-const TTS = { modelId: 'inworld-tts-2', lang, voiceId, languageCode, timestampType: 'WORD', speakingRate: 0.95, deliveryMode: 'STABLE', instruction: INSTRUCTION };
+const TTS = provider === 'elevenlabs'
+  ? { modelId: ELEVEN_MODEL, lang, voiceId, outputFormat: 'pcm_24000', voiceSettings: ELEVEN_SETTINGS }
+  : { modelId: 'inworld-tts-2', lang, voiceId, languageCode, timestampType: 'WORD', speakingRate: 0.95, deliveryMode: 'STABLE', instruction: INSTRUCTION };
 
+// Local files take precedence over the ambient environment so a project-local
+// `.env.local` can point at a different account/key without exporting anything.
 const envFiles = [
-  process.env.INWORLD_API_KEY ? ['process.env', { INWORLD_API_KEY: process.env.INWORLD_API_KEY }] : null,
-  path.join(ROOT, '.env'),
   path.join(ROOT, '.env.local'),
+  path.join(ROOT, '.env'),
   path.join(ROOT, '..', 'palindrome-969696', '.env'),
-].filter(Boolean);
+];
 let env = {};
 for (const f of envFiles) {
-  if (typeof f === 'object') { env = f[1]; continue; }
   if (!fs.existsSync(f)) continue;
   for (const l of fs.readFileSync(f, 'utf8').split('\n').map((x) => x.trim())) {
     if (!l || l.startsWith('#') || !l.includes('=')) continue;
@@ -96,7 +117,14 @@ for (const f of envFiles) {
     if (!env[k]) env[k] = v;
   }
 }
-if (!env.INWORLD_API_KEY) throw new Error('INWORLD_API_KEY missing from .env');
+for (const [k, v] of Object.entries(process.env)) {
+  if (v && !env[k]) env[k] = v;
+}
+if (provider === 'elevenlabs') {
+  if (!env.ELEVENLABS_API_KEY) throw new Error('ELEVENLABS_API_KEY missing from .env');
+} else if (!env.INWORLD_API_KEY) {
+  throw new Error('INWORLD_API_KEY missing from .env');
+}
 
 const sandbox = { window: {} };
 vm.createContext(sandbox);
@@ -145,6 +173,33 @@ async function inworld(text) {
   }
 }
 
+async function elevenlabs(text) {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${ELEVENLABS}/${TTS.voiceId}/with-timestamps?output_format=${TTS.outputFormat}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': env.ELEVENLABS_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        model_id: TTS.modelId,
+        voice_settings: TTS.voiceSettings,
+      }),
+    });
+    const body = Buffer.from(await res.arrayBuffer());
+    if (res.ok) return JSON.parse(body.toString('utf8'));
+    const errText = body.toString('utf8').slice(0, 400);
+    if ([429, 500, 502, 503, 504].includes(res.status) && attempt < 6) {
+      const wait = Number(res.headers.get('retry-after')) * 1000 || 2000 * 2 ** attempt;
+      console.warn(`  tts: HTTP ${res.status}, retrying in ${Math.round(wait / 1000)}s`);
+      await sleep(wait);
+      continue;
+    }
+    throw new Error(`elevenlabs: HTTP ${res.status} ${errText}`);
+  }
+}
+
 function parseWav(buf) {
   if (buf.toString('ascii', 0, 4) !== 'RIFF' || buf.toString('ascii', 8, 12) !== 'WAVE') throw new Error('not a WAV');
   let off = 12, fmt = null;
@@ -175,22 +230,58 @@ function wordsFromAlignment(timestampInfo) {
   return out;
 }
 
+// ElevenLabs returns character-level timestamps; group them into words so the
+// same token aligner can be used for both providers.
+function wordsFromElevenAlignment(alignment) {
+  const chars = alignment?.characters;
+  const starts = alignment?.character_start_times_seconds;
+  const ends = alignment?.character_end_times_seconds;
+  if (!chars?.length || !starts || !ends) throw new Error('ElevenLabs returned no character timestamps');
+  const out = [];
+  let word = '', start = null, end = null;
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i];
+    if (/\s/.test(ch)) {
+      if (word && norm(word)) out.push({ word, start, end });
+      word = ''; start = null; end = null;
+    } else {
+      if (start === null) start = starts[i];
+      word += ch;
+      end = ends[i];
+    }
+  }
+  if (word && norm(word)) out.push({ word, start, end });
+  if (!out.length) throw new Error('ElevenLabs timestamps were all silence/punctuation');
+  return out;
+}
+
 async function tts(text) {
-  if (text.length > 2000) throw new Error('clip too long for Inworld unary TTS: ' + text.slice(0, 60));
+  if (text.length > 2000) throw new Error('clip too long for unary TTS: ' + text.slice(0, 60));
   const key = sha(JSON.stringify([TTS, text]));
-  const wavFile = path.join(CACHE, 'tts', key + '.wav');
+  const audioExt = provider === 'elevenlabs' ? '.pcm' : '.wav';
+  const audioFile = path.join(CACHE, 'tts', key + audioExt);
   const jsonFile = path.join(CACHE, 'tts', key + '.json');
-  if (!fs.existsSync(wavFile) || !fs.existsSync(jsonFile)) {
-    const json = await inworld(text);
-    if (!json.audioContent) throw new Error('TTS returned no audioContent');
-    fs.writeFileSync(wavFile, Buffer.from(json.audioContent, 'base64'));
-    fs.writeFileSync(jsonFile, JSON.stringify(json.timestampInfo || {}));
+  if (!fs.existsSync(audioFile) || !fs.existsSync(jsonFile)) {
+    if (provider === 'elevenlabs') {
+      const json = await elevenlabs(text);
+      if (!json.audio_base64) throw new Error('ElevenLabs returned no audio');
+      fs.writeFileSync(audioFile, Buffer.from(json.audio_base64, 'base64'));
+      fs.writeFileSync(jsonFile, JSON.stringify(json.alignment || {}));
+    } else {
+      const json = await inworld(text);
+      if (!json.audioContent) throw new Error('TTS returned no audioContent');
+      fs.writeFileSync(audioFile, Buffer.from(json.audioContent, 'base64'));
+      fs.writeFileSync(jsonFile, JSON.stringify(json.timestampInfo || {}));
+    }
     stats.ttsChars += text.length;
   }
-  const wav = fs.readFileSync(wavFile);
+  const audio = fs.readFileSync(audioFile);
+  const pcm = provider === 'elevenlabs' ? audio.subarray(0, audio.length & ~1) : parseWav(audio);
   return {
-    key, file: wavFile, pcm: parseWav(wav),
-    words: wordsFromAlignment(JSON.parse(fs.readFileSync(jsonFile, 'utf8'))),
+    key, file: audioFile, pcm,
+    words: provider === 'elevenlabs'
+      ? wordsFromElevenAlignment(JSON.parse(fs.readFileSync(jsonFile, 'utf8')))
+      : wordsFromAlignment(JSON.parse(fs.readFileSync(jsonFile, 'utf8'))),
   };
 }
 
@@ -277,7 +368,7 @@ const clips = items.filter((it) => it.end > it.start).map((it) => {
   };
 });
 
-console.log(`[${lang}/${TTS.voiceId}] ${tokens.length} words in ${clips.length} clips (${clips.reduce((a, c) => a + c.text.length, 0)} characters to narrate)`);
+console.log(`[${lang}/${voiceName}] ${tokens.length} words in ${clips.length} clips (${clips.reduce((a, c) => a + c.text.length, 0)} characters to narrate)`);
 let done = 0;
 await pool(clips, 3, async (clip) => {
   if (clip.hold) { clip.duration = clip.hold; done++; return; }
@@ -315,18 +406,20 @@ execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 's16le', '-ar', String
 fs.unlinkSync(pcmFile);
 
 const narration = {
-  v: 1, model: TTS.modelId, voice: TTS.voiceId, lang: TTS.lang, speed: TTS.speakingRate, aligner: 'inworld-word',
+  v: 1, model: TTS.modelId, voice: provider === 'elevenlabs' ? voiceName : TTS.voiceId, lang: TTS.lang,
+  speed: provider === 'elevenlabs' ? TTS.voiceSettings.speed : TTS.speakingRate,
+  aligner: provider === 'elevenlabs' ? 'elevenlabs-char' : 'inworld-word',
   duration: +duration.toFixed(2), count: tokens.length, sig: sig(tokens),
   t: times.map((x) => +x.toFixed(2)),
 };
 if (lang === 'en') {
   fs.writeFileSync(path.join(OUT, stem + '.js'), `${globalName} = ${JSON.stringify(narration)};\n`);
 } else {
-  const pack = [{ id: shortId, name: TTS.voiceId, nar: narration }];
+  const pack = [{ id: shortId, name: voiceName, nar: narration }];
   fs.writeFileSync(path.join(OUT, stem + '.js'), `window.NARRATION_PACK_LANG = ${JSON.stringify(lang)};\nwindow.NARRATION_PACK = ${JSON.stringify(pack)};\n`);
 }
 
 const mb = (fs.statSync(path.join(OUT, stem + '.mp3')).size / 1e6).toFixed(1);
-console.log(`[${lang}/${TTS.voiceId}] ${stem}.audio: ${Math.floor(duration / 60)}m${Math.round(duration % 60)}s, ${mb} MB`);
-console.log(`[${lang}/${TTS.voiceId}] new API usage this run: ${stats.ttsChars} TTS characters`);
+console.log(`[${lang}/${voiceName}] ${stem}.audio: ${Math.floor(duration / 60)}m${Math.round(duration % 60)}s, ${mb} MB`);
+console.log(`[${lang}/${voiceName}] new API usage this run: ${stats.ttsChars} TTS characters`);
 if (weak.length) console.log('low-confidence alignments (interpolated):\n  ' + weak.join('\n  '));

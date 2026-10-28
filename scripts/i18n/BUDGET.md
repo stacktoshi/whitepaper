@@ -19,6 +19,15 @@
 | nl | Lennart | 21,615 | 0.54 |
 | hi | Aanya | 18,908 | 0.47 |
 | he | Oren | 14,787 | 0.37 |
+| gr | Tristan | 22,914 | 0.57 (superseded by ElevenLabs) |
 
-Running total: 274,754 chars ≈ $6.87 of ~$15. All 14 languages done.
+Running total: 297,668 chars ≈ $7.44 of ~$15. All 15 languages done.
 Plan: remaining packs ≈ $0.55 each (CJK cheaper) — well within budget.
+
+## ElevenLabs (Greek re-voice)
+
+| lang | voice | model | chars billed |
+|------|-------|-------|-------------:|
+| gr | Theon (native Greek) | eleven_multilingual_v2 | 22,914 |
+
+Greek narration is generated with `node scripts/build-narration.mjs --lang gr --provider elevenlabs`.

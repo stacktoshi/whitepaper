@@ -482,6 +482,7 @@
   html[data-script="ar"] { --serif: 'Noto Naskh Arabic', 'Times New Roman', Times, serif; --display: 'Cinzel', 'Noto Naskh Arabic', Optima, serif; }
   html[data-script="he"] { --serif: 'Noto Serif Hebrew', 'Times New Roman', Times, serif; --display: 'Cinzel', 'Noto Serif Hebrew', Optima, serif; }
   html[data-script="hi"] { --serif: 'Noto Serif Devanagari', 'Times New Roman', Times, serif; --display: 'Cinzel', 'Noto Serif Devanagari', Optima, serif; }
+  html[data-script="greek"] { --serif: 'Noto Serif', 'Times New Roman', Times, serif; --display: 'Noto Serif', 'Cinzel', Optima, serif; }
   html[data-script="zh"] .tl0, html[data-script="ja"] .tl0, html[data-script="ko"] .tl0 { font-size: 165px; letter-spacing: .08em; }
   html[data-script="zh"] .tl1, html[data-script="ja"] .tl1, html[data-script="ko"] .tl1 { font-size: 74px; }
   html[data-script="zh"] .tl2, html[data-script="ja"] .tl2, html[data-script="ko"] .tl2 { font-size: 118px; }
@@ -624,7 +625,10 @@
     var nav = []; try { nav = navigator.languages || [navigator.language || 'en']; } catch (e) {}
     outer: for (var i = 0; i < nav.length; i++) {
       var pref = String(nav[i] || '').toLowerCase().split('-')[0];
-      for (var j = 0; j < cat.length; j++) if (cat[j].id === pref) { lang = pref; break outer; }
+      for (var j = 0; j < cat.length; j++) {
+        var base = String(cat[j].bcp47 || cat[j].id).toLowerCase().split('-')[0];
+        if (cat[j].id === pref || base === pref) { lang = cat[j].id; break outer; }
+      }
     }
   }
   window.WP_LANG = lang;
@@ -633,6 +637,7 @@
   var FONTS = {
     zh: 'Noto+Serif+SC:wght@400;600;700', ja: 'Noto+Serif+JP:wght@400;600;700', ko: 'Noto+Serif+KR:wght@400;600;700',
     ar: 'Noto+Naskh+Arabic:wght@400;500;700', he: 'Noto+Serif+Hebrew:wght@400;600;700', hi: 'Noto+Serif+Devanagari:wght@400;600;700',
+    gr: 'Noto+Serif:wght@400;600;700',
   };
   window.WP_FONT_QUERY = FONTS; window.WP_FONTS_DONE = {};
   if (FONTS[lang]) { window.WP_FONTS_DONE[lang] = true; var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + FONTS[lang] + '&display=swap'; document.head.appendChild(l); }
@@ -670,7 +675,8 @@ let CAPS = UI.caps || {};
 let CUES = UI.cues || {};
 let BCP47 = ((window.WP_LOCALES || []).find((l) => l.id === window.WP_LANG) || {}).bcp47 || 'en-US';
 // Narrator voices — each has its own narration audio + per-word timestamps
-// (build with `node scripts/build-narration.mjs <Voice>` / `--lang <lang>`).
+// (build with `node scripts/build-narration.mjs <Voice>` / `--lang <lang>`;
+// Greek uses `--lang gr --provider elevenlabs`).
 // Invalid/missing metadata drops the voice from the picker.
 const EN_VOICES = [
   { id: 'ru', name: 'Rupert', nar: window.NARRATION },

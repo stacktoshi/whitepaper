@@ -119,5 +119,13 @@ window.WP_LOCALES = [
     "script": "hebrew",
     "name": "Hebrew",
     "nativeName": "עברית"
+  },
+  {
+    "id": "gr",
+    "bcp47": "el-GR",
+    "dir": "ltr",
+    "script": "greek",
+    "name": "Greek",
+    "nativeName": "Ελληνικά"
   }
 ];
