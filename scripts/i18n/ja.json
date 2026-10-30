@@ -659,7 +659,16 @@
       "readerMode": "読書",
       "posterMode": "ポスター",
       "about": "概要",
-      "aboutClose": "閉じる"
+      "aboutClose": "閉じる",
+      "printTitle": "印刷 / PDF",
+      "printAria": "ポスターを印刷または PDF で保存",
+      "printHeading": "用紙サイズ",
+      "printCustom": "カスタム",
+      "printWidth": "幅（mm）",
+      "printHeight": "高さ（mm）",
+      "printAction": "印刷 / PDF で保存",
+      "printHint": "印刷ダイアログで「PDF に保存」を選択してください。「背景グラフィック」を有効にすると紙の質感が保持されます。",
+      "printWhite": "白い背景"
     },
     "caps": {
       "coin": [

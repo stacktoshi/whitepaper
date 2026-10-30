@@ -659,7 +659,16 @@
       "readerMode": "קריאה",
       "posterMode": "פוסטר",
       "about": "אודות",
-      "aboutClose": "סגור"
+      "aboutClose": "סגור",
+      "printTitle": "הדפסה / PDF",
+      "printAria": "הדפס או שמור את הפוסטר כ-PDF",
+      "printHeading": "גודל נייר",
+      "printCustom": "מותאם אישית",
+      "printWidth": "רוחב (מ״מ)",
+      "printHeight": "גובה (מ״מ)",
+      "printAction": "הדפסה / שמירה כ-PDF",
+      "printHint": "בחר «שמירה כ-PDF» בתיבת ההדפסה. הפעל «גרפיקת רקע» כדי לשמור על מרקם הנייר.",
+      "printWhite": "רקע לבן"
     },
     "caps": {
       "coin": [

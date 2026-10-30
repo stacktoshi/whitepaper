@@ -659,7 +659,16 @@
       "readerMode": "Lettura",
       "posterMode": "Poster",
       "about": "Informazioni",
-      "aboutClose": "Chiudi"
+      "aboutClose": "Chiudi",
+      "printTitle": "Stampa / PDF",
+      "printAria": "Stampa o salva il poster in PDF",
+      "printHeading": "Formato carta",
+      "printCustom": "Personalizzato",
+      "printWidth": "Larghezza (mm)",
+      "printHeight": "Altezza (mm)",
+      "printAction": "Stampa / Salva come PDF",
+      "printHint": "Scegli «Salva come PDF» nella finestra di stampa. Attiva «Grafica di sfondo» per mantenere la trama della carta.",
+      "printWhite": "Sfondo bianco"
     },
     "caps": {
       "coin": [

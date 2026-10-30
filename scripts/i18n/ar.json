@@ -659,7 +659,16 @@
       "readerMode": "قراءة",
       "posterMode": "ملصق",
       "about": "حول",
-      "aboutClose": "إغلاق"
+      "aboutClose": "إغلاق",
+      "printTitle": "طباعة / PDF",
+      "printAria": "طباعة الملصق أو حفظه بصيغة PDF",
+      "printHeading": "حجم الورق",
+      "printCustom": "مخصص",
+      "printWidth": "العرض (مم)",
+      "printHeight": "الارتفاع (مم)",
+      "printAction": "طباعة / حفظ بصيغة PDF",
+      "printHint": "اختر «حفظ بصيغة PDF» في نافذة الطباعة. فعّل «الرسومات الخلفية» للحفاظ على ملمس الورق.",
+      "printWhite": "خلفية بيضاء"
     },
     "caps": {
       "coin": [

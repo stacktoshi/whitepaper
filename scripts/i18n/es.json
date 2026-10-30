@@ -659,7 +659,16 @@
       "readerMode": "Lector",
       "posterMode": "Póster",
       "about": "Acerca de",
-      "aboutClose": "Cerrar"
+      "aboutClose": "Cerrar",
+      "printTitle": "Imprimir / PDF",
+      "printAria": "Imprimir o guardar el póster como PDF",
+      "printHeading": "Tamaño de papel",
+      "printCustom": "Personalizado",
+      "printWidth": "Ancho (mm)",
+      "printHeight": "Alto (mm)",
+      "printAction": "Imprimir / Guardar como PDF",
+      "printHint": "Elige «Guardar como PDF» en el diálogo de impresión. Activa «Gráficos de fondo» para conservar la textura del papel.",
+      "printWhite": "Fondo blanco"
     },
     "caps": {
       "coin": [

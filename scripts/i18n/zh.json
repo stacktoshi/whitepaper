@@ -659,7 +659,16 @@
       "readerMode": "阅读",
       "posterMode": "海报",
       "about": "关于",
-      "aboutClose": "关闭"
+      "aboutClose": "关闭",
+      "printTitle": "打印 / PDF",
+      "printAria": "打印或将海报保存为 PDF",
+      "printHeading": "纸张尺寸",
+      "printCustom": "自定义",
+      "printWidth": "宽度（毫米）",
+      "printHeight": "高度（毫米）",
+      "printAction": "打印 / 另存为 PDF",
+      "printHint": "在打印对话框中选择“另存为 PDF”。启用“背景图形”以保留纸张纹理。",
+      "printWhite": "白色背景"
     },
     "caps": {
       "coin": [

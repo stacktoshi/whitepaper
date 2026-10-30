@@ -659,7 +659,16 @@
       "posterMode": "Αφίσα",
       "confirmationsN": "{n} επιβεβαιώσεις",
       "about": "Σχετικά",
-      "aboutClose": "Κλείσιμο"
+      "aboutClose": "Κλείσιμο",
+      "printTitle": "Εκτύπωση / PDF",
+      "printAria": "Εκτύπωση ή αποθήκευση της αφίσας ως PDF",
+      "printHeading": "Μέγεθος χαρτιού",
+      "printCustom": "Προσαρμοσμένο",
+      "printWidth": "Πλάτος (mm)",
+      "printHeight": "Ύψος (mm)",
+      "printAction": "Εκτύπωση / Αποθήκευση ως PDF",
+      "printHint": "Επιλέξτε «Αποθήκευση ως PDF» στο παράθυρο εκτύπωσης. Ενεργοποιήστε τα «Γραφικά φόντου» για να διατηρηθεί η υφή του χαρτιού.",
+      "printWhite": "Λευκό φόντο"
     },
     "caps": {
       "coin": [

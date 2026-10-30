@@ -26,6 +26,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
+  /* Static Cinzel for print: Chrome embeds these as CID TrueType, unlike the
+     Google Fonts variable font, which it emits as Type 3. */
+  @font-face { font-family: 'Cinzel Print'; src: url('whitepaper/fonts/Cinzel-400.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: block; }
+  @font-face { font-family: 'Cinzel Print'; src: url('whitepaper/fonts/Cinzel-500.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: block; }
+  @font-face { font-family: 'Cinzel Print'; src: url('whitepaper/fonts/Cinzel-600.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: block; }
+  @font-face { font-family: 'Cinzel Print'; src: url('whitepaper/fonts/Cinzel-700.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: block; }
   :root {
     --paper: #f8f4eb;
     --paper2: #fbf8f2;
@@ -337,6 +343,71 @@
   .ab-x { position: absolute; top: 6px; right: 8px; border: 0; background: none; font: 600 17px/1 var(--display); color: var(--ink2); cursor: pointer; padding: 6px 8px; }
   .ab-x:hover { color: var(--orange); }
 
+  /* print / PDF modal */
+  #printModal { position: fixed; inset: 0; z-index: 72; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(var(--ink-rgb), .4); }
+  #printModal.open { display: flex; }
+  #printModal .ab-tt { margin-bottom: 8px; }
+  .pr-card { position: relative; width: min(580px, calc(100vw - 32px)); max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 18px 24px 16px; background: var(--paper2) var(--grain); border: 1px solid var(--ink); outline: 1px solid rgba(var(--ink-rgb), .25); outline-offset: 4px; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); }
+  .pr-head { font: 600 9.5px var(--display); letter-spacing: .2em; text-transform: uppercase; color: var(--ink3); margin: 8px 0 4px; }
+  .pr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .pr-size:last-child { grid-column: span 2; }
+  .pr-size { border: 1px solid rgba(var(--ink-rgb), .3); background: none; padding: 6px 5px 5px; cursor: pointer; font: 600 11px var(--display); letter-spacing: .04em; color: var(--ink); text-align: center; transition: background .2s, border-color .2s, color .2s; }
+  .pr-size:hover, .pr-size:focus-visible { border-color: var(--orange); background: rgba(201, 122, 44, .14); outline: none; }
+  .pr-size.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .pr-size small { display: block; margin-top: 2px; font: 400 9.5px var(--serif); letter-spacing: 0; opacity: .72; }
+  .pr-fields { display: flex; gap: 12px; margin-top: 8px; }
+  .pr-fields label { flex: 1; display: flex; flex-direction: column; gap: 4px; font: 600 9px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); }
+  .pr-fields input { width: 100%; border: 1px solid rgba(var(--ink-rgb), .35); background: var(--paper); color: var(--ink); font: 600 13px var(--display); padding: 8px 9px; outline: none; }
+  .pr-fields input:focus { border-color: var(--orange); }
+  .pr-check { display: flex; align-items: center; gap: 9px; margin-top: 8px; cursor: pointer; font: 13px/1.3 var(--serif); color: var(--ink); }
+  .pr-check input { appearance: none; -webkit-appearance: none; flex: none; width: 15px; height: 15px; border: 1px solid var(--ink); background: var(--paper); cursor: pointer; display: grid; place-items: center; }
+  .pr-check input:checked::after { content: ''; width: 9px; height: 9px; background: var(--orange); }
+  .pr-check input:focus-visible { outline: 1px dashed var(--orange); outline-offset: 3px; }
+  .pr-go { width: 100%; margin-top: 10px; padding: 10px 18px; border: 0; background: var(--ink); color: var(--paper); cursor: pointer; font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; transition: background .2s; }
+  .pr-go:hover { background: var(--orange); }
+  .pr-hint { font: 13px/1.45 var(--serif); color: var(--ink2); margin: 7px 0 0; }
+  #printBtn { width: 40px; height: 36px; border: 1px solid var(--ink); background: none; cursor: pointer; display: grid; place-items: center; transition: background .2s, color .2s; }
+  #printBtn:hover { background: rgba(201, 122, 44, .14); }
+  #printBtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  /* off-screen print copy: only visible to the print engine; always light paper */
+  #printRoot { display: none; --paper: #f8f4eb; --paper2: #fbf8f2; --ink: #191613; --ink2: #4b443c; --ink3: #8d8378; --orange: #c97a2c; --orange-soft: rgba(201, 122, 44, .16); --wall: #e4ded2; --ink-rgb: 25, 22, 19; --hotfill: #fbeedf; --warmfill: #f7e7d3; --up: #2f6b3a; --down: #9a3b22; }
+  #printRoot.print-white { --paper: #fff; --paper2: #fff; }
+  .print-poster { position: absolute; left: 0; top: 0; width: 2400px; padding: 120px 90px 110px; background: var(--paper) var(--grain); color: var(--ink); transform-origin: 0 0; box-shadow: none !important; --display: 'Cinzel Print', 'Cinzel', 'Trajan Pro', Optima, 'Times New Roman', serif; }
+  .print-poster.print-white { background: #fff !important; }
+  .print-poster > * { position: relative; z-index: 1; }
+  .print-poster .nw { white-space: nowrap; }
+  /* print inks: the screen orange is too pale on paper */
+  .print-poster .h, .print-poster .byline .sep { color: #a8611c; }
+  .print-poster .abs1 .acc { color: #a8611c !important; }
+  /* US Letter: give the body more room by tightening the masthead */
+  .print-poster.print-letter .tl0 { font-size: 230px; }
+  .print-poster.print-letter .tl1 { font-size: 76px; margin-top: 12px; }
+  .print-poster.print-letter .tl2 { font-size: 128px; letter-spacing: .03em; margin-top: 8px; }
+  .print-poster.print-letter .byline { font-size: 24px; margin: 32px 0 46px; }
+  .print-poster.print-letter .byline .em { font-size: 23px; }
+  .print-poster.print-letter .abs1 { font-size: 50px; line-height: 1.18; margin-bottom: 22px; }
+  .print-poster.print-letter .abs2 { font-size: 29px; line-height: 1.26; column-gap: 64px; margin-bottom: 44px; }
+  .print-poster.print-letter .body { font-size: 16.6px; line-height: 1.38; }
+  .print-poster.print-letter .body .h { font-size: 19px; }
+  @media (max-width: 520px) {
+    .pr-grid { grid-template-columns: repeat(2, 1fr); }
+    .pr-fields { flex-direction: column; gap: 8px; }
+  }
+  @media print {
+    @page { margin: 0; }
+    html, body { margin: 0 !important; padding: 0 !important; height: auto !important; overflow: visible !important; background: var(--paper) !important; }
+    body::after { display: none !important; }
+    body.printing #stage, body.printing #reader, body.printing #hud, body.printing #topActionsHost,
+    body.printing #panel, body.printing #intro, body.printing #introLang, body.printing #bar,
+    body.printing #findbar, body.printing #tip, body.printing #aboutModal, body.printing #printModal,
+    body.printing #citeTip, body.printing #fadeTop, body.printing #fadeSide, body.printing #fadeBot,
+    body.printing #shareToast { display: none !important; }
+    body.printing #printRoot { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; visibility: visible !important; overflow: hidden !important; background: var(--paper) var(--grain) !important; }
+    body.printing #printRoot.print-white { background: #fff !important; }
+    body.printing .print-poster { box-shadow: none !important; }
+    body.printing * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+
   /* ------------------------------------------------------------ reader mode (serial) */
   #reader { position: fixed; inset: 0; z-index: 2; overflow-y: auto; overscroll-behavior: contain; display: none; padding: 52px 22px 175px; -webkit-user-select: text; user-select: text; background: var(--paper) var(--grain); }
   body.reader #reader { display: block; }
@@ -551,6 +622,21 @@
     <p class="ab-p">This narrated edition is open source at <a href="https://github.com/stacktoshi/whitepaper" target="_blank" rel="noopener">github.com/stacktoshi/whitepaper</a> and live at <a href="https://bitcoinwhitepaper.art" target="_blank" rel="noopener">bitcoinwhitepaper.art</a>. Satoshi announced the paper on the cryptography mailing list on 31 October 2008: <a href="https://www.metzdowd.com/pipermail/cryptography/2008-October/014810.html" target="_blank" rel="noopener">original announcement</a>.</p>
   </div>
 </div>
+<div id="printModal" role="dialog" aria-modal="true" aria-labelledby="printTitle">
+  <div class="pr-card">
+    <button class="ab-x" id="printClose" aria-label="Close">&times;</button>
+    <div class="ab-tt" id="printTitle">Print / PDF</div>
+    <div class="pr-head" id="printHeading">Paper size</div>
+    <div class="pr-grid" id="printSizes"></div>
+    <div class="pr-fields">
+      <label><span id="printWidthLabel">Width (mm)</span><input id="printW" type="number" min="100" max="3000" step="0.1" value="420" inputmode="decimal"></label>
+      <label><span id="printHeightLabel">Height (mm)</span><input id="printH" type="number" min="100" max="3000" step="0.1" value="594" inputmode="decimal"></label>
+    </div>
+    <label class="pr-check"><input type="checkbox" id="printWhite"><span id="printWhiteLabel">White background</span></label>
+    <button class="pr-go" id="printGo">Print / Save as PDF</button>
+    <p class="pr-hint" id="printHint">Choose “Save as PDF” in the print dialog. Enable “Background graphics” to keep the paper texture.</p>
+  </div>
+</div>
 <div id="citeTip" role="tooltip" aria-hidden="true"></div>
 <div class="fade" id="fadeTop"></div><div class="fade" id="fadeSide"></div><div class="fade" id="fadeBot"></div>
 
@@ -595,6 +681,7 @@
       <button id="voice" title="Narrator voice" aria-label="Narrator voice" aria-haspopup="true"><svg viewBox="0 0 20 20"><path d="M8.2 2h3.6l.4 2a6.5 6.5 0 0 1 1.7 1l1.9-.8 1.8 3.1-1.5 1.3a6.6 6.6 0 0 1 0 2l1.5 1.3-1.8 3.1-1.9-.8a6.5 6.5 0 0 1-1.7 1l-.4 2H8.2l-.4-2a6.5 6.5 0 0 1-1.7-1l-1.9.8-1.8-3.1 1.5-1.3a6.6 6.6 0 0 1 0-2L2.4 7.3l1.8-3.1 1.9.8a6.5 6.5 0 0 1 1.7-1z" /><circle cx="10" cy="10" r="2.7" /></svg></button>
       <div id="vmenu" role="menu"><div class="vh" id="vLangHead">Language</div><div id="langList"></div><div class="vh" id="vVoiceHead">Narrator</div><div class="vh" id="themeHead">Theme</div><button id="themeBtn" role="menuitem"></button><button id="aboutBtn" role="menuitem"></button></div>
     </div>
+    <button id="printBtn" title="Print / PDF" aria-label="Print / PDF"><svg viewBox="0 0 20 20"><path d="M5 7V3h10v4" /><rect x="3" y="7" width="14" height="8" rx="1" /><path d="M6 12h8v5H6z" /><circle cx="14.5" cy="9.5" r="1" /></svg></button>
     <button id="findBtn" title="Find in paper (Ctrl+F)" aria-label="Find in paper"><svg viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg></button>
   </div>
   <button id="ov" title="Whole poster (O)" aria-label="Toggle whole-poster view"><svg viewBox="0 0 20 20"><path d="M2 7V2h5M13 2h5v5M18 13v5h-5M7 18H2v-5" /></svg></button>
@@ -729,6 +816,12 @@ const EN = {
     theme: 'Theme', themeAuto: 'Auto', themeLight: 'Light', themeDark: 'Dark',
     readerMode: 'Reader', posterMode: 'Poster',
     about: 'About', aboutClose: 'Close',
+    printTitle: 'Print / PDF', printAria: 'Print or save the poster as PDF',
+    printHeading: 'Paper size', printCustom: 'Custom',
+    printWidth: 'Width (mm)', printHeight: 'Height (mm)',
+    printWhite: 'White background',
+    printAction: 'Print / Save as PDF',
+    printHint: 'Choose “Save as PDF” in the print dialog. Enable “Background graphics” to keep the paper texture.',
     confirmationsN: '{n} confirmations',
   },
   labels: {
@@ -1032,6 +1125,183 @@ modeBtn.addEventListener('click', () => setReaderMode(!readerMode));
   modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
+// print / PDF: render an off-screen copy of the poster at the chosen paper size,
+// then hand it to the browser print dialog (Save as PDF).
+// ordered smallest to largest by sheet area; "custom" stays last
+const PRINT_SIZES = [
+  { id: 'letter', label: 'US Letter', w: 216, h: 279 },
+  { id: 'a3', label: 'A3', w: 297, h: 420 },
+  { id: 'a2', label: 'A2', w: 420, h: 594 },
+  { id: '18x24', label: '18 × 24 in', w: 457, h: 610 },
+  { id: 'a1', label: 'A1', w: 594, h: 841 },
+  { id: '60x90', label: '60 × 90 cm', w: 600, h: 900 },
+  { id: '24x36', label: '24 × 36 in', w: 610, h: 914 },
+  { id: '27x40', label: '27 × 40 in', w: 686, h: 1016 },
+  { id: 'b1', label: 'B1', w: 707, h: 1000 },
+  { id: 'ansie', label: 'ANSI E', w: 864, h: 1118 },
+  { id: 'a0', label: 'A0', w: 841, h: 1189 },
+  { id: '36x48', label: '36 × 48 in', w: 914, h: 1219 },
+  { id: 'b0', label: 'B0', w: 1000, h: 1414 },
+  { id: '40x60', label: '40 × 60 in', w: 1016, h: 1524 },
+  { id: 'custom', label: 'Custom', w: 600, h: 900 },
+];
+let printSizeId = 'a2';
+let printWhite = false;
+let printRoot = null, printStyle = null, printTimer = null;
+const printBtn = $('#printBtn'), printModal = $('#printModal');
+const printW = $('#printW'), printH = $('#printH'), printSizes = $('#printSizes');
+const printWhiteEl = $('#printWhite');
+printWhiteEl.addEventListener('change', () => { printWhite = printWhiteEl.checked; });
+function cleanupPrint() {
+  document.body.classList.remove('printing');
+  if (printRoot) { printRoot.remove(); printRoot = null; }
+  if (printStyle) { printStyle.remove(); printStyle = null; }
+  if (printTimer) { clearTimeout(printTimer); printTimer = null; }
+}
+function renderPrintSizes() {
+  printSizes.innerHTML = PRINT_SIZES.map((s) => {
+    const label = s.id === 'custom' ? CHX('printCustom') : s.label;
+    const sub = s.id === 'custom' ? '' : `<small>${s.w} × ${s.h} mm</small>`;
+    return `<button type="button" class="pr-size${s.id === printSizeId ? ' on' : ''}" data-size="${s.id}"><span>${esc(label)}</span>${sub}</button>`;
+  }).join('');
+}
+function setPrintSize(id) {
+  const s = PRINT_SIZES.find((x) => x.id === id) || PRINT_SIZES.find((x) => x.id === 'a2') || PRINT_SIZES[0];
+  printSizeId = s.id;
+  if (s.id !== 'custom') { printW.value = s.w; printH.value = s.h; }
+  printSizes.querySelectorAll('.pr-size').forEach((b) => b.classList.toggle('on', b.dataset.size === s.id));
+}
+function openPrint() {
+  renderPrintSizes();
+  setPrintSize(printSizeId);
+  printModal.classList.add('open');
+  printBtn.setAttribute('aria-expanded', 'true');
+  const first = printModal.querySelector('.pr-size.on') || printModal.querySelector('.pr-size');
+  if (first) setTimeout(() => first.focus(), 0);
+}
+function closePrint() {
+  printModal.classList.remove('open');
+  printBtn.setAttribute('aria-expanded', 'false');
+  printBtn.focus();
+}
+// The poster is 2400px wide, and its height depends on the language. If the
+// chosen paper has a different aspect ratio, scaling it whole leaves bars on
+// two sides. Widen or narrow the poster until its height/width ratio matches
+// the paper, so the columns reflow and the page is filled without cropping.
+function fitPrintWidth(clone, targetRatio) {
+  const baseW = 2400, minW = 2000, maxW = 3600;
+  const measure = (w) => {
+    clone.style.width = w + 'px';
+    return clone.offsetHeight || 1;
+  };
+  const baseH = measure(baseW);
+  const baseRatio = baseH / baseW;
+  const letterbox = baseRatio > targetRatio ? targetRatio / baseRatio : baseRatio / targetRatio;
+  if (letterbox > 0.999) return { w: baseW, h: baseH };
+  // Height/width falls as the poster widens, so bisect on the paper's ratio.
+  let lo, hi;
+  if (baseRatio > targetRatio) {
+    lo = baseW; hi = maxW;
+    const hiH = measure(hi);
+    if (hiH / hi > targetRatio) return { w: hi, h: hiH };
+  } else {
+    lo = minW; hi = baseW;
+    const loH = measure(lo);
+    if (loH / lo < targetRatio) return { w: lo, h: loH };
+  }
+  for (let i = 0; i < 9; i++) {
+    const mid = (lo + hi) / 2;
+    if (measure(mid) / mid > targetRatio) lo = mid; else hi = mid;
+  }
+  // Column breaks make the curve slightly stepped; pick the best nearby width.
+  let bestW = hi, bestH = measure(hi), bestDiff = Math.abs(bestH / bestW - targetRatio);
+  for (let w = Math.max(minW, Math.floor(lo) - 6); w <= Math.min(maxW, Math.ceil(hi) + 6); w += 2) {
+    const h = measure(w);
+    const diff = Math.abs(h / w - targetRatio);
+    if (diff < bestDiff) { bestW = w; bestH = h; bestDiff = diff; }
+  }
+  clone.style.width = bestW + 'px';
+  return { w: bestW, h: measure(bestW) };
+}
+
+async function printPoster(wmm, hmm) {
+  cleanupPrint();
+  await Promise.all([400, 500, 600, 700].map((w) => document.fonts.load(`${w} 100px "Cinzel Print"`)));
+  await document.fonts.ready;
+  const clone = poster.cloneNode(true);
+  clone.id = 'printPoster';
+  clone.className = 'print-poster';
+  clone.style.transform = 'none';
+  clone.style.opacity = '1';
+  clone.querySelectorAll('.w').forEach((el) => el.classList.remove('read', 'cur', 'find'));
+  clone.querySelectorAll('.blk').forEach((el) => el.classList.remove('cur'));
+  clone.querySelectorAll('.refjump').forEach((el) => el.remove());
+  const marker = clone.querySelector('#marker');
+  if (marker) marker.remove();
+  // US Letter: put "cash system" on the "electronic" line and use a smaller
+  // masthead, so the body can be set larger. Other languages keep their layout.
+  const letter = window.WP_LANG === 'en' && Math.abs(wmm - 216) <= 2 && Math.abs(hmm - 279) <= 2;
+  if (letter) {
+    clone.classList.add('print-letter');
+    const tl2 = clone.querySelector('.tl2'), tl3 = clone.querySelector('.tl3');
+    if (tl2 && tl3) {
+      tl2.appendChild(document.createTextNode(' '));
+      while (tl3.firstChild) tl2.appendChild(tl3.firstChild);
+      tl3.remove();
+    }
+  }
+  printRoot = document.createElement('div');
+  printRoot.id = 'printRoot';
+  printRoot.appendChild(clone);
+  printRoot.style.cssText = 'position:fixed;left:-10000px;top:0;display:block;visibility:hidden;';
+  document.body.appendChild(printRoot);
+  if (printWhite) { clone.classList.add('print-white'); printRoot.classList.add('print-white'); }
+  const fitted = fitPrintWidth(clone, hmm / wmm);
+  const naturalW = fitted.w;
+  const naturalH = fitted.h;
+  const mmToPx = 96 / 25.4;
+  const pageW = Math.round(wmm * mmToPx);
+  const pageH = Math.round(hmm * mmToPx);
+  const scale = Math.min(pageW / naturalW, pageH / naturalH);
+  const x = Math.round((pageW - naturalW * scale) / 2);
+  const y = Math.round((pageH - naturalH * scale) / 2);
+  printRoot.style.width = pageW + 'px';
+  printRoot.style.height = pageH + 'px';
+  clone.style.transform = `scale(${scale})`;
+  clone.style.left = x + 'px';
+  clone.style.top = y + 'px';
+  printStyle = document.createElement('style');
+  printStyle.id = 'printPageStyle';
+  printStyle.textContent = `@page { size: ${wmm}mm ${hmm}mm; margin: 0; }`;
+  document.head.appendChild(printStyle);
+  document.body.classList.add('printing');
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  window.addEventListener('afterprint', cleanupPrint, { once: true });
+  printTimer = setTimeout(cleanupPrint, 60000);
+  window.print();
+}
+printBtn.setAttribute('aria-haspopup', 'dialog');
+printBtn.setAttribute('aria-expanded', 'false');
+printBtn.addEventListener('click', openPrint);
+$('#printClose').addEventListener('click', closePrint);
+printModal.addEventListener('click', (e) => { if (e.target === printModal) closePrint(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && printModal.classList.contains('open')) closePrint(); });
+printSizes.addEventListener('click', (e) => {
+  const b = e.target.closest('.pr-size');
+  if (!b) return;
+  setPrintSize(b.dataset.size);
+  if (b.dataset.size === 'custom') printW.focus();
+});
+printW.addEventListener('input', () => { printSizeId = 'custom'; printSizes.querySelectorAll('.pr-size').forEach((b) => b.classList.toggle('on', b.dataset.size === 'custom')); });
+printH.addEventListener('input', () => { printSizeId = 'custom'; printSizes.querySelectorAll('.pr-size').forEach((b) => b.classList.toggle('on', b.dataset.size === 'custom')); });
+$('#printGo').addEventListener('click', async () => {
+  if (!printW.reportValidity() || !printH.reportValidity()) return;
+  const wmm = clamp(+printW.value, 100, 3000);
+  const hmm = clamp(+printH.value, 100, 3000);
+  closePrint();
+  await printPoster(wmm, hmm);
+});
+
 // word / figure clicks seek, same as on the poster
 reader.addEventListener('click', (e) => {
   if (!READY || switchingLang || suppressClick) return;
@@ -2967,7 +3237,9 @@ const LANG_PDF = { es: 'es', zh: 'zh_cn', ja: 'jp', ko: 'ko', fr: 'fr', de: 'de'
 const pdfLink = () => {
   const lang = window.WP_LANG;
   const file = lang === 'en' ? 'bitcoin.pdf' : 'bitcoin_' + (LANG_PDF[lang] || 'bitcoin') + '.pdf';
-  const url = lang === 'en' ? 'https://bitcoin.org/bitcoin.pdf' : 'https://bitcoin.org/files/bitcoin-paper/' + file;
+  // bitcoin.org paths are case-sensitive: link lower-case, but let CSS print the
+  // footer label in caps (text-transform) so the visible text stays capitalized.
+  const url = (lang === 'en' ? 'https://bitcoin.org/bitcoin.pdf' : 'https://bitcoin.org/files/bitcoin-paper/' + file).toLowerCase();
   return { url, label: 'bitcoin.org/' + (lang === 'en' ? 'bitcoin.pdf' : file) };
 };
 // wrap bare URLs in references with real links (opened in a new tab)
@@ -3600,6 +3872,17 @@ function applyChrome() {
   $('#aboutBtn').textContent = CHX('about');
   $('#aboutTitle').textContent = CHX('about');
   $('#aboutClose').setAttribute('aria-label', CHX('aboutClose'));
+  $('#printBtn').title = CHX('printTitle');
+  $('#printBtn').setAttribute('aria-label', CHX('printAria'));
+  $('#printTitle').textContent = CHX('printTitle');
+  $('#printHeading').textContent = CHX('printHeading');
+  $('#printWidthLabel').textContent = CHX('printWidth');
+  $('#printHeightLabel').textContent = CHX('printHeight');
+  $('#printWhiteLabel').textContent = CHX('printWhite');
+  $('#printGo').textContent = CHX('printAction');
+  $('#printHint').textContent = CHX('printHint');
+  $('#printClose').setAttribute('aria-label', CHX('aboutClose'));
+  if (printModal.classList.contains('open')) renderPrintSizes();
   setModeLabel();
 }
 // Static figures inside a poster element (re-run per rendered poster).

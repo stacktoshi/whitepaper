@@ -659,7 +659,16 @@
       "readerMode": "Lezer",
       "posterMode": "Poster",
       "about": "Over",
-      "aboutClose": "Sluiten"
+      "aboutClose": "Sluiten",
+      "printTitle": "Printen / PDF",
+      "printAria": "Poster printen of als PDF opslaan",
+      "printHeading": "Papierformaat",
+      "printCustom": "Aangepast",
+      "printWidth": "Breedte (mm)",
+      "printHeight": "Hoogte (mm)",
+      "printAction": "Printen / Opslaan als PDF",
+      "printHint": "Kies ‘Opslaan als PDF’ in het printdialoog. Schakel ‘Achtergrondafbeeldingen’ in om de papiertextuur te behouden.",
+      "printWhite": "Witte achtergrond"
     },
     "caps": {
       "coin": [

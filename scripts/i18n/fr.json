@@ -659,7 +659,16 @@
       "readerMode": "Lecture",
       "posterMode": "Affiche",
       "about": "À propos",
-      "aboutClose": "Fermer"
+      "aboutClose": "Fermer",
+      "printTitle": "Imprimer / PDF",
+      "printAria": "Imprimer ou enregistrer l’affiche en PDF",
+      "printHeading": "Format du papier",
+      "printCustom": "Personnalisé",
+      "printWidth": "Largeur (mm)",
+      "printHeight": "Hauteur (mm)",
+      "printAction": "Imprimer / Enregistrer en PDF",
+      "printHint": "Choisissez « Enregistrer au format PDF » dans la boîte de dialogue d’impression. Activez « Graphiques d’arrière-plan » pour conserver la texture du papier.",
+      "printWhite": "Fond blanc"
     },
     "caps": {
       "coin": [

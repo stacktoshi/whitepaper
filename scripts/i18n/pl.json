@@ -659,7 +659,16 @@
       "readerMode": "Czytnik",
       "posterMode": "Plakat",
       "about": "O aplikacji",
-      "aboutClose": "Zamknij"
+      "aboutClose": "Zamknij",
+      "printTitle": "Drukuj / PDF",
+      "printAria": "Drukuj plakat lub zapisz go jako PDF",
+      "printHeading": "Rozmiar papieru",
+      "printCustom": "Niestandardowy",
+      "printWidth": "Szerokość (mm)",
+      "printHeight": "Wysokość (mm)",
+      "printAction": "Drukuj / Zapisz jako PDF",
+      "printHint": "Wybierz „Zapisz jako PDF” w oknie drukowania. Włącz „Grafikę tła”, aby zachować fakturę papieru.",
+      "printWhite": "Białe tło"
     },
     "caps": {
       "coin": [

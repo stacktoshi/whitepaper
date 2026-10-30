@@ -5,7 +5,8 @@ Peer-to-Peer Electronic Cash System"*, in 16 languages (English, Spanish,
 Chinese, Japanese, Korean, French, German, Portuguese, Russian, Arabic, Italian,
 Hindi, Polish, Dutch, Hebrew, Greek) with per-language text-to-speech narration, right-to-left
 and CJK typography, dark mode, a cinematic poster reading mode, a serial reader
-mode, and full offline-capable PWA packaging.
+mode, print-ready PDF export at A3–A0, B1/B0 and large-format sizes, and full
+offline-capable PWA packaging.
 
 **Live:** https://bitcoinwhitepaper.art
 

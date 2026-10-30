@@ -659,7 +659,16 @@
       "readerMode": "पढ़ें",
       "posterMode": "पोस्टर",
       "about": "परिचय",
-      "aboutClose": "बंद करें"
+      "aboutClose": "बंद करें",
+      "printTitle": "प्रिंट / PDF",
+      "printAria": "पोस्टर प्रिंट करें या PDF के रूप में सहेजें",
+      "printHeading": "कागज़ का आकार",
+      "printCustom": "कस्टम",
+      "printWidth": "चौड़ाई (मिमी)",
+      "printHeight": "ऊँचाई (मिमी)",
+      "printAction": "प्रिंट / PDF के रूप में सहेजें",
+      "printHint": "प्रिंट संवाद में “PDF के रूप में सहेजें” चुनें। कागज़ की बनावट बनाए रखने के लिए “पृष्ठभूमि ग्राफ़िक्स” सक्षम करें।",
+      "printWhite": "सफ़ेद पृष्ठभूमि"
     },
     "caps": {
       "coin": [

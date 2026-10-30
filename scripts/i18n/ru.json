@@ -659,7 +659,16 @@
       "readerMode": "Чтение",
       "posterMode": "Постер",
       "about": "О программе",
-      "aboutClose": "Закрыть"
+      "aboutClose": "Закрыть",
+      "printTitle": "Печать / PDF",
+      "printAria": "Печать или сохранение постера в PDF",
+      "printHeading": "Размер бумаги",
+      "printCustom": "Другой",
+      "printWidth": "Ширина (мм)",
+      "printHeight": "Высота (мм)",
+      "printAction": "Печать / Сохранить как PDF",
+      "printHint": "Выберите «Сохранить как PDF» в диалоге печати. Включите «Фоновые графические элементы», чтобы сохранить текстуру бумаги.",
+      "printWhite": "Белый фон"
     },
     "caps": {
       "coin": [

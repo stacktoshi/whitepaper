@@ -40,7 +40,16 @@
     "posterMode": "Poster",
     "confirmationsN": "{n} confirmations",
     "about": "About",
-    "aboutClose": "Close"
+    "aboutClose": "Close",
+    "printTitle": "Print / PDF",
+    "printAria": "Print or save the poster as PDF",
+    "printHeading": "Paper size",
+    "printCustom": "Custom",
+    "printWidth": "Width (mm)",
+    "printHeight": "Height (mm)",
+    "printAction": "Print / Save as PDF",
+    "printHint": "Choose “Save as PDF” in the print dialog. Enable “Background graphics” to keep the paper texture.",
+    "printWhite": "White background"
   },
   "labels": {
     "ringText": "A PEER-TO-PEER ELECTRONIC CASH SYSTEM ✦ SATOSHI NAKAMOTO ✦ MMVIII ✦",
