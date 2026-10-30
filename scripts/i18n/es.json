@@ -667,7 +667,6 @@
       "printWidth": "Ancho (mm)",
       "printHeight": "Alto (mm)",
       "printAction": "Imprimir / Guardar como PDF",
-      "printHint": "Elige «Guardar como PDF» en el diálogo de impresión. Activa «Gráficos de fondo» para conservar la textura del papel.",
       "printWhite": "Fondo blanco"
     },
     "caps": {

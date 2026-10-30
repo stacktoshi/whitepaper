@@ -667,7 +667,6 @@
       "printWidth": "幅（mm）",
       "printHeight": "高さ（mm）",
       "printAction": "印刷 / PDF で保存",
-      "printHint": "印刷ダイアログで「PDF に保存」を選択してください。「背景グラフィック」を有効にすると紙の質感が保持されます。",
       "printWhite": "白い背景"
     },
     "caps": {

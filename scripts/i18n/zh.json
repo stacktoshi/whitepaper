@@ -667,7 +667,6 @@
       "printWidth": "宽度（毫米）",
       "printHeight": "高度（毫米）",
       "printAction": "打印 / 另存为 PDF",
-      "printHint": "在打印对话框中选择“另存为 PDF”。启用“背景图形”以保留纸张纹理。",
       "printWhite": "白色背景"
     },
     "caps": {

@@ -667,7 +667,6 @@
       "printWidth": "Largeur (mm)",
       "printHeight": "Hauteur (mm)",
       "printAction": "Imprimer / Enregistrer en PDF",
-      "printHint": "Choisissez « Enregistrer au format PDF » dans la boîte de dialogue d’impression. Activez « Graphiques d’arrière-plan » pour conserver la texture du papier.",
       "printWhite": "Fond blanc"
     },
     "caps": {

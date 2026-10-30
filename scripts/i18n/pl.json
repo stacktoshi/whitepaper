@@ -667,7 +667,6 @@
       "printWidth": "Szerokość (mm)",
       "printHeight": "Wysokość (mm)",
       "printAction": "Drukuj / Zapisz jako PDF",
-      "printHint": "Wybierz „Zapisz jako PDF” w oknie drukowania. Włącz „Grafikę tła”, aby zachować fakturę papieru.",
       "printWhite": "Białe tło"
     },
     "caps": {

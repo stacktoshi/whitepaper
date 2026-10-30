@@ -365,7 +365,6 @@
   .pr-check input:focus-visible { outline: 1px dashed var(--orange); outline-offset: 3px; }
   .pr-go { width: 100%; margin-top: 10px; padding: 10px 18px; border: 0; background: var(--ink); color: var(--paper); cursor: pointer; font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; transition: background .2s; }
   .pr-go:hover { background: var(--orange); }
-  .pr-hint { font: 13px/1.45 var(--serif); color: var(--ink2); margin: 7px 0 0; }
   #printBtn { width: 40px; height: 36px; border: 1px solid var(--ink); background: none; cursor: pointer; display: grid; place-items: center; transition: background .2s, color .2s; }
   #printBtn:hover { background: rgba(201, 122, 44, .14); }
   #printBtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -634,7 +633,6 @@
     </div>
     <label class="pr-check"><input type="checkbox" id="printWhite"><span id="printWhiteLabel">White background</span></label>
     <button class="pr-go" id="printGo">Print / Save as PDF</button>
-    <p class="pr-hint" id="printHint">Choose “Save as PDF” in the print dialog. Enable “Background graphics” to keep the paper texture.</p>
   </div>
 </div>
 <div id="citeTip" role="tooltip" aria-hidden="true"></div>
@@ -821,7 +819,6 @@ const EN = {
     printWidth: 'Width (mm)', printHeight: 'Height (mm)',
     printWhite: 'White background',
     printAction: 'Print / Save as PDF',
-    printHint: 'Choose “Save as PDF” in the print dialog. Enable “Background graphics” to keep the paper texture.',
     confirmationsN: '{n} confirmations',
   },
   labels: {
@@ -3880,7 +3877,6 @@ function applyChrome() {
   $('#printHeightLabel').textContent = CHX('printHeight');
   $('#printWhiteLabel').textContent = CHX('printWhite');
   $('#printGo').textContent = CHX('printAction');
-  $('#printHint').textContent = CHX('printHint');
   $('#printClose').setAttribute('aria-label', CHX('aboutClose'));
   if (printModal.classList.contains('open')) renderPrintSizes();
   setModeLabel();

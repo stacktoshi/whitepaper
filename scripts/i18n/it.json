@@ -667,7 +667,6 @@
       "printWidth": "Larghezza (mm)",
       "printHeight": "Altezza (mm)",
       "printAction": "Stampa / Salva come PDF",
-      "printHint": "Scegli «Salva come PDF» nella finestra di stampa. Attiva «Grafica di sfondo» per mantenere la trama della carta.",
       "printWhite": "Sfondo bianco"
     },
     "caps": {

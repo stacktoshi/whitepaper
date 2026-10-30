@@ -48,7 +48,6 @@
     "printWidth": "Width (mm)",
     "printHeight": "Height (mm)",
     "printAction": "Print / Save as PDF",
-    "printHint": "Choose “Save as PDF” in the print dialog. Enable “Background graphics” to keep the paper texture.",
     "printWhite": "White background"
   },
   "labels": {

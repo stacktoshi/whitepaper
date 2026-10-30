@@ -667,7 +667,6 @@
       "printWidth": "Breite (mm)",
       "printHeight": "Höhe (mm)",
       "printAction": "Drucken / Als PDF speichern",
-      "printHint": "Wähle im Druckdialog „Als PDF speichern“. Aktiviere „Hintergrundgrafiken“, um die Papierstruktur zu erhalten.",
       "printWhite": "Weißer Hintergrund"
     },
     "caps": {
