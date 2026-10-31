@@ -412,6 +412,121 @@
     body.started #dayBadge { bottom: calc(78px + 10px + env(safe-area-inset-bottom, 0px)); }
   }
 
+  .tb {
+    position: relative; z-index: 2; margin: 0; pointer-events: auto;
+    width: 720px; max-width: 100%; border: 1px solid #9a9a9a; border-radius: 7px;
+    background: #f3f3f3;
+    box-shadow: 0 42px 90px rgba(52, 38, 22, .38), 0 10px 26px rgba(52, 38, 22, .2);
+    overflow: hidden; font-family: var(--ui); color: #202020; text-align: left;
+    --ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    transform: translateY(-2px);
+  }
+  .tb-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    height: 36px; padding: 0 10px 0 12px;
+    background: linear-gradient(#fafafa, #ececec); border-bottom: 1px solid #cfcfcf;
+    font: 400 12.5px/1 var(--ui); color: #1f1f1f; user-select: none;
+  }
+  .tb-pen { width: 16px; height: 16px; flex: none; color: #333; }
+  .tb-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-controls { display: flex; align-items: stretch; height: 100%; margin-left: auto; }
+  .tb-controls > * { display: grid; place-items: center; width: 34px; height: 100%; padding: 0; border: 0; background: none; font: 400 15px/1 var(--ui); color: #555; cursor: default; }
+  .tb-controls > *:hover { background: #e4e4e4; }
+  .tb-controls .close { cursor: pointer; }
+  .tb-controls .close:hover { background: #e81123; color: #fff; }
+  .tb-menubar {
+    display: flex; align-items: center; gap: 1px; height: 28px; padding: 0 10px;
+    background: #f7f7f7; border-bottom: 1px solid #dedede;
+    font: 400 12px/1 var(--ui); color: #202020; user-select: none;
+  }
+  .tb-menubar span { padding: 5px 8px; border-radius: 2px; cursor: default; }
+  .tb-menubar span:hover { background: #dcebf5; }
+  .tb-toolbar {
+    display: flex; align-items: center; gap: 4px;
+    min-height: 42px; padding: 0 10px;
+    background: linear-gradient(#fbfbfb, #f2f2f2); border-bottom: 1px solid #d3d3d3;
+    font: 400 12px/1 var(--ui); color: #222; user-select: none;
+  }
+  .tb-tool {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 3px;
+    white-space: nowrap; cursor: default;
+  }
+  .tb-tool:hover { background: #e5f1f9; border-color: #b9d7e9; }
+  .tb-tool svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-tool.encrypt { border-color: #c4c4c4; background: #f4f4f4; }
+  .tb-tool.encrypt:hover { background: #e5f1f9; }
+  .tb-spacer { flex: 1; }
+  .tb-tool .caret, .tb-format .caret, .tb-drop {
+    display: inline-block; width: 0; height: 0; margin-left: 2px;
+    border-left: 3px solid transparent; border-right: 3px solid transparent;
+    border-top: 4px solid #555; background: none; animation: none; vertical-align: middle;
+  }
+  .tb-fields { background: #f2f2f2; border-bottom: 1px solid #d6d6d6; padding: 2px 0 4px; }
+  .tb-field { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 2px 12px; font: 400 12.5px/1.3 var(--ui); }
+  .tb-label { flex: none; width: 58px; text-align: right; color: #333; }
+  .tb-value { flex: 1; min-width: 0; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-drop { flex: none; }
+  .tb-side { flex: none; display: flex; gap: 14px; padding-left: 14px; border-left: 1px solid #d2d2d2; color: #333; font-size: 12px; }
+  .tb-side span { cursor: default; }
+  .tb-to-wrap { flex: 1; display: flex; align-items: center; min-width: 0; }
+  .tb-to-chip {
+    display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 3px 6px;
+    background: #f0f0f0; border: 1px solid #c4c4c4; border-radius: 3px;
+    color: #222; font: 400 12.5px/1.25 var(--ui);
+  }
+  .tb-to-chip .addr { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tb-subject {
+    flex: 1; min-width: 0; padding: 4px 7px;
+    background: #fff; border: 1px solid #bfbfbf; border-radius: 2px;
+    color: #222; font: 400 12.5px/1.3 var(--ui);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tb-format {
+    display: flex; align-items: center; gap: 2px; height: 34px; padding: 0 10px;
+    background: #f3f3f3; border-bottom: 1px solid #cfcfcf;
+    font: 400 12px/1 var(--ui); color: #222; user-select: none;
+  }
+  .tb-format .fmt {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 26px; height: 25px; padding: 0 5px; border: 1px solid transparent; border-radius: 2px;
+    cursor: default; white-space: nowrap;
+  }
+  .tb-format .fmt:hover { background: #e5f1f9; border-color: #bdd8e8; }
+  .tb-format .fmt.wide { padding-inline: 8px; }
+  .tb-format .sep { width: 1px; height: 18px; margin: 0 4px; background: #ccc; }
+  .tb-format .swatch { width: 14px; height: 14px; background: #1b1b1b; border: 1px solid #777; }
+  .tb-format .bold { font-weight: 700; }
+  .tb-format .italic { font-style: italic; font-family: Georgia, serif; font-size: 14px; }
+  .tb-format .underline { text-decoration: underline; }
+  .tb-format svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-body {
+    height: 300px; overflow-y: auto; padding: 16px 22px 22px;
+    background: #fff; color: #111;
+    scrollbar-width: thin; scrollbar-color: #b5b5b5 #fff;
+  }
+  .tb-body::-webkit-scrollbar { width: 10px; }
+  .tb-body::-webkit-scrollbar-thumb { background: #c2c2c2; }
+  .tb-text { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; font: 400 14px/1.48 var(--mono); color: #111; }
+  .tb-caret {
+    display: inline-block; width: 1px; height: 1.05em; margin-left: 1px;
+    background: #000; vertical-align: -.12em;
+    animation: tblink 1.05s steps(1) infinite;
+  }
+  @keyframes tblink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  @media (max-width: 680px) {
+    .tb-menubar { display: none; }
+    .tb-toolbar { overflow-x: auto; }
+    .tb-tool { flex: none; }
+    .tb-side { display: none; }
+    .tb-label { width: 48px; }
+    .tb-format { overflow-x: auto; }
+    .tb-format .fmt { flex: none; }
+    .tb-body { height: 46vh; min-height: 260px; padding: 14px 15px 18px; }
+    .tb-text { font-size: 12.5px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tb-caret { animation: none; } }
+
   /* ------------------------------------------------ anniversary modal */
   #dayModal {
     position: fixed; inset: 0; z-index: 90; display: none;
@@ -763,14 +878,68 @@
       <h2 class="day-title" id="dayTitle">Bitcoin Whitepaper Day ’26</h2>
       <p class="day-sub">Celebrating 18 years of Bitcoin</p>
     </div>
-    <div class="day-card">
-      <button class="day-close" id="dayClose" type="button" aria-label="Close">×</button>
-      <div class="day-fields">
-        <div class="day-field"><span class="day-label">From</span><span class="day-value">Satoshi Nakamoto &lt;<span id="dayFrom"></span>&gt;</span></div>
-        <div class="day-field"><span class="day-label">To</span><span class="day-chip" id="dayTo"></span></div>
-        <div class="day-field"><span class="day-label">Subject</span><span class="day-subject">Bitcoin P2P e-cash paper</span></div>
+    <div class="tb" aria-label="Thunderbird-style re-creation of Satoshi Nakamoto’s original announcement email">
+      <div class="tb-titlebar">
+        <svg class="tb-pen" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 10.4-10.4a2.2 2.2 0 0 0-3.1-3.1L5.1 15.9 4 20z"/><path d="M13.8 6.4l3.8 3.8"/></svg>
+        <span class="tb-title">Write: Bitcoin P2P e-cash paper - Thunderbird</span>
+        <span class="tb-controls"><span aria-hidden="true">–</span><span aria-hidden="true">▢</span><button class="close" id="dayClose" type="button" aria-label="Close">×</button></span>
       </div>
-      <div class="day-body" id="dayBody"><div class="day-text" id="dayText"><span id="dayTyped"></span><span class="day-caret" id="dayCaret" aria-hidden="true"></span></div></div>
+      <div class="tb-menubar" aria-hidden="true">
+        <span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Options</span><span>Security</span><span>Tools</span><span>Help</span>
+      </div>
+      <div class="tb-toolbar" aria-hidden="true">
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M21 3L3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l5-5"/></svg>Send</span>
+        <span class="tb-tool encrypt"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Encrypt <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="3"/><path d="M11 12h9M17 12v3M20 12v3"/></svg>OpenPGP <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M4 6h9M4 12h7M4 18h9"/><path d="M16 15l2 2 4-5"/></svg>Spelling <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>Save <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-spacer"></span>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M8 12l7-7a3 3 0 0 1 4 4l-9 9a5 5 0 0 1-7-7l9-9"/></svg></span>
+        <span class="tb-tool">A</span>
+      </div>
+      <div class="tb-fields">
+        <div class="tb-field">
+          <span class="tb-label">From</span>
+          <span class="tb-value">Satoshi Nakamoto &lt;<span class="addr" id="dayFrom"></span>&gt;</span>
+          <span class="tb-drop" aria-hidden="true"></span>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">To</span>
+          <span class="tb-to-wrap"><span class="tb-to-chip"><span class="addr" id="dayTo"></span></span></span>
+          <span class="tb-side"><span>Cc</span><span>Bcc</span><span>»</span></span>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">Subject</span>
+          <span class="tb-subject">Bitcoin P2P e-cash paper</span>
+        </div>
+      </div>
+      <div class="tb-format" aria-hidden="true">
+        <span class="fmt wide">Paragraph <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt wide">Fixed Width <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt"><span class="swatch"></span></span>
+        <span class="sep"></span>
+        <span class="fmt">Tt <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt">T<span style="font-size:9px;vertical-align:super">x</span> <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt">T<span style="font-size:9px;vertical-align:sub">x</span> <span class="caret" aria-hidden="true"></span></span>
+        <span class="sep"></span>
+        <span class="fmt bold">B</span>
+        <span class="fmt italic">I</span>
+        <span class="fmt underline">U</span>
+        <span class="fmt">A</span>
+        <span class="sep"></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h1M4 12h1M4 18h1"/></svg></span>
+        <span class="sep"></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h13"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
+        <span class="sep"></span>
+        <span class="fmt">☺</span>
+      </div>
+      <div class="tb-body" id="dayBody">
+        <div class="tb-text" id="dayText"><span id="dayTyped"></span><span class="tb-caret" id="dayCaret" aria-hidden="true"></span></div>
+      </div>
     </div>
   </div>
 </div>
