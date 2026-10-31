@@ -4325,9 +4325,9 @@ window.__wp = {
     clearTimeout(timer);
     index = FULL.length;
     render(index);
-    bodyEl.scrollTop = 0;
+    bodyEl.scrollTop = bodyEl.scrollHeight;
     typing = false;
-    caret.style.display = 'none';
+    caret.style.display = '';
   }
 
   function tick() {
@@ -4348,7 +4348,7 @@ window.__wp = {
     if (reduceMotion) { finish(); return; }
     typing = true;
     caret.style.display = '';
-    timer = setTimeout(tick, 800);
+    timer = setTimeout(tick, 3000);
   }
 
   function setUrl(on) {

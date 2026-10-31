@@ -312,18 +312,18 @@
     body.scrollTop = body.scrollHeight;
   }
 
-  function finish(atTop) {
+  function finish() {
     clearTimeout(timer);
     index = FULL.length;
     render(index);
-    if (atTop) body.scrollTop = 0;
+    body.scrollTop = body.scrollHeight;
     typing = false;
-    caret.style.display = 'none';
+    caret.style.display = '';
   }
 
   function tick() {
     if (!typing) return;
-    if (index >= FULL.length) { finish(false); return; }
+    if (index >= FULL.length) { finish(); return; }
     const ch = FULL[index++];
     render(index);
     let delay = CHAR_MS;
@@ -336,10 +336,10 @@
     clearTimeout(timer);
     index = 0;
     render(0);
-    if (reduceMotion) { finish(true); return; }
+    if (reduceMotion) { finish(); return; }
     typing = true;
     caret.style.display = '';
-    timer = setTimeout(tick, 800);
+    timer = setTimeout(tick, 3000);
   }
 
   start();
