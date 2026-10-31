@@ -10,7 +10,7 @@ offline-capable PWA packaging.
 
 **Live:** https://bitcoinwhitepaper.art
 
-**Bitcoin Whitepaper Day ’26:** https://bitcoinwhitepaper.art/?day=1 — opens the anniversary email modal over the front page.
+**Bitcoin Whitepaper Day ’26:** https://bitcoinwhitepaper.art/?day=1 — anniversary modal over the front page. Standalone Thunderbird page: https://bitcoinwhitepaper.art/whitepaper-day
 
 ## How it works
 

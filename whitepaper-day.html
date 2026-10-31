@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bitcoin Whitepaper Day ’26 · Celebrating 18 years of Bitcoin</title>
+<meta name="description" content="Bitcoin Whitepaper Day ’26 — Satoshi Nakamoto’s original announcement to the Cryptography Mailing List, 31 October 2008.">
+<meta name="theme-color" content="#f8f4eb">
+<link rel="icon" type="image/svg+xml" href="whitepaper/favicon.svg">
+<style>
+  @font-face { font-family: 'Cinzel'; src: url('whitepaper/fonts/Cinzel-400.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Cinzel'; src: url('whitepaper/fonts/Cinzel-500.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Cinzel'; src: url('whitepaper/fonts/Cinzel-600.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Cinzel'; src: url('whitepaper/fonts/Cinzel-700.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+  :root {
+    --paper: #f8f4eb;
+    --paper2: #fbf8f2;
+    --ink: #191613;
+    --ink2: #4b443c;
+    --ink3: #8d8378;
+    --orange: #c97a2c;
+    --ink-rgb: 25, 22, 19;
+    --bg1: #ece7dd; --bg2: #e2dbcf; --bg3: #d3cbbd;
+    --display: 'Cinzel', 'Trajan Pro', Optima, 'Times New Roman', serif;
+    --serif: 'Times New Roman', Times, Tinos, serif;
+    --mono: 'Courier New', Courier, monospace;
+    --ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .32 0 0 0 0 .26 0 0 0 0 .18 0 0 0 .075 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    color: var(--ink); font-family: var(--serif);
+    background: radial-gradient(120% 90% at 50% 32%, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
+    overflow-x: hidden;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: var(--grain); opacity: .45;
+  }
+  .page { position: relative; z-index: 1; padding: clamp(16px, 3vw, 36px) clamp(14px, 4vw, 38px) 36px; }
+  .sheet {
+    max-width: 1080px; margin: 0 auto;
+    padding: clamp(24px, 4vw, 48px) clamp(20px, 4.6vw, 58px) clamp(24px, 3.4vw, 42px);
+    background: var(--paper) var(--grain);
+    border: 1px solid rgba(var(--ink-rgb), .1);
+    box-shadow: 0 50px 120px rgba(52, 38, 22, .28), 0 8px 22px rgba(52, 38, 22, .14);
+  }
+  .masthead { text-align: center; padding-bottom: clamp(22px, 3vw, 32px); border-bottom: 1px solid rgba(var(--ink-rgb), .18); }
+  .kicker { font: 600 10px/1 var(--display); letter-spacing: .34em; text-transform: uppercase; color: var(--orange); }
+  h1 {
+    margin: 12px 0 0;
+    font: 500 clamp(32px, 4.4vw, 54px)/1.05 var(--display);
+    letter-spacing: .005em; color: var(--ink); text-wrap: balance;
+  }
+  h1 .year { color: var(--orange); }
+  .subtitle { margin: 12px 0 0; font: italic 400 clamp(18px, 2.2vw, 25px)/1.35 var(--serif); color: var(--ink2); }
+  .rule { width: 58px; height: 1px; margin: 18px auto 0; background: var(--orange); opacity: .8; }
+
+  .tb {
+    position: relative; z-index: 2; margin: clamp(24px, 3.2vw, 34px) auto 0;
+    width: 100%; border: 1px solid #9a9a9a; border-radius: 7px;
+    background: #f3f3f3;
+    box-shadow: 0 42px 90px rgba(52, 38, 22, .38), 0 10px 26px rgba(52, 38, 22, .2);
+    overflow: hidden; font-family: var(--ui); color: #202020; text-align: left;
+    transform: translateY(-2px);
+  }
+  .tb-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    height: 36px; padding: 0 10px 0 12px;
+    background: linear-gradient(#fafafa, #ececec); border-bottom: 1px solid #cfcfcf;
+    font: 400 12.5px/1 var(--ui); color: #1f1f1f; user-select: none;
+  }
+  .tb-pen { width: 16px; height: 16px; flex: none; color: #333; }
+  .tb-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-controls { display: flex; align-items: stretch; height: 100%; margin-left: auto; }
+  .tb-controls span { display: grid; place-items: center; width: 34px; height: 100%; font: 400 15px/1 var(--ui); color: #555; cursor: default; }
+  .tb-controls span:hover { background: #e4e4e4; }
+  .tb-controls .close:hover { background: #e81123; color: #fff; }
+  .tb-menubar {
+    display: flex; align-items: center; gap: 1px; height: 28px; padding: 0 10px;
+    background: #f7f7f7; border-bottom: 1px solid #dedede;
+    font: 400 12px/1 var(--ui); color: #202020; user-select: none;
+  }
+  .tb-menubar span { padding: 5px 8px; border-radius: 2px; cursor: default; }
+  .tb-menubar span:hover { background: #dcebf5; }
+  .tb-toolbar {
+    display: flex; align-items: center; gap: 4px;
+    min-height: 42px; padding: 0 10px;
+    background: linear-gradient(#fbfbfb, #f2f2f2); border-bottom: 1px solid #d3d3d3;
+    font: 400 12px/1 var(--ui); color: #222; user-select: none;
+  }
+  .tb-tool {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 3px;
+    white-space: nowrap; cursor: default;
+  }
+  .tb-tool:hover { background: #e5f1f9; border-color: #b9d7e9; }
+  .tb-tool svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-tool.encrypt { border-color: #c4c4c4; background: #f4f4f4; }
+  .tb-tool.encrypt:hover { background: #e5f1f9; }
+  .tb-toolbar button.tb-action {
+    height: 28px; padding: 0 9px; border: 1px solid #c4c4c4; border-radius: 3px;
+    background: #f4f4f4; color: #222; font: 400 12px/1 var(--ui); cursor: pointer;
+  }
+  .tb-toolbar button.tb-action:hover { background: #e5f1f9; border-color: #b9d7e9; }
+  .tb-toolbar button.tb-action:disabled { opacity: .5; cursor: default; }
+  .tb-spacer { flex: 1; }
+  .tb-tool .caret, .tb-format .caret, .tb-drop {
+    display: inline-block; width: 0; height: 0; margin-left: 2px;
+    border-left: 3px solid transparent; border-right: 3px solid transparent;
+    border-top: 4px solid #555; background: none; animation: none; vertical-align: middle;
+  }
+  .tb-fields { background: #f2f2f2; border-bottom: 1px solid #d6d6d6; padding: 2px 0 4px; }
+  .tb-field { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 2px 12px; font: 400 12.5px/1.3 var(--ui); }
+  .tb-label { flex: none; width: 58px; text-align: right; color: #333; }
+  .tb-value { flex: 1; min-width: 0; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-drop { flex: none; }
+  .tb-side { flex: none; display: flex; gap: 14px; padding-left: 14px; border-left: 1px solid #d2d2d2; color: #333; font-size: 12px; }
+  .tb-side span { cursor: default; }
+  .tb-to-wrap { flex: 1; display: flex; align-items: center; min-width: 0; }
+  .tb-to-chip {
+    display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 3px 6px;
+    background: #f0f0f0; border: 1px solid #c4c4c4; border-radius: 3px;
+    color: #222; font: 400 12.5px/1.25 var(--ui);
+  }
+  .tb-to-chip .addr { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tb-subject {
+    flex: 1; min-width: 0; padding: 4px 7px;
+    background: #fff; border: 1px solid #bfbfbf; border-radius: 2px;
+    color: #222; font: 400 12.5px/1.3 var(--ui);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tb-format {
+    display: flex; align-items: center; gap: 2px; height: 34px; padding: 0 10px;
+    background: #f3f3f3; border-bottom: 1px solid #cfcfcf;
+    font: 400 12px/1 var(--ui); color: #222; user-select: none;
+  }
+  .tb-format .fmt {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 26px; height: 25px; padding: 0 5px; border: 1px solid transparent; border-radius: 2px;
+    cursor: default; white-space: nowrap;
+  }
+  .tb-format .fmt:hover { background: #e5f1f9; border-color: #bdd8e8; }
+  .tb-format .fmt.wide { padding-inline: 8px; }
+  .tb-format .sep { width: 1px; height: 18px; margin: 0 4px; background: #ccc; }
+  .tb-format .swatch { width: 14px; height: 14px; background: #1b1b1b; border: 1px solid #777; }
+  .tb-format .bold { font-weight: 700; }
+  .tb-format .italic { font-style: italic; font-family: Georgia, serif; font-size: 14px; }
+  .tb-format .underline { text-decoration: underline; }
+  .tb-format svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-body {
+    height: 300px; overflow-y: auto; padding: 16px 22px 22px;
+    background: #fff; color: #111;
+    scrollbar-width: thin; scrollbar-color: #b5b5b5 #fff;
+  }
+  .tb-body::-webkit-scrollbar { width: 10px; }
+  .tb-body::-webkit-scrollbar-thumb { background: #c2c2c2; }
+  .tb-text { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; font: 400 14px/1.48 var(--mono); color: #111; }
+  .caret {
+    display: inline-block; width: 1px; height: 1.05em; margin-left: 1px;
+    background: #000; vertical-align: -.12em;
+    animation: blink 1.05s steps(1) infinite;
+  }
+  @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  .caption { margin: 20px 0 0; text-align: center; font: italic 13px/1.45 var(--serif); color: var(--ink3); }
+  @media (max-width: 680px) {
+    .tb-menubar { display: none; }
+    .tb-toolbar { overflow-x: auto; }
+    .tb-tool { flex: none; }
+    .tb-side { display: none; }
+    .tb-label { width: 48px; }
+    .tb-format { overflow-x: auto; }
+    .tb-format .fmt { flex: none; }
+    .tb-body { height: 46vh; min-height: 260px; padding: 14px 15px 18px; }
+    .tb-text { font-size: 12.5px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+</style>
+</head>
+<body>
+<main class="page">
+  <article class="sheet">
+    <header class="masthead">
+      <div class="kicker">31 · X · MMXXVI</div>
+      <h1>Bitcoin Whitepaper Day <span class="year">’26</span></h1>
+      <p class="subtitle">Celebrating 18 years of Bitcoin</p>
+      <div class="rule" aria-hidden="true"></div>
+    </header>
+
+    <section class="tb" aria-label="Thunderbird-style re-creation of Satoshi Nakamoto’s original announcement email">
+      <div class="tb-titlebar">
+        <svg class="tb-pen" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4.2-1 10.4-10.4a2.2 2.2 0 0 0-3.1-3.1L5.1 15.9 4 20z"/><path d="M13.8 6.4l3.8 3.8"/></svg>
+        <span class="tb-title">Write: Bitcoin P2P e-cash paper - Thunderbird</span>
+        <span class="tb-controls" aria-hidden="true"><span>–</span><span>▢</span><span class="close">×</span></span>
+      </div>
+      <div class="tb-menubar" aria-hidden="true">
+        <span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Options</span><span>Security</span><span>Tools</span><span>Help</span>
+      </div>
+      <div class="tb-toolbar">
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M21 3L3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l5-5"/></svg>Send</span>
+        <span class="tb-tool encrypt"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Encrypt <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="3"/><path d="M11 12h9M17 12v3M20 12v3"/></svg>OpenPGP <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M4 6h9M4 12h7M4 18h9"/><path d="M16 15l2 2 4-5"/></svg>Spelling <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>Save <span class="caret" aria-hidden="true"></span></span>
+        <span class="tb-spacer"></span>
+        <button class="tb-tool tb-action" type="button" id="skipBtn" aria-label="Skip to the full email">Skip</button>
+        <button class="tb-tool tb-action" type="button" id="replayBtn" aria-label="Replay the typing animation">Replay</button>
+        <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M8 12l7-7a3 3 0 0 1 4 4l-9 9a5 5 0 0 1-7-7l9-9"/></svg></span>
+        <span class="tb-tool">A</span>
+      </div>
+      <div class="tb-fields">
+        <div class="tb-field">
+          <span class="tb-label">From</span>
+          <span class="tb-value">Satoshi Nakamoto &lt;<span class="addr" id="fromAddr"></span>&gt;</span>
+          <span class="tb-drop" aria-hidden="true"></span>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">To</span>
+          <span class="tb-to-wrap"><span class="tb-to-chip"><span class="addr" id="mailTo"></span></span></span>
+          <span class="tb-side"><span>Cc</span><span>Bcc</span><span>»</span></span>
+        </div>
+        <div class="tb-field">
+          <span class="tb-label">Subject</span>
+          <span class="tb-subject">Bitcoin P2P e-cash paper</span>
+        </div>
+      </div>
+      <div class="tb-format" aria-hidden="true">
+        <span class="fmt wide">Paragraph <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt wide">Fixed Width <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt"><span class="swatch"></span></span>
+        <span class="sep"></span>
+        <span class="fmt">Tt <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt">T<span style="font-size:9px;vertical-align:super">x</span> <span class="caret" aria-hidden="true"></span></span>
+        <span class="fmt">T<span style="font-size:9px;vertical-align:sub">x</span> <span class="caret" aria-hidden="true"></span></span>
+        <span class="sep"></span>
+        <span class="fmt bold">B</span>
+        <span class="fmt italic">I</span>
+        <span class="fmt underline">U</span>
+        <span class="fmt">A</span>
+        <span class="sep"></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h1M4 12h1M4 18h1"/></svg></span>
+        <span class="sep"></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h16M4 18h13"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h16"/></svg></span>
+        <span class="fmt"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
+        <span class="sep"></span>
+        <span class="fmt">☺</span>
+      </div>
+      <div class="tb-body" id="mailBody">
+        <div class="tb-text" id="mailText"><span id="typed"></span><span class="caret" id="caret" aria-hidden="true"></span></div>
+      </div>
+    </section>
+
+    <p class="caption">Satoshi Nakamoto’s announcement to the Cryptography Mailing List · 31 October 2008</p>
+  </article>
+</main>
+
+<script>
+  const FULL = [
+    "I've been working on a new electronic cash system that's fully",
+    "peer-to-peer, with no trusted third party.",
+    "",
+    "The paper is available at:",
+    "http://www.bitcoin.org/bitcoin.pdf",
+    "",
+    "The main properties:",
+    " Double-spending is prevented with a peer-to-peer network.",
+    " No mint or other trusted parties.",
+    " Participants can be anonymous.",
+    " New coins are made from Hashcash style proof-of-work.",
+    " The proof-of-work for new coin generation also powers the",
+    "    network to prevent double-spending.",
+    "",
+    "Bitcoin: A Peer-to-Peer Electronic Cash System",
+    "",
+    "Abstract.  A purely peer-to-peer version of electronic cash would",
+    "allow online payments to be sent directly from one party to another",
+    "without the burdens of going through a financial institution.",
+    "Digital signatures provide part of the solution, but the main",
+    "benefits are lost if a trusted party is still required to prevent",
+    "double-spending.  We propose a solution to the double-spending",
+    "problem using a peer-to-peer network.  The network timestamps",
+    "transactions by hashing them into an ongoing chain of hash-based",
+    "proof-of-work, forming a record that cannot be changed without",
+    "redoing the proof-of-work.  The longest chain not only serves as",
+    "proof of the sequence of events witnessed, but proof that it came",
+    "from the largest pool of CPU power.  As long as honest nodes control",
+    "the most CPU power on the network, they can generate the longest",
+    "chain and outpace any attackers.  The network itself requires",
+    "minimal structure.  Messages are broadcast on a best effort basis,",
+    "and nodes can leave and rejoin the network at will, accepting the",
+    "longest proof-of-work chain as proof of what happened while they",
+    "were gone.",
+    "",
+    "Full paper at:",
+    "http://www.bitcoin.org/bitcoin.pdf",
+    "",
+    "Satoshi Nakamoto"
+  ].join("\n");
+
+  const AT = String.fromCharCode(64);
+  document.getElementById('mailTo').textContent = 'majordomo' + AT + 'metzdowd.com';
+  document.getElementById('fromAddr').textContent = 'satoshi' + AT + 'vistomail.com';
+
+  const body = document.getElementById('mailBody');
+  const typed = document.getElementById('typed');
+  const caret = document.getElementById('caret');
+  const skipBtn = document.getElementById('skipBtn');
+  const replayBtn = document.getElementById('replayBtn');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const CHAR_MS = 1000 / 15;   // 150 wpm, counting spaces
+  const SENTENCE_MS = 500;
+  const PARAGRAPH_MS = 1500;
+  let timer = 0, index = 0, typing = false;
+
+  function render(n) {
+    typed.textContent = FULL.slice(0, n);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function finish(atTop) {
+    clearTimeout(timer);
+    index = FULL.length;
+    render(index);
+    if (atTop) body.scrollTop = 0;
+    typing = false;
+    caret.style.display = 'none';
+    skipBtn.disabled = true;
+    replayBtn.disabled = false;
+  }
+
+  function tick() {
+    if (!typing) return;
+    if (index >= FULL.length) { finish(false); return; }
+    const ch = FULL[index++];
+    render(index);
+    let delay = CHAR_MS;
+    if (ch === '\n' && FULL[index - 2] === '\n') delay += PARAGRAPH_MS;
+    else if (/[.!?]/.test(ch) && (index >= FULL.length || /\s/.test(FULL[index]))) delay += SENTENCE_MS;
+    timer = setTimeout(tick, delay);
+  }
+
+  function start() {
+    clearTimeout(timer);
+    index = 0;
+    render(0);
+    if (reduceMotion) { finish(true); return; }
+    typing = true;
+    caret.style.display = '';
+    skipBtn.disabled = false;
+    replayBtn.disabled = false;
+    timer = setTimeout(tick, 800);
+  }
+
+  skipBtn.addEventListener('click', () => { if (typing) finish(true); });
+  replayBtn.addEventListener('click', () => start());
+  start();
+</script>
+</body>
+</html>
