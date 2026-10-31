@@ -99,12 +99,6 @@
   .tb-tool svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
   .tb-tool.encrypt { border-color: #c4c4c4; background: #f4f4f4; }
   .tb-tool.encrypt:hover { background: #e5f1f9; }
-  .tb-toolbar button.tb-action {
-    height: 28px; padding: 0 9px; border: 1px solid #c4c4c4; border-radius: 3px;
-    background: #f4f4f4; color: #222; font: 400 12px/1 var(--ui); cursor: pointer;
-  }
-  .tb-toolbar button.tb-action:hover { background: #e5f1f9; border-color: #b9d7e9; }
-  .tb-toolbar button.tb-action:disabled { opacity: .5; cursor: default; }
   .tb-spacer { flex: 1; }
   .tb-tool .caret, .tb-format .caret, .tb-drop {
     display: inline-block; width: 0; height: 0; margin-left: 2px;
@@ -204,8 +198,6 @@
         <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M4 6h9M4 12h7M4 18h9"/><path d="M16 15l2 2 4-5"/></svg>Spelling <span class="caret" aria-hidden="true"></span></span>
         <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>Save <span class="caret" aria-hidden="true"></span></span>
         <span class="tb-spacer"></span>
-        <button class="tb-tool tb-action" type="button" id="skipBtn" aria-label="Skip to the full email">Skip</button>
-        <button class="tb-tool tb-action" type="button" id="replayBtn" aria-label="Replay the typing animation">Replay</button>
         <span class="tb-tool"><svg viewBox="0 0 24 24"><path d="M8 12l7-7a3 3 0 0 1 4 4l-9 9a5 5 0 0 1-7-7l9-9"/></svg></span>
         <span class="tb-tool">A</span>
       </div>
@@ -308,8 +300,6 @@
   const body = document.getElementById('mailBody');
   const typed = document.getElementById('typed');
   const caret = document.getElementById('caret');
-  const skipBtn = document.getElementById('skipBtn');
-  const replayBtn = document.getElementById('replayBtn');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const CHAR_MS = 1000 / 15;   // 150 wpm, counting spaces
@@ -329,8 +319,6 @@
     if (atTop) body.scrollTop = 0;
     typing = false;
     caret.style.display = 'none';
-    skipBtn.disabled = true;
-    replayBtn.disabled = false;
   }
 
   function tick() {
@@ -351,13 +339,9 @@
     if (reduceMotion) { finish(true); return; }
     typing = true;
     caret.style.display = '';
-    skipBtn.disabled = false;
-    replayBtn.disabled = false;
     timer = setTimeout(tick, 800);
   }
 
-  skipBtn.addEventListener('click', () => { if (typing) finish(true); });
-  replayBtn.addEventListener('click', () => start());
   start();
 </script>
 </body>
