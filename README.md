@@ -10,7 +10,7 @@ offline-capable PWA packaging.
 
 **Live:** https://bitcoinwhitepaper.art
 
-**Bitcoin Whitepaper Day ’26:** https://bitcoinwhitepaper.art/whitepaper-day — Satoshi’s original announcement, typed.
+**Bitcoin Whitepaper Day ’26:** https://bitcoinwhitepaper.art/?day=1 — opens the anniversary email modal over the front page.
 
 ## How it works
 

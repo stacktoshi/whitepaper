@@ -6,7 +6,7 @@
   "description": "The Bitcoin whitepaper — a narrated, interactive, fully translated edition of Satoshi Nakamoto's 2008 paper.",
   "scripts": {
     "serve": "npm run build && npx serve dist",
-    "build": "mkdir -p dist/whitepaper && cp index.html whitepaper-day.html dist/ && cp -R public/whitepaper/. dist/whitepaper/",
+    "build": "rm -rf dist && mkdir -p dist/whitepaper && cp index.html dist/ && cp -R public/whitepaper/. dist/whitepaper/",
     "extract-strings": "node scripts/i18n/extract-strings.mjs",
     "build:i18n": "node scripts/i18n/build-locale.mjs es zh ja ko fr de pt ru ar it hi pl nl he gr",
     "build:narration": "node scripts/build-narration.mjs",

@@ -388,6 +388,128 @@
   .print-poster.print-letter .abs2 { font-size: 29px; line-height: 1.26; column-gap: 64px; margin-bottom: 44px; }
   .print-poster.print-letter .body { font-size: 16.6px; line-height: 1.38; }
   .print-poster.print-letter .body .h { font-size: 19px; }
+
+
+  /* ------------------------------------------------ anniversary badge */
+  #dayBadge {
+    position: fixed; left: 22px; bottom: 22px; z-index: 26;
+    width: 46px; height: 46px; padding: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    border: 1px solid var(--ink);
+    background: var(--paper2) var(--grain);
+    color: var(--ink); cursor: pointer;
+    box-shadow: 0 3px 9px rgba(52, 38, 22, .16);
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  #dayBadge .b { font: 600 9px/1 var(--display); letter-spacing: .02em; white-space: nowrap; }
+  #dayBadge .b i { font-style: normal; color: var(--orange); }
+  #dayBadge .y { font: 600 10px/1 var(--display); letter-spacing: .06em; color: var(--orange); }
+  #dayBadge:hover { border-color: var(--orange); box-shadow: 0 4px 14px rgba(52, 38, 22, .32); }
+  #dayBadge:active { transform: scale(.95); }
+  body.started #dayBadge { bottom: calc(86px + 16px + env(safe-area-inset-bottom, 0px)); }
+  @media (max-width: 760px) {
+    #dayBadge { left: 10px; bottom: 8px; width: 44px; height: 44px; }
+    body.started #dayBadge { bottom: calc(78px + 10px + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  /* ------------------------------------------------ anniversary modal */
+  #dayModal {
+    position: fixed; inset: 0; z-index: 90; display: none;
+    align-items: center; justify-content: center;
+    padding: clamp(18px, 4vw, 48px);
+    overflow-y: auto;
+    background: rgba(248, 244, 235, .68);
+    -webkit-backdrop-filter: blur(10px) saturate(.85);
+    backdrop-filter: blur(10px) saturate(.85);
+  }
+  html[data-theme="dark"] #dayModal { background: rgba(20, 17, 12, .7); }
+  #dayModal.open { display: flex; }
+  .day-inner {
+    width: 100%; max-width: 900px; margin: auto;
+    display: flex; flex-direction: column; align-items: center;
+    gap: clamp(18px, 3vw, 30px);
+    pointer-events: none;
+  }
+  .day-head { text-align: center; pointer-events: none; color: #f8f4eb; }
+  .day-title {
+    margin: 0;
+    font: 500 clamp(34px, 5vw, 60px)/1.05 var(--display);
+    letter-spacing: .005em;
+    color: #f8f4eb;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, .3);
+  }
+  .day-sub {
+    margin: 10px 0 0;
+    font: italic 400 clamp(18px, 2.2vw, 26px)/1.3 var(--serif);
+    color: #f8f4eb; opacity: .86;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, .3);
+  }
+  html[data-theme="dark"] .day-head { color: #191613; }
+  html[data-theme="dark"] .day-title,
+  html[data-theme="dark"] .day-sub { color: #191613; text-shadow: 0 1px 12px rgba(255, 255, 255, .34); }
+  .day-card {
+    position: relative; pointer-events: auto;
+    width: 100%;
+    background: var(--paper2) var(--grain);
+    border: 1px solid rgba(var(--ink-rgb), .22);
+    box-shadow: 0 30px 80px rgba(52, 38, 22, .28), 0 8px 24px rgba(52, 38, 22, .15);
+    padding: 22px 26px 24px;
+  }
+  html[data-theme="dark"] .day-card { box-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 8px 24px rgba(0, 0, 0, .35); }
+  .day-close {
+    position: absolute; top: 6px; right: 8px;
+    width: 32px; height: 32px; padding: 0; border: 0; background: none;
+    color: var(--ink3); font: 400 22px/1 var(--display); cursor: pointer;
+  }
+  .day-close:hover, .day-close:focus-visible { color: var(--orange); outline: none; }
+  .day-fields { padding: 2px 0 0; }
+  .day-field { display: flex; align-items: baseline; gap: 14px; padding: 4px 0; }
+  .day-label {
+    flex: none; width: 62px;
+    font: 600 8.5px/1.4 var(--display); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink3);
+  }
+  .day-value, .day-subject {
+    font: 400 14px/1.4 var(--mono); color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  .day-chip {
+    display: inline-block; padding: 3px 7px;
+    background: rgba(var(--ink-rgb), .06);
+    border: 1px solid rgba(var(--ink-rgb), .18);
+    border-radius: 3px;
+    font: 400 13px/1.4 var(--mono); color: var(--ink);
+  }
+  .day-body {
+    height: min(42vh, 420px); overflow-y: auto;
+    margin-top: 14px; padding: 14px 16px 18px;
+    border-top: 1px solid rgba(var(--ink-rgb), .15);
+    background: rgba(var(--ink-rgb), .025);
+    scrollbar-width: thin; scrollbar-color: rgba(var(--ink-rgb), .28) transparent;
+  }
+  .day-body::-webkit-scrollbar { width: 8px; }
+  .day-body::-webkit-scrollbar-thumb { background: rgba(var(--ink-rgb), .22); }
+  .day-text {
+    margin: 0; white-space: pre-wrap; overflow-wrap: break-word;
+    font: 400 14px/1.5 var(--mono); color: var(--ink);
+  }
+  .day-caret {
+    display: inline-block; width: 1px; height: 1.05em; margin-left: 1px;
+    background: var(--orange); vertical-align: -.12em;
+    animation: dayblink 1.05s steps(1) infinite;
+  }
+  @keyframes dayblink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  @media (max-width: 640px) {
+    #dayModal { align-items: flex-start; padding: 18px 14px; }
+    .day-inner { gap: 18px; }
+    .day-card { padding: 18px 16px 18px; }
+    .day-label { width: 52px; }
+    .day-value, .day-subject { font-size: 12.5px; }
+    .day-body { height: 46vh; min-height: 260px; padding: 12px 12px 14px; }
+    .day-text { font-size: 12.5px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .day-caret { animation: none; } }
+
   @media (max-width: 520px) {
     .pr-grid { grid-template-columns: repeat(2, 1fr); }
     .pr-fields { flex-direction: column; gap: 8px; }
@@ -398,7 +520,7 @@
     body::after { display: none !important; }
     body.printing #stage, body.printing #reader, body.printing #hud, body.printing #topActionsHost,
     body.printing #panel, body.printing #intro, body.printing #introLang, body.printing #bar,
-    body.printing #findbar, body.printing #tip, body.printing #aboutModal, body.printing #printModal,
+    body.printing #findbar, body.printing #tip, body.printing #aboutModal, body.printing #printModal, body.printing #dayModal, body.printing #dayBadge,
     body.printing #citeTip, body.printing #fadeTop, body.printing #fadeSide, body.printing #fadeBot,
     body.printing #shareToast { display: none !important; }
     body.printing #printRoot { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; visibility: visible !important; overflow: hidden !important; background: var(--paper) var(--grain) !important; }
@@ -618,7 +740,7 @@
     <div class="ab-tt" id="aboutTitle">About</div>
     <p class="ab-p">The layout and typography of this edition take inspiration from <a href="https://dailycoinpost.com/free-high-quality-bitcoin-whitepaper-poster/" target="_blank" rel="noopener">Daily Coin Post&rsquo;s free high-quality Bitcoin whitepaper poster</a>.</p>
     <p class="ab-p"><a href="https://bitcoinwhitepaper.online/" target="_blank" rel="noopener">BitcoinWhitepaper.online</a> is an independent provenance record for the four known versions of the Bitcoin whitepaper: the lost August 2008 draft, the surviving 3 October 2008 draft, a January 2009 copy known only through the COPA v Wright court record, and the canonical 24 March 2009 file embedded in the block chain at block 230,009. It identifies any copy in seconds through plain-text tests (citation numbering, section text, PDF structure and embedded font subsets) and ships standard-library Python scripts that carve and verify the canonical bytes straight from the block chain. Its dating rests on content rather than file metadata: a citation the author had only just learned to make, and a transaction-fee paragraph that did not exist yet.</p>
-    <p class="ab-p">This narrated edition is open source at <a href="https://github.com/stacktoshi/whitepaper" target="_blank" rel="noopener">github.com/stacktoshi/whitepaper</a> and live at <a href="https://bitcoinwhitepaper.art" target="_blank" rel="noopener">bitcoinwhitepaper.art</a>. Satoshi announced the paper on the cryptography mailing list on 31 October 2008: <a href="https://www.metzdowd.com/pipermail/cryptography/2008-October/014810.html" target="_blank" rel="noopener">original announcement</a>. See <a href="whitepaper-day">Bitcoin Whitepaper Day ’26</a> for a typing animation of it.</p>
+    <p class="ab-p">This narrated edition is open source at <a href="https://github.com/stacktoshi/whitepaper" target="_blank" rel="noopener">github.com/stacktoshi/whitepaper</a> and live at <a href="https://bitcoinwhitepaper.art" target="_blank" rel="noopener">bitcoinwhitepaper.art</a>. Satoshi announced the paper on the cryptography mailing list on 31 October 2008: <a href="https://www.metzdowd.com/pipermail/cryptography/2008-October/014810.html" target="_blank" rel="noopener">original announcement</a>.</p>
   </div>
 </div>
 <div id="printModal" role="dialog" aria-modal="true" aria-labelledby="printTitle">
@@ -633,6 +755,23 @@
     </div>
     <label class="pr-check"><input type="checkbox" id="printWhite"><span id="printWhiteLabel">White background</span></label>
     <button class="pr-go" id="printGo">Print / Save as PDF</button>
+  </div>
+</div>
+<div id="dayModal" role="dialog" aria-modal="true" aria-labelledby="dayTitle" aria-hidden="true">
+  <div class="day-inner">
+    <div class="day-head">
+      <h2 class="day-title" id="dayTitle">Bitcoin Whitepaper Day ’26</h2>
+      <p class="day-sub">Celebrating 18 years of Bitcoin</p>
+    </div>
+    <div class="day-card">
+      <button class="day-close" id="dayClose" type="button" aria-label="Close">×</button>
+      <div class="day-fields">
+        <div class="day-field"><span class="day-label">From</span><span class="day-value">Satoshi Nakamoto &lt;<span id="dayFrom"></span>&gt;</span></div>
+        <div class="day-field"><span class="day-label">To</span><span class="day-chip" id="dayTo"></span></div>
+        <div class="day-field"><span class="day-label">Subject</span><span class="day-subject">Bitcoin P2P e-cash paper</span></div>
+      </div>
+      <div class="day-body" id="dayBody"><div class="day-text" id="dayText"><span id="dayTyped"></span><span class="day-caret" id="dayCaret" aria-hidden="true"></span></div></div>
+    </div>
   </div>
 </div>
 <div id="citeTip" role="tooltip" aria-hidden="true"></div>
@@ -668,6 +807,7 @@
 </div>
 
 <div class="vwrap" id="introLang"><button id="introFlag" aria-haspopup="true"></button></div>
+<button id="dayBadge" type="button" aria-label="Open Bitcoin Whitepaper Day ’26"><span class="b"><i>₿</i>WD</span><span class="y">’26</span></button>
 
 <footer id="bar">
   <button id="play" aria-label="Play / pause"><svg viewBox="0 0 20 20" id="playIcon"><path d="M5 3l12 7-12 7z" /></svg></button>
@@ -3945,6 +4085,140 @@ window.__wp = {
     return out;
   },
 };
+})();
+</script>
+<script>
+(() => {
+  const modal = document.getElementById('dayModal');
+  if (!modal) return;
+  const typed = document.getElementById('dayTyped');
+  const bodyEl = document.getElementById('dayBody');
+  const caret = document.getElementById('dayCaret');
+  const closeBtn = document.getElementById('dayClose');
+  const AT = String.fromCharCode(64);
+  document.getElementById('dayFrom').textContent = 'satoshi' + AT + 'vistomail.com';
+  document.getElementById('dayTo').textContent = 'majordomo' + AT + 'metzdowd.com';
+
+  const FULL = [
+    "I've been working on a new electronic cash system that's fully",
+    "peer-to-peer, with no trusted third party.",
+    "",
+    "The paper is available at:",
+    "http://www.bitcoin.org/bitcoin.pdf",
+    "",
+    "The main properties:",
+    " Double-spending is prevented with a peer-to-peer network.",
+    " No mint or other trusted parties.",
+    " Participants can be anonymous.",
+    " New coins are made from Hashcash style proof-of-work.",
+    " The proof-of-work for new coin generation also powers the",
+    "    network to prevent double-spending.",
+    "",
+    "Bitcoin: A Peer-to-Peer Electronic Cash System",
+    "",
+    "Abstract.  A purely peer-to-peer version of electronic cash would",
+    "allow online payments to be sent directly from one party to another",
+    "without the burdens of going through a financial institution.",
+    "Digital signatures provide part of the solution, but the main",
+    "benefits are lost if a trusted party is still required to prevent",
+    "double-spending.  We propose a solution to the double-spending",
+    "problem using a peer-to-peer network.  The network timestamps",
+    "transactions by hashing them into an ongoing chain of hash-based",
+    "proof-of-work, forming a record that cannot be changed without",
+    "redoing the proof-of-work.  The longest chain not only serves as",
+    "proof of the sequence of events witnessed, but proof that it came",
+    "from the largest pool of CPU power.  As long as honest nodes control",
+    "the most CPU power on the network, they can generate the longest",
+    "chain and outpace any attackers.  The network itself requires",
+    "minimal structure.  Messages are broadcast on a best effort basis,",
+    "and nodes can leave and rejoin the network at will, accepting the",
+    "longest proof-of-work chain as proof of what happened while they",
+    "were gone.",
+    "",
+    "Full paper at:",
+    "http://www.bitcoin.org/bitcoin.pdf",
+    "",
+    "Satoshi Nakamoto"
+  ].join("\n");
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const CHAR_MS = 1000 / 15; // 150 wpm, counting spaces
+  const SENTENCE_MS = 500;
+  const PARAGRAPH_MS = 1500;
+  let timer = 0, index = 0, typing = false;
+
+  function render(n) {
+    typed.textContent = FULL.slice(0, n);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  function finish() {
+    clearTimeout(timer);
+    index = FULL.length;
+    render(index);
+    bodyEl.scrollTop = 0;
+    typing = false;
+    caret.style.display = 'none';
+  }
+
+  function tick() {
+    if (!typing || !modal.classList.contains('open')) return;
+    if (index >= FULL.length) { finish(); return; }
+    const ch = FULL[index++];
+    render(index);
+    let delay = CHAR_MS;
+    if (ch === '\n' && FULL[index - 2] === '\n') delay += PARAGRAPH_MS;
+    else if (/[.!?]/.test(ch) && (index >= FULL.length || /\s/.test(FULL[index]))) delay += SENTENCE_MS;
+    timer = setTimeout(tick, delay);
+  }
+
+  function start() {
+    clearTimeout(timer);
+    index = 0;
+    render(0);
+    if (reduceMotion) { finish(); return; }
+    typing = true;
+    caret.style.display = '';
+    timer = setTimeout(tick, 800);
+  }
+
+  function setUrl(on) {
+    const url = new URL(location.href);
+    if (on) url.searchParams.set('day', '1');
+    else url.searchParams.delete('day');
+    history.replaceState(null, '', url.pathname + (url.search ? '?' + url.searchParams.toString() : '') + url.hash);
+  }
+
+  function openDay() {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('day-open');
+    const about = document.getElementById('aboutModal');
+    if (about) about.classList.remove('open');
+    setUrl(true);
+    start();
+    closeBtn.focus({ preventScroll: true });
+  }
+
+  function closeDay() {
+    clearTimeout(timer);
+    typing = false;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('day-open');
+    setUrl(false);
+  }
+
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeDay(); });
+  closeBtn.addEventListener('click', closeDay);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeDay();
+  });
+
+  const badge = document.getElementById('dayBadge');
+  if (badge) badge.addEventListener('click', openDay);
+  const isAnniversary = (() => { const d = new Date(); return d.getMonth() === 9 && d.getDate() === 31; })();
+  if (new URLSearchParams(location.search).get('day') === '1' || isAnniversary) openDay();
 })();
 </script>
 </body>
