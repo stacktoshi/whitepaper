@@ -151,7 +151,7 @@
         <button class="mail-toggle" id="mailToggle" type="button" aria-label="Skip to the end">Skip</button>
       </div>
       <div class="mail-fields">
-        <div class="mail-field"><span class="mail-label">To</span><span class="mail-value"><!--email_off-->majordomo&#64;metzdowd.com<!--/email_off--></span></div>
+        <div class="mail-field"><span class="mail-label">To</span><span class="mail-value" id="mailTo"></span></div>
         <div class="mail-field"><span class="mail-label">Subject</span><span class="mail-value">Bitcoin P2P e-cash paper</span></div>
       </div>
       <div class="mail-body" id="mailBody">
@@ -206,6 +206,7 @@
     "Satoshi Nakamoto"
   ].join("\n");
 
+  document.getElementById('mailTo').textContent = 'majordomo' + String.fromCharCode(64) + 'metzdowd.com';
   const body = document.getElementById('mailBody');
   const typed = document.getElementById('typed');
   const caret = document.getElementById('caret');
