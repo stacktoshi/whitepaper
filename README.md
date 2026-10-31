@@ -10,6 +10,8 @@ offline-capable PWA packaging.
 
 **Live:** https://bitcoinwhitepaper.art
 
+**Bitcoin Whitepaper Day ’26:** https://bitcoinwhitepaper.art/whitepaper-day.html — Satoshi’s original announcement, typed.
+
 ## How it works
 
 Everything is one self-contained HTML document (`index.html`) — layout,
